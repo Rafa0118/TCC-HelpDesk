@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Helpium | Professor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: linear-gradient(135deg, #f3ecff 0%, #f8f5ff 45%, #f2f0ff 100%);
+        --bg-strong: #efe6ff;
+        --panel: rgba(255, 255, 255, 0.84);
+        --panel-strong: #ffffff;
+        --surface: #f9f5ff;
+        --surface-2: #f1eaff;
+        --primary: #7a4ae8;
+        --primary-dark: #5d2ad1;
+        --primary-soft: #efe6ff;
+        --primary-soft-strong: #e3d4ff;
+        --text: #1c1b22;
+        --muted: #5e5a6d;
+        --line: rgba(42, 31, 74, 0.12);
+        --line-strong: rgba(42, 31, 74, 0.2);
+        --shadow: 0 22px 48px rgba(77, 48, 123, 0.12);
+        --shadow-soft: 0 10px 22px rgba(116, 84, 181, 0.12);
+        --success: #ebf9ee;
+        --success-text: #2f7d4a;
+        --progress: #fff3bf;
+        --progress-text: #996b00;
+        --waiting: #f2edff;
+        --waiting-text: #5b2ec4;
+        --cancelled: #ffe5e5;
+        --cancelled-text: #bf2b2b;
+      }
+
+      * { box-sizing: border-box; }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Inter", "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      button, input, textarea, select {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .page-shell {
+        --sidebar-width: 72px;
+        width: 100%;
+        min-height: 720px;
+        margin: 0;
+        display: grid;
+        grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        overflow: visible;
+        backdrop-filter: none;
+        transition: grid-template-columns 0.25s ease;
+      }
+
+      .page-shell.is-expanded {
+        --sidebar-width: 220px;
+      }
+
+      .sidebar {
+        background: transparent;
+        border-right: 1px solid rgba(42, 31, 74, 0.08);
+        padding: 18px 10px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-left: 0;
+        width: 72px;
+        transition: width 0.25s ease;
+        overflow: visible;
+      }
+
+      .page-shell.is-expanded .sidebar {
+        width: 220px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 8px 18px;
+        min-height: 42px;
+        color: var(--text);
+      }
+
+      .brand-mark {
+        width: 24px;
+        height: 24px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #1b1b1e 0%, #3a2f49 100%);
+        position: relative;
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2);
+      }
+
+      .brand-mark::before {
+        content: "";
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        left: 8px;
+        top: 5px;
+        background: #fff;
+        border-radius: 3px;
+        transform: rotate(45deg);
+      }
+
+      .nav {
+        display: grid;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid transparent;
+        border-radius: 12px;
+        background: transparent;
+        color: var(--text);
+        font-size: 0.94rem;
+        font-weight: 600;
+        height: 42px;
+        padding: 0 12px;
+        text-align: left;
+        transition: all 0.25s ease;
+        width: 100%;
+        white-space: nowrap;
+      }
+
+      .nav-item-text {
+        display: inline-block;
+        max-width: 0;
+        opacity: 0;
+        white-space: nowrap;
+        transform: translateX(-8px);
+        transition: max-width 0.22s ease, opacity 0.18s ease, transform 0.18s ease;
+      }
+
+      .page-shell.is-expanded .nav-item-text {
+        max-width: 180px;
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      .nav-item:hover,
+      .nav-item:focus-visible {
+        background: rgba(122, 74, 232, 0.08);
+        border-color: rgba(122, 74, 232, 0.12);
+        transform: translateX(2px);
+        outline: none;
+      }
+
+      .nav-item.active {
+        background: linear-gradient(135deg, rgba(122, 74, 232, 0.12), rgba(122, 74, 232, 0.04));
+        border-color: rgba(122, 74, 232, 0.16);
+        color: var(--primary-dark);
+      }
+
+      .nav-icon {
+        width: 16px;
+        height: 16px;
+        position: relative;
+        flex-shrink: 0;
+      }
+
+      .nav-icon.home::before {
+        content: "";
+        position: absolute;
+        inset: 3px 2px 2px 2px;
+        border: 2px solid currentColor;
+        border-top: 0;
+        border-radius: 3px 3px 5px 5px;
+      }
+
+      .nav-icon.home::after {
+        content: "";
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        left: 2px;
+        top: 0;
+        border-left: 2px solid currentColor;
+        border-top: 2px solid currentColor;
+        transform: rotate(45deg);
+      }
+
+      .nav-icon.list::before {
+        content: "";
+        position: absolute;
+        inset: 2px 2px 2px 2px;
+        border: 2px solid currentColor;
+        border-radius: 4px;
+      }
+
+      .nav-icon.list::after {
+        content: "";
+        position: absolute;
+        left: 4px;
+        right: 4px;
+        top: 6px;
+        height: 2px;
+        background: currentColor;
+        box-shadow: 0 5px 0 currentColor, 0 10px 0 currentColor;
+      }
+
+      .nav-icon.plus::before,
+      .nav-icon.plus::after {
+        content: "";
+        position: absolute;
+        background: currentColor;
+        border-radius: 2px;
+      }
+
+      .nav-icon.plus::before {
+        left: 7px;
+        top: 2px;
+        width: 2px;
+        height: 12px;
+      }
+
+      .nav-icon.plus::after {
+        left: 2px;
+        top: 7px;
+        width: 12px;
+        height: 2px;
+      }
+
+      .nav-icon.user::before {
+        content: "";
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        left: 4px;
+        top: 1px;
+        background: currentColor;
+        border-radius: 50%;
+      }
+
+      .nav-icon.user::after {
+        content: "";
+        position: absolute;
+        width: 12px;
+        height: 8px;
+        left: 2px;
+        bottom: 1px;
+        border-radius: 7px 7px 4px 4px;
+        background: currentColor;
+      }
+
+      .content {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        background: transparent;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        min-height: 78px;
+        padding: 18px 28px 10px;
+      }
+
+      .header-tools {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .mobile-menu-button {
+        display: none;
+        width: 42px;
+        height: 42px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: rgba(255,255,255,0.8);
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 5px;
+        padding: 0;
+        box-shadow: 0 8px 20px rgba(28, 22, 36, 0.08);
+      }
+
+      .mobile-menu-button span {
+        display: block;
+        width: 18px;
+        height: 2px;
+        border-radius: 8px;
+        background: var(--text);
+        transition: all 0.22s ease;
+      }
+
+      .mobile-menu-button[aria-expanded="true"] span:nth-child(1) {
+        transform: translateY(7px) rotate(45deg);
+      }
+
+      .mobile-menu-button[aria-expanded="true"] span:nth-child(2) {
+        opacity: 0;
+      }
+
+      .mobile-menu-button[aria-expanded="true"] span:nth-child(3) {
+        transform: translateY(-7px) rotate(-45deg);
+      }
+
+      .header-action {
+        width: 40px;
+        height: 40px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.7);
+        border-radius: 12px;
+        color: var(--text);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      }
+
+      .header-action:hover,
+      .header-action:focus-visible {
+        transform: translateY(-1px) scale(1.02);
+        box-shadow: var(--shadow-soft);
+        border-color: rgba(122,74,232,0.2);
+        outline: none;
+      }
+
+      .bell {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        line-height: 1;
+      }
+
+      .bell .material-symbols-outlined {
+        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        font-size: 22px;
+      }
+
+      .user-pill {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 10px 7px 8px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.8);
+        border: 1px solid var(--line);
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text);
+        transition: all 0.25s ease;
+      }
+
+      .user-pill:hover,
+      .user-pill:focus-visible {
+        border-color: rgba(122, 74, 232, 0.2);
+        box-shadow: var(--shadow-soft);
+        outline: none;
+      }
+
+      .avatar {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #221d2a 0%, #6a4ad3 100%);
+        position: relative;
+      }
+
+      .avatar::before {
+        content: "";
+        position: absolute;
+        width: 7px;
+        height: 7px;
+        background: #fff;
+        border-radius: 50%;
+        left: 5px;
+        top: 2px;
+      }
+
+      .avatar::after {
+        content: "";
+        position: absolute;
+        width: 10px;
+        height: 7px;
+        background: #fff;
+        border-radius: 8px 8px 4px 4px;
+        left: 4px;
+        bottom: 2px;
+      }
+
+      .user-menu {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        min-width: 150px;
+        background: rgba(255,255,255,0.98);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 8px;
+        box-shadow: var(--shadow-soft);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-8px);
+        transition: all 0.2s ease;
+      }
+
+      .user-menu.open {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+
+      .user-menu button {
+        display: block;
+        width: 100%;
+        border: 0;
+        border-radius: 10px;
+        background: transparent;
+        color: var(--text);
+        padding: 9px 10px;
+        text-align: left;
+        font-size: 0.76rem;
+        font-weight: 700;
+        transition: background 0.2s ease, color 0.2s ease;
+      }
+
+      .user-menu button:hover {
+        background: var(--primary-soft);
+        color: var(--primary-dark);
+      }
+
+      .main-panel {
+        flex: 1;
+        padding: 0 28px 22px;
+      }
+
+      .section {
+        scroll-margin-top: 28px;
+      }
+
+      .hero-box {
+        background: rgba(255,255,255,0.68);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 18px 18px 14px;
+        margin-bottom: 18px;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
+      }
+
+      .hero-title {
+        margin: 0 0 6px;
+        font-size: clamp(2rem, 2vw, 2.6rem);
+        letter-spacing: -0.08em;
+        font-weight: 900;
+        color: var(--primary-dark);
+      }
+
+      .hero-subtitle {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .new-ticket-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        width: 100%;
+        min-height: 76px;
+        border: 2px solid rgba(91, 46, 196, 0.8);
+        background: linear-gradient(135deg, rgba(122, 74, 232, 0.12), rgba(122, 74, 232, 0.04));
+        border-radius: 16px;
+        font-size: 1.08rem;
+        font-weight: 800;
+        color: var(--primary-dark);
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+      }
+
+      .new-ticket-button:hover,
+      .new-ticket-button:focus-visible {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 26px rgba(122, 74, 232, 0.15);
+        border-color: var(--primary-dark);
+        background: linear-gradient(135deg, rgba(255,255,255,1), rgba(233,225,255,0.96));
+        outline: none;
+      }
+
+      .new-ticket-button .material-symbols-outlined {
+        font-size: 28px;
+        line-height: 1;
+        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(18, 15, 24, 0.38);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        z-index: 1000;
+      }
+
+      .modal-overlay.open {
+        display: flex;
+      }
+
+      .ticket-form {
+        display: block;
+        width: min(760px, 100%);
+        max-height: min(90vh, 760px);
+        overflow: auto;
+        background: rgba(255,255,255,0.92);
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        padding: 18px 18px 14px;
+        margin: 0;
+        box-shadow: var(--shadow);
+        animation: slideDown 0.28s ease;
+        position: relative;
+      }
+
+      .ticket-form h3 {
+        margin: 0 0 16px;
+        font-size: 1.1rem;
+        letter-spacing: -0.05em;
+      }
+
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+
+      .modal-close {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.8);
+        color: var(--text);
+        font-size: 1.4rem;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .modal-close:hover,
+      .modal-close:focus-visible {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-soft);
+        outline: none;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+      }
+
+      .field.full {
+        grid-column: 1 / -1;
+      }
+
+      .field label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--muted);
+      }
+
+      .field input,
+      .field textarea,
+      .field select {
+        width: 100%;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.8);
+        border-radius: 12px;
+        padding: 11px 12px;
+        color: var(--text);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .field input:focus,
+      .field textarea:focus,
+      .field select:focus {
+        outline: none;
+        border-color: rgba(122, 74, 232, 0.35);
+        box-shadow: 0 0 0 4px rgba(122, 74, 232, 0.08);
+      }
+
+      .field textarea {
+        min-height: 90px;
+        resize: vertical;
+      }
+
+      .image-upload {
+        display: grid;
+        gap: 10px;
+      }
+
+      .image-upload input[type="file"] {
+        border: 1px dashed var(--line-strong);
+        background: rgba(255,255,255,0.75);
+        border-radius: 12px;
+        padding: 12px;
+        color: var(--muted);
+      }
+
+      .image-preview {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 12px;
+        border: 1px solid rgba(122, 74, 232, 0.2);
+        background: rgba(122, 74, 232, 0.04);
+        border-radius: 12px;
+      }
+
+      .image-preview.has-image {
+        display: flex;
+      }
+
+      .image-preview img {
+        width: 88px;
+        height: 88px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid rgba(122, 74, 232, 0.2);
+        background: #fff;
+      }
+
+      .image-remove-btn {
+        border: 1px solid rgba(191, 43, 43, 0.3);
+        background: rgba(255, 229, 229, 0.8);
+        color: #a32929;
+        border-radius: 10px;
+        padding: 8px 10px;
+        font-size: 0.72rem;
+        font-weight: 700;
+      }
+
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .secondary-btn,
+      .primary-btn {
+        border-radius: 12px;
+        padding: 0.8rem 1.2rem;
+        font-weight: 700;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .secondary-btn {
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.7);
+        color: var(--text);
+      }
+
+      .primary-btn {
+        border: 0;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: #fff;
+        box-shadow: 0 12px 20px rgba(122, 74, 232, 0.22);
+      }
+
+      .secondary-btn:hover,
+      .primary-btn:hover,
+      .secondary-btn:focus-visible,
+      .primary-btn:focus-visible {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-soft);
+        outline: none;
+      }
+
+      .tickets-card {
+        margin-top: 18px;
+        background: rgba(255,255,255,0.72);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 14px 16px 8px;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.45);
+        min-height: 520px;
+      }
+
+      .tickets-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .tickets-header h3 {
+        margin: 0;
+        font-size: 1.02rem;
+        letter-spacing: -0.05em;
+      }
+
+      .tickets-filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 0 0 14px;
+        padding: 8px 10px;
+        border: 1px solid rgba(122, 74, 232, 0.12);
+        border-radius: 12px;
+        background: rgba(122, 74, 232, 0.04);
+      }
+
+      .filter-tab {
+        border: 1px solid rgba(122, 74, 232, 0.16);
+        background: rgba(255, 255, 255, 0.8);
+        color: var(--muted);
+        font-size: 0.7rem;
+        font-weight: 700;
+        border-radius: 999px;
+        padding: 7px 10px;
+        transition: all 0.2s ease;
+      }
+
+      .filter-tab:hover,
+      .filter-tab.active {
+        background: linear-gradient(135deg, rgba(122, 74, 232, 0.12), rgba(122, 74, 232, 0.18));
+        border-color: rgba(122, 74, 232, 0.24);
+        color: var(--primary-dark);
+        box-shadow: 0 10px 18px rgba(122, 74, 232, 0.08);
+      }
+
+      .link-button {
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--primary-dark);
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 6px 8px;
+        border-radius: 8px;
+        transition: background 0.2s ease, border-color 0.2s ease;
+      }
+
+      .link-button:hover,
+      .link-button:focus-visible {
+        background: var(--primary-soft);
+        border-color: rgba(122, 74, 232, 0.12);
+        outline: none;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.76rem;
+      }
+
+      th, td {
+        padding: 10px 8px;
+        text-align: left;
+        border-bottom: 1px solid rgba(18,18,18,0.08);
+        vertical-align: middle;
+      }
+
+      th {
+        color: var(--muted);
+        font-size: 0.66rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+
+      tbody tr {
+        transition: background 0.2s ease, transform 0.2s ease;
+      }
+
+      tbody tr:hover {
+        background: rgba(122, 74, 232, 0.03);
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 100px;
+        height: 28px;
+        padding: 0 10px;
+        border-radius: 999px;
+        font-size: 0.62rem;
+        font-weight: 700;
+        border: 1px solid transparent;
+      }
+
+      .status.waiting {
+        background: var(--waiting);
+        color: var(--waiting-text);
+      }
+
+      .status.progress {
+        background: var(--progress);
+        color: var(--progress-text);
+      }
+
+      .status.done {
+        background: var(--success);
+        color: var(--success-text);
+      }
+
+      .status.cancelled {
+        background: var(--cancelled);
+        color: var(--cancelled-text);
+      }
+
+      .ticket-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .cancel-ticket-btn {
+        border: 1px solid rgba(191, 43, 43, 0.25);
+        background: rgba(255, 229, 229, 0.88);
+        color: var(--cancelled-text);
+        border-radius: 10px;
+        padding: 7px 10px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .cancel-ticket-btn:hover,
+      .cancel-ticket-btn:focus-visible {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-soft);
+        outline: none;
+      }
+
+      .support-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-top: 18px;
+        padding: 12px 14px 10px;
+        background: rgba(255,255,255,0.76);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+      }
+
+      .support-bar span {
+        font-size: 0.76rem;
+        color: var(--muted);
+      }
+
+      .support-bar button {
+        background: linear-gradient(135deg, var(--primary-soft) 0%, rgba(122, 74, 232, 0.1) 100%);
+        border: 1px solid rgba(122, 74, 232, 0.12);
+        color: var(--primary-dark);
+        font-weight: 800;
+        font-size: 0.72rem;
+        padding: 8px 12px;
+        border-radius: 10px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .support-bar button:hover,
+      .support-bar button:focus-visible {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-soft);
+        outline: none;
+      }
+
+      .toast {
+        position: fixed;
+        right: 22px;
+        bottom: 22px;
+        padding: 0.9rem 1.1rem;
+        background: rgba(28, 27, 34, 0.94);
+        color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 12px 30px rgba(24, 18, 36, 0.18);
+        font-size: 0.76rem;
+        font-weight: 700;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(12px);
+        transition: all 0.25s ease;
+      }
+
+      .toast.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+
+      .profile-modal {
+        display: block;
+        width: min(600px, 100%);
+        max-height: min(90vh, 600px);
+        overflow: auto;
+        background: rgba(255,255,255,0.95);
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        padding: 24px;
+        margin: 0;
+        box-shadow: var(--shadow);
+        animation: slideDown 0.28s ease;
+        position: relative;
+      }
+
+      .profile-header {
+        margin-bottom: 20px;
+      }
+
+      .profile-header h3 {
+        margin: 0;
+        font-size: 1.02rem;
+        letter-spacing: -0.05em;
+        color: var(--primary-dark);
+      }
+
+      .profile-content {
+        display: flex;
+        gap: 32px;
+        flex-wrap: wrap;
+      }
+
+      .profile-avatar-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .profile-avatar-wrapper {
+        position: relative;
+        width: 120px;
+        height: 120px;
+      }
+
+      .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--primary-soft);
+        background: var(--surface);
+      }
+
+      .avatar-upload-label {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--primary);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #fff;
+        transition: transform 0.2s ease, background 0.2s ease;
+      }
+
+      .avatar-upload-label:hover {
+        transform: scale(1.1);
+        background: var(--primary-dark);
+      }
+
+      .avatar-upload-label::before {
+        content: "📷";
+        font-size: 14px;
+      }
+
+      .profile-avatar-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .profile-avatar-actions .secondary-btn {
+        font-size: 0.72rem;
+        padding: 8px 12px;
+      }
+
+      .danger-btn {
+        border: 1px solid rgba(191, 43, 43, 0.3);
+        background: rgba(255, 229, 229, 0.8);
+        color: #a32929;
+        border-radius: 10px;
+        padding: 8px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .danger-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .profile-info-section {
+        flex: 1;
+        min-width: 250px;
+        display: grid;
+        gap: 16px;
+      }
+
+      .info-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .info-group label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .info-value {
+        margin: 0;
+        font-size: 0.94rem;
+        color: var(--text);
+        padding: 10px 12px;
+        background: rgba(255,255,255,0.6);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+      }
+
+      .status-active {
+        color: var(--success-text);
+        font-weight: 700;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 1100px) {
+        .page-shell {
+          width: min(1000px, calc(100% - 26px));
+        }
+      }
+
+      @media (max-width: 900px) {
+        body {
+          padding-bottom: 78px;
+        }
+
+        .page-shell {
+          width: min(760px, calc(100% - 18px));
+          grid-template-columns: 1fr;
+          min-height: auto;
+        }
+
+        .page-shell.is-expanded {
+          grid-template-columns: 1fr;
+        }
+
+        .page-shell.is-expanded .sidebar {
+          width: 100%;
+        }
+
+        .header {
+          position: relative;
+          padding: 14px 14px 8px;
+        }
+
+        .header-tools {
+          width: 100%;
+          justify-content: flex-end;
+          gap: 10px;
+        }
+
+        .sidebar {
+          position: fixed;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          width: 100%;
+          display: flex;
+          flex-direction: row;
+          align-items: stretch;
+          justify-content: center;
+          background: rgba(255,255,255,0.98);
+          border: 1px solid var(--line);
+          border-radius: 18px 18px 0 0;
+          padding: 7px 10px calc(7px + env(safe-area-inset-bottom));
+          box-shadow: var(--shadow);
+          z-index: 1000;
+        }
+
+        .sidebar.is-open {
+          display: flex;
+        }
+
+        .nav {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 4px;
+          width: 100%;
+          margin: 0;
+        }
+
+        .page-shell.is-nav-open .nav,
+        .sidebar.is-open .nav {
+          display: grid;
+        }
+
+        .brand {
+          display: none;
+        }
+
+        .nav-item {
+          width: 100%;
+          height: 58px;
+          min-width: 0;
+          padding: 5px 2px;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          gap: 3px;
+          border-radius: 12px;
+          font-size: 0.62rem;
+          text-align: center;
+        }
+
+        .nav-item-text {
+          max-width: none;
+          opacity: 1;
+          transform: none;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          width: 100%;
+        }
+
+        .main-panel {
+          padding-bottom: 20px;
+        }
+
+        .mobile-menu-button {
+          display: none;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .page-shell {
+          width: min(100%, calc(100% - 12px));
+          margin: 8px auto;
+          border-radius: 18px;
+        }
+
+        .header {
+          padding: 14px 12px 8px;
+        }
+
+        .main-panel {
+          padding: 0 12px 16px;
+        }
+
+        .hero-box {
+          padding: 16px 14px 12px;
+        }
+
+        .hero-title {
+          font-size: 1.7rem;
+        }
+
+        .new-ticket-button {
+          min-height: 66px;
+          font-size: 0.96rem;
+        }
+
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .tickets-card {
+          overflow-x: auto;
+        }
+
+        table {
+          min-width: 500px;
+        }
+
+        .support-bar {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-shell">
+      <aside class="sidebar">
+        <div class="brand" aria-label="Marca do sistema">
+          <span class="brand-mark" aria-hidden="true"></span>
+        </div>
+
+        <nav class="nav" aria-label="Menu principal">
+          <button class="nav-item active" data-target="inicio" type="button">
+            <span class="nav-icon home" aria-hidden="true"></span>
+            <span class="nav-item-text">Início</span>
+          </button>
+          <button class="nav-item" data-target="meus-chamados" type="button">
+            <span class="nav-icon list" aria-hidden="true"></span>
+            <span class="nav-item-text">Meus chamados</span>
+          </button>
+          <button class="nav-item" data-target="abrir-chamado" type="button">
+            <span class="nav-icon plus" aria-hidden="true"></span>
+            <span class="nav-item-text">Abrir chamado</span>
+          </button>
+          <button class="nav-item" data-target="perfil" type="button">
+            <span class="nav-icon user" aria-hidden="true"></span>
+            <span class="nav-item-text">Perfil</span>
+          </button>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <header class="header">
+          <div class="header-tools">
+            <button class="header-action bell" id="notificationsBtn" type="button" aria-label="Notificações">
+              <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
+            </button>
+            <div class="user-pill" id="userMenuToggle" tabindex="0" aria-label="Menu de perfil">
+              <span class="avatar" aria-hidden="true"></span>
+              <span id="userName">Professor</span>
+              <div class="user-menu" id="userMenu" aria-label="Opções do usuário">
+                <button type="button" data-action="profile">Perfil</button>
+                <button type="button" data-action="logout">Sair</button>
+              </div>
+            </div>
+            <button class="mobile-menu-button" type="button" aria-expanded="false" aria-label="Abrir menu">
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+          </div>
+        </header>
+
+        <section class="main-panel">
+          <section id="inicio" class="section">
+            <div class="hero-box">
+              <h1 class="hero-title">Olá, Professor!</h1>
+              <p class="hero-subtitle">Como podemos ajudar hoje?</p>
+            </div>
+
+            <button class="new-ticket-button" id="newTicketButton" type="button">
+              <span class="material-symbols-outlined" aria-hidden="true">add_circle</span>
+              <span>Abrir novo chamado</span>
+            </button>
+          </section>
+
+          <div class="modal-overlay" id="ticketModalOverlay" aria-hidden="true">
+            <section id="abrir-chamado" class="section ticket-form" aria-label="Formulário de novo chamado">
+              <div class="modal-header">
+                <h3>Registrar novo chamado</h3>
+                <button class="modal-close" id="closeTicketModalBtn" type="button" aria-label="Fechar formulário">×</button>
+              </div>
+              <form id="ticketForm">
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="ticketTitle">Título</label>
+                    <input id="ticketTitle" name="title" type="text" placeholder="Ex: Projetor não liga" required />
+                  </div>
+
+                  <div class="field">
+                    <label for="ticketRoom">Sala</label>
+                    <input id="ticketRoom" name="room" type="text" placeholder="Ex: Sala 12" required />
+                  </div>
+
+                  <div class="field full">
+                    <label for="ticketDescription">Descrição</label>
+                    <textarea id="ticketDescription" name="description" placeholder="Descreva o problema..." required></textarea>
+                  </div>
+
+                  <div class="field full">
+                    <label for="ticketPhoto">Foto da situação</label>
+                    <div class="image-upload">
+                      <input id="ticketPhoto" name="photo" type="file" accept="image/*" />
+                      <div class="image-preview" id="ticketPhotoPreviewWrap">
+                        <img id="ticketPhotoPreview" src="" alt="Pré-visualização da situação" />
+                        <button class="image-remove-btn" id="removeTicketPhotoBtn" type="button">Remover</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <label for="ticketType">Tipo de problema</label>
+                    <select id="ticketType" name="type">
+                      <option value="Wi‑Fi">Wi‑Fi</option>
+                      <option value="Computador do professor">Computador do professor</option>
+                      <option value="Computador do aluno">Computador do aluno</option>
+                      <option value="TV">TV</option>
+                      <option value="Outros" selected>Outros</option>
+                    </select>
+                  </div>
+
+                </div>
+
+                <div class="form-actions">
+                  <button class="secondary-btn" type="button" id="cancelTicketBtn">Cancelar</button>
+                  <button class="primary-btn" type="submit">Salvar chamado</button>
+                </div>
+              </form>
+            </section>
+          </div>
+
+          <section id="meus-chamados" class="section tickets-card">
+            <div class="tickets-header">
+              <h3>Meus chamados</h3>
+              <button class="link-button" id="viewAllBtn" type="button">Ver todos</button>
+            </div>
+
+            <nav class="tickets-filter-bar" aria-label="Filtrar chamados por status">
+              <button class="filter-tab active" type="button" data-filter="Todos">Todos</button>
+              <button class="filter-tab" type="button" data-filter="Em espera">Em espera</button>
+              <button class="filter-tab" type="button" data-filter="Em andamento">Em andamento</button>
+              <button class="filter-tab" type="button" data-filter="Concluído">Concluído</button>
+              <button class="filter-tab" type="button" data-filter="Cancelado">Cancelado</button>
+            </nav>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Nº</th>
+                  <th>Título</th>
+                  <th>Sala</th>
+                  <th>Data</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="ticketsTableBody"></tbody>
+            </table>
+          </section>
+
+
+          <div class="support-bar">
+            <span>Precisa de ajuda?</span>
+            <button id="supportBtn" type="button">Suporte</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal-overlay" id="profileModalOverlay" aria-hidden="true">
+      <div class="profile-modal">
+        <div class="modal-header">
+          <h3>Meu Perfil</h3>
+          <button class="modal-close" id="closeProfileModalBtn" type="button" aria-label="Fechar perfil">×</button>
+        </div>
+
+        <div class="profile-content">
+          <div class="profile-avatar-section">
+            <div class="profile-avatar-wrapper">
+              <img id="profileAvatarImage" class="profile-avatar" src="" alt="Foto de perfil" />
+              <label class="avatar-upload-label" for="profilePhotoInput" aria-label="Alterar foto de perfil"></label>
+              <input id="profilePhotoInput" type="file" accept="image/*" hidden />
+            </div>
+            <div class="profile-avatar-actions">
+              <button id="uploadPhotoBtn" class="secondary-btn" type="button">Alterar foto</button>
+              <button id="removePhotoBtn" class="danger-btn" type="button">Remover</button>
+            </div>
+          </div>
+
+          <div class="profile-info-section">
+            <div class="info-group">
+              <label>Nome</label>
+              <p id="profileName" class="info-value">—</p>
+            </div>
+            <div class="info-group">
+              <label>Email</label>
+              <p id="profileEmail" class="info-value">—</p>
+            </div>
+            <div class="info-group">
+              <label>Função</label>
+              <p id="profileRole" class="info-value">—</p>
+            </div>
+            <div class="info-group">
+              <label>Status</label>
+              <p id="profileStatus" class="info-value status-active">Ativo</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" aria-live="polite"></div>
+
+    <script>
+      const STORAGE_KEY = 'helpium_professor_tickets';
+      const user = JSON.parse(localStorage.getItem('helpium_logged_user') || 'null');
+
+      if (!user || user.role !== 'professor') {
+        window.location.href = 'index.html';
+      }
+
+      const defaultTickets = [
+        { id: '#25', title: 'Projetor não liga', room: 'Sala 12', date: '28/05/2025', status: 'Em andamento' },
+        { id: '#24', title: 'Computador lento', room: 'Sala 08', date: '27/05/2025', status: 'Em andamento' },
+        { id: '#23', title: 'Internet instável', room: 'Sala 06', date: '26/05/2025', status: 'Concluído' },
+        { id: '#22', title: 'Impressora sem papel', room: 'Sala 01', date: '26/05/2025', status: 'Em espera' }
+      ];
+
+      function getTickets() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+          if (Array.isArray(saved) && saved.length) return saved;
+        } catch (error) {
+          console.warn('Erro ao carregar chamados do professor.', error);
+        }
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultTickets));
+        return defaultTickets;
+      }
+
+      function saveTickets(tickets) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(tickets));
+      }
+
+      function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+        clearTimeout(showToast.timeoutId);
+        showToast.timeoutId = setTimeout(() => toast.classList.remove('show'), 2200);
+      }
+
+      const statusClassMap = {
+        'Em espera': 'waiting',
+        'Em andamento': 'progress',
+        'Concluído': 'done',
+        'Cancelado': 'cancelled'
+      };
+
+      let currentTicketFilter = 'Todos';
+
+      function renderTickets() {
+        const tbody = document.getElementById('ticketsTableBody');
+        const tickets = getTickets();
+        const filteredTickets = currentTicketFilter === 'Todos'
+          ? tickets
+          : tickets.filter((ticket) => ticket.status === currentTicketFilter);
+
+        tbody.innerHTML = filteredTickets.map((ticket) => `
+          <tr>
+            <td>${ticket.id}</td>
+            <td>${ticket.title}</td>
+            <td>${ticket.room}</td>
+            <td>${ticket.date}</td>
+            <td><span class="status ${statusClassMap[ticket.status] || 'waiting'}">${ticket.status}</span></td>
+            <td>
+              <div class="ticket-actions">
+                <button class="cancel-ticket-btn" type="button" data-ticket-id="${ticket.id}">Cancelar</button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+
+        document.querySelectorAll('.cancel-ticket-btn').forEach((button) => {
+          button.addEventListener('click', () => {
+            const ticketId = button.dataset.ticketId;
+            const tickets = getTickets();
+            const updatedTickets = tickets.map((ticket) => {
+              if (ticket.id === ticketId) {
+                return { ...ticket, status: 'Cancelado' };
+              }
+              return ticket;
+            });
+
+            saveTickets(updatedTickets);
+            renderTickets();
+            showToast('Chamado cancelado com sucesso.');
+          });
+        });
+      }
+
+      const ticketModalOverlay = document.getElementById('ticketModalOverlay');
+      const ticketPhotoInput = document.getElementById('ticketPhoto');
+      const ticketPhotoPreview = document.getElementById('ticketPhotoPreview');
+      const ticketPhotoPreviewWrap = document.getElementById('ticketPhotoPreviewWrap');
+
+      function getPriorityFromType(type) {
+        const mapping = {
+          'Wi‑Fi': 'Alta',
+          'Computador do professor': 'Alta',
+          'Computador do aluno': 'Média',
+          'TV': 'Média',
+          'Outros': 'Baixa'
+        };
+
+        return mapping[type] || 'Baixa';
+      }
+
+      function resetTicketPhotoPreview() {
+        ticketPhotoInput.value = '';
+        ticketPhotoPreview.src = '';
+        ticketPhotoPreviewWrap.classList.remove('has-image');
+      }
+
+      function openTicketModal() {
+        ticketModalOverlay.classList.add('open');
+        ticketModalOverlay.setAttribute('aria-hidden', 'false');
+        document.querySelectorAll('.nav-item').forEach((button) => {
+          button.classList.toggle('active', button.dataset.target === 'abrir-chamado');
+        });
+        const titleInput = document.getElementById('ticketTitle');
+        if (titleInput) {
+          setTimeout(() => titleInput.focus(), 60);
+        }
+      }
+
+      function closeTicketModal() {
+        ticketModalOverlay.classList.remove('open');
+        ticketModalOverlay.setAttribute('aria-hidden', 'true');
+        const form = document.getElementById('ticketForm');
+        if (form) {
+          form.reset();
+        }
+        resetTicketPhotoPreview();
+      }
+
+      // Profile Modal
+      const profileModalOverlay = document.getElementById('profileModalOverlay');
+
+      function openProfileModal() {
+        profileModalOverlay.classList.add('open');
+        profileModalOverlay.setAttribute('aria-hidden', 'false');
+        document.querySelectorAll('.nav-item').forEach((button) => {
+          button.classList.toggle('active', button.dataset.target === 'perfil');
+        });
+      }
+
+      function closeProfileModal() {
+        profileModalOverlay.classList.remove('open');
+        profileModalOverlay.setAttribute('aria-hidden', 'true');
+        document.querySelectorAll('.nav-item').forEach((button) => {
+          button.classList.toggle('active', button.dataset.target === 'inicio');
+        });
+      }
+
+      document.getElementById('closeProfileModalBtn').addEventListener('click', closeProfileModal);
+
+      profileModalOverlay.addEventListener('click', (event) => {
+        if (event.target === profileModalOverlay) {
+          closeProfileModal();
+        }
+      });
+
+      function openSection(targetId) {
+        document.querySelectorAll('.nav-item').forEach((button) => {
+          button.classList.toggle('active', button.dataset.target === targetId);
+        });
+
+        if (targetId === 'abrir-chamado') {
+          openTicketModal();
+          return;
+        }
+
+        if (targetId === 'perfil') {
+          openProfileModal();
+          return;
+        }
+
+        const target = document.getElementById(targetId);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+
+      function handleNewTicketSubmit(event) {
+        event.preventDefault();
+
+        const form = event.currentTarget;
+        const title = form.title.value.trim();
+        const room = form.room.value.trim();
+        const description = form.description.value.trim();
+        const type = form.type.value;
+        const priority = getPriorityFromType(type);
+        const status = 'Em espera';
+        const photo = ticketPhotoPreview.src || '';
+
+        if (!title || !room || !description) {
+          showToast('Preencha todos os campos do chamado.');
+          return;
+        }
+
+        const tickets = getTickets();
+        const nextNumber = tickets.length ? Number(String(tickets[0].id).replace('#', '')) + 1 : 26;
+        const newTicket = {
+          id: `#${nextNumber}`,
+          title,
+          room,
+          date: new Date().toLocaleDateString('pt-BR'),
+          status,
+          type,
+          priority,
+          description,
+          photo
+        };
+
+        saveTickets([newTicket, ...tickets]);
+        renderTickets();
+        form.reset();
+        closeTicketModal();
+        showToast('Chamado registrado com sucesso!');
+        openSection('meus-chamados');
+      }
+
+      const pageShell = document.querySelector('.page-shell');
+      const sidebar = document.querySelector('.sidebar');
+      const mobileMenuButton = document.querySelector('.mobile-menu-button');
+
+      function setSidebarExpanded(isExpanded) {
+        pageShell.classList.toggle('is-expanded', isExpanded);
+      }
+
+      function closeMobileMenu() {
+        pageShell.classList.remove('is-nav-open');
+        sidebar.classList.remove('is-open');
+        if (mobileMenuButton) {
+          mobileMenuButton.setAttribute('aria-expanded', 'false');
+          mobileMenuButton.setAttribute('aria-label', 'Abrir menu');
+        }
+      }
+
+      if (mobileMenuButton) {
+        mobileMenuButton.addEventListener('click', () => {
+          const isOpen = !pageShell.classList.contains('is-nav-open');
+          pageShell.classList.toggle('is-nav-open', isOpen);
+          sidebar.classList.toggle('is-open', isOpen);
+          mobileMenuButton.setAttribute('aria-expanded', String(isOpen));
+          mobileMenuButton.setAttribute('aria-label', isOpen ? 'Fechar menu' : 'Abrir menu');
+        });
+      }
+
+      document.addEventListener('click', (event) => {
+        if (window.innerWidth > 900) {
+          return;
+        }
+
+        const clickedInsideMenu = sidebar.contains(event.target) || mobileMenuButton?.contains(event.target);
+        if (!clickedInsideMenu) {
+          closeMobileMenu();
+        }
+      });
+
+      sidebar.addEventListener('mouseenter', () => {
+        if (window.innerWidth <= 900) return;
+        setSidebarExpanded(true);
+      });
+      sidebar.addEventListener('mouseleave', () => {
+        if (window.innerWidth <= 900) return;
+        setSidebarExpanded(false);
+      });
+
+      document.querySelectorAll('.nav-item').forEach((button) => {
+        button.addEventListener('click', () => {
+          openSection(button.dataset.target);
+          closeMobileMenu();
+        });
+      });
+
+      document.getElementById('newTicketButton').addEventListener('click', () => {
+        openTicketModal();
+      });
+
+      document.getElementById('closeTicketModalBtn').addEventListener('click', () => {
+        closeTicketModal();
+        openSection('inicio');
+      });
+
+      document.getElementById('cancelTicketBtn').addEventListener('click', () => {
+        closeTicketModal();
+        openSection('inicio');
+      });
+
+      ticketPhotoInput.addEventListener('change', (event) => {
+        const file = event.target.files && event.target.files[0];
+
+        if (!file) {
+          resetTicketPhotoPreview();
+          return;
+        }
+
+        if (!file.type.startsWith('image/')) {
+          showToast('Selecione uma imagem válida para a situação.');
+          resetTicketPhotoPreview();
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (loadEvent) => {
+          ticketPhotoPreview.src = loadEvent.target.result;
+          ticketPhotoPreviewWrap.classList.add('has-image');
+        };
+        reader.readAsDataURL(file);
+      });
+
+      document.getElementById('removeTicketPhotoBtn').addEventListener('click', () => {
+        resetTicketPhotoPreview();
+      });
+
+      ticketModalOverlay.addEventListener('click', (event) => {
+        if (event.target === ticketModalOverlay) {
+          closeTicketModal();
+          openSection('inicio');
+        }
+      });
+
+      document.getElementById('ticketForm').addEventListener('submit', handleNewTicketSubmit);
+      document.getElementById('viewAllBtn').addEventListener('click', () => {
+        currentTicketFilter = 'Todos';
+        document.querySelectorAll('.filter-tab').forEach((tab) => {
+          tab.classList.toggle('active', tab.dataset.filter === currentTicketFilter);
+        });
+        renderTickets();
+        openSection('meus-chamados');
+      });
+
+      document.querySelectorAll('.filter-tab').forEach((tab) => {
+        tab.addEventListener('click', () => {
+          currentTicketFilter = tab.dataset.filter;
+          document.querySelectorAll('.filter-tab').forEach((item) => {
+            item.classList.toggle('active', item === tab);
+          });
+          renderTickets();
+        });
+      });
+
+      document.getElementById('supportBtn').addEventListener('click', () => {
+        window.location.href = 'mailto:suporte@helpium.com?subject=Solicita%C3%A7%C3%A3o%20de%20suporte%20-%20Professor';
+      });
+
+      document.getElementById('notificationsBtn').addEventListener('click', () => {
+        showToast('Você tem 2 notificações novas.');
+      });
+
+      const userMenuToggle = document.getElementById('userMenuToggle');
+      const userMenu = document.getElementById('userMenu');
+
+      function toggleMenu() {
+        userMenu.classList.toggle('open');
+      }
+
+      userMenuToggle.addEventListener('click', toggleMenu);
+      userMenuToggle.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          toggleMenu();
+        }
+      });
+
+      document.querySelector('[data-action="profile"]').addEventListener('click', () => {
+        userMenu.classList.remove('open');
+        openProfileModal();
+      });
+
+      document.querySelector('[data-action="logout"]').addEventListener('click', () => {
+        localStorage.removeItem('helpium_logged_user');
+        window.location.href = 'index.html';
+      });
+
+      if (user && user.name) {
+        document.getElementById('userName').textContent = user.name;
+      }
+
+      // Load profile data
+      function loadProfileData() {
+        const profileName = document.getElementById('profileName');
+        const profileEmail = document.getElementById('profileEmail');
+        const profileRole = document.getElementById('profileRole');
+        const profileAvatarImage = document.getElementById('profileAvatarImage');
+
+        if (user) {
+          profileName.textContent = user.name || '—';
+          profileEmail.textContent = user.email || '—';
+          profileRole.textContent = user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : '—';
+
+          // Load saved profile photo
+          const savedPhoto = localStorage.getItem('helpium_professor_photo');
+          if (savedPhoto) {
+            profileAvatarImage.src = savedPhoto;
+          }
+        }
+      }
+
+      // Profile photo upload
+      const profilePhotoInput = document.getElementById('profilePhotoInput');
+      const profileAvatarImage = document.getElementById('profileAvatarImage');
+      const uploadPhotoBtn = document.getElementById('uploadPhotoBtn');
+      const removePhotoBtn = document.getElementById('removePhotoBtn');
+
+      function handleProfilePhotoUpload(event) {
+        const file = event.target.files && event.target.files[0];
+
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+          showToast('Selecione uma imagem válida.');
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (loadEvent) => {
+          const photoData = loadEvent.target.result;
+          profileAvatarImage.src = photoData;
+          localStorage.setItem('helpium_professor_photo', photoData);
+          showToast('Foto de perfil atualizada!');
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function removeProfilePhoto() {
+        profileAvatarImage.src = '';
+        localStorage.removeItem('helpium_professor_photo');
+        showToast('Foto de perfil removida.');
+      }
+
+      profilePhotoInput.addEventListener('change', handleProfilePhotoUpload);
+      uploadPhotoBtn.addEventListener
+      removePhotoBtn.addEventListener('click', removeProfilePhoto);
+
+      // Update user menu profile action
+      document.querySelector('[data-action="profile"]').addEventListener('click', () => {
+        userMenu.classList.remove('open');
+        openSection('perfil');
+      });
+
+      loadProfileData();
+      renderTickets();
+    </script>
+  </body>
+</html>

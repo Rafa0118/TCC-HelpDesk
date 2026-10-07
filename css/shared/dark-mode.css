@@ -1,0 +1,355 @@
+/* ============================================
+   HELPIUM - Dark Mode Overrides
+   Loaded LAST to guarantee overrides win
+   ============================================ */
+
+[data-theme="dark"] .header-action,
+[data-theme="dark"] .user-pill,
+[data-theme="dark"] .mobile-menu-button {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+[data-theme="dark"] .user-menu {
+  background: rgba(26, 21, 40, 0.97);
+}
+
+[data-theme="dark"] .field input,
+[data-theme="dark"] .field select,
+[data-theme="dark"] .field textarea,
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="email"],
+[data-theme="dark"] input[type="password"],
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background: var(--surface);
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+
+[data-theme="dark"] .field input::placeholder {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .tickets-card,
+[data-theme="dark"] .profile-card,
+[data-theme="dark"] .panel-card,
+[data-theme="dark"] .section-card,
+[data-theme="dark"] .report-box,
+[data-theme="dark"] .metric-box,
+[data-theme="dark"] .report-item,
+[data-theme="dark"] .ticket-row,
+[data-theme="dark"] .resource-row,
+[data-theme="dark"] .back-button,
+[data-theme="dark"] .table-list .table-row {
+  background: var(--panel);
+  border-color: var(--line);
+  box-shadow: none;
+}
+
+[data-theme="dark"] .data-table tbody tr:hover {
+  background: linear-gradient(90deg, rgba(155, 122, 255, 0.08) 0%, transparent 60%);
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+
+[data-theme="dark"] .filter-bar {
+  background: var(--surface-2);
+  border-color: var(--line);
+}
+
+/* Mobile bottom nav bar */
+[data-theme="dark"] .sidebar {
+  background: rgba(27, 32, 52, 0.98);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .nav-item:hover,
+[data-theme="dark"] .nav-item:focus-visible,
+[data-theme="dark"] .nav-item.active {
+  background: rgba(155, 122, 255, 0.12);
+  border-color: rgba(155, 122, 255, 0.2);
+  color: var(--primary-dark);
+}
+
+[data-theme="dark"] .brand-mark {
+  background: linear-gradient(145deg, #373d69, #5651a2);
+}
+
+[data-theme="dark"] .stat-change {
+  color: var(--success-text);
+}
+
+/* Toast */
+[data-theme="dark"] .toast {
+  background: #2a2440;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Modal */
+[data-theme="dark"] .modal-overlay {
+  background: rgba(8, 6, 14, 0.6);
+}
+
+/* Support bar */
+[data-theme="dark"] .support-bar {
+  background: var(--panel);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .support-bar button {
+  background: var(--primary-soft);
+  border-color: rgba(155, 122, 255, 0.2);
+  color: var(--primary-dark);
+}
+
+/* Shortcut buttons */
+[data-theme="dark"] .shortcut {
+  background: var(--panel);
+  border-color: var(--line);
+}
+
+/* Legend & donut */
+[data-theme="dark"] .legend-row {
+  color: var(--muted);
+}
+[data-theme="dark"] .legend-row strong {
+  color: var(--text);
+}
+
+/* Empty state */
+[data-theme="dark"] .empty-state {
+  background: var(--panel);
+}
+
+/* Skeleton adjusts automatically via variables */
+
+[data-theme="dark"] .profile-avatar-wrapper {
+  background: var(--primary-soft);
+}
+
+[data-theme="dark"] .secondary-btn,
+[data-theme="dark"] .danger-btn {
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+/* Technician View & Funnel in Dark Mode */
+[data-theme="dark"] .technician-ticket-card,
+[data-theme="dark"] .solicitation-summary-card,
+[data-theme="dark"] .status-option-btn,
+[data-theme="dark"] .funnel-step-box,
+[data-theme="dark"] .category-stat-card,
+[data-theme="dark"] .resolution-audit-item,
+[data-theme="dark"] .solicitation-preview-box,
+[data-theme="dark"] .summary-desc-box {
+  background: var(--panel);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .filter-tab {
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .filter-tab.active {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .resolution-preview-card {
+  background: rgba(155, 122, 255, 0.07);
+  border-color: rgba(155, 122, 255, 0.25);
+}
+
+[data-theme="dark"] .resolution-text-snippet {
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .funnel-container {
+  background: linear-gradient(180deg, rgba(155, 122, 255, 0.08) 0%, rgba(155, 122, 255, 0.02) 100%);
+  border-color: rgba(155, 122, 255, 0.25);
+}
+
+/* Scrollbar (WebKit) */
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(155, 122, 255, 0.25);
+  border-radius: 8px;
+}
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: rgba(200, 190, 230, 0.05);
+}
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb {
+  background: rgba(122, 74, 232, 0.18);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* FAB (dark mode) */
+[data-theme="dark"] .fab--ticket {
+  background: linear-gradient(135deg, #9b7aff 0%, #5d2ad1 100%);
+  box-shadow: 0 6px 20px rgba(155, 122, 255, 0.4);
+}
+
+/* Dark mode table row hover (shared .table-row) */
+[data-theme="dark"] .table-row:hover {
+  background: rgba(155, 122, 255, 0.1);
+}
+
+/* Dark mode filter tab (professor page) */
+[data-theme="dark"] .filter-tab {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(155, 122, 255, 0.15);
+  color: var(--muted);
+}
+
+[data-theme="dark"] .filter-tab.active {
+  background: var(--primary-soft);
+  border-color: rgba(155, 122, 255, 0.3);
+  color: var(--primary-dark);
+}
+
+/* Dark mode bell dot border matches dark panels */
+[data-theme="dark"] .header-action .notification-dot,
+[data-theme="dark"] .bell .notification-dot {
+  border-color: #1a1528;
+}
+
+/* Dark mode toast success check color stays bright */
+[data-theme="dark"] .toast.success::before { color: #34d399; }
+
+/* Professor tickets table in dark mode */
+[data-theme="dark"] .tickets-card th,
+[data-theme="dark"] .tickets-card td {
+  border-bottom-color: rgba(200, 190, 230, 0.12);
+}
+
+[data-theme="dark"] .tickets-card tbody tr:hover {
+  background: linear-gradient(90deg, rgba(155, 122, 255, 0.09) 0%, rgba(155, 122, 255, 0.02) 70%);
+}
+
+/* Dark mode cancel ticket button */
+[data-theme="dark"] .cancel-ticket-btn {
+  background: rgba(244, 63, 94, 0.12);
+  border-color: rgba(244, 63, 94, 0.3);
+  color: var(--cancelled-text);
+}
+
+/* Dark mode image preview + dashed upload */
+[data-theme="dark"] .image-upload input[type="file"],
+[data-theme="dark"] .image-preview {
+  background: var(--surface);
+  border-color: var(--line-strong);
+  color: var(--muted);
+}
+
+/* Dark mode profile info values */
+[data-theme="dark"] .info-value {
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+/* Dark mode primary-btn shadow subtle */
+[data-theme="dark"] .primary-btn {
+  box-shadow: 0 12px 20px rgba(155, 122, 255, 0.18);
+}
+
+/* Refinement layer theme adjustments */
+[data-theme="dark"] .hero-box {
+  background: linear-gradient(118deg, #34306f 0%, #413a82 56%, #514995 100%);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.22);
+}
+
+[data-theme="dark"] .content-card,
+[data-theme="dark"] .tickets-card,
+[data-theme="dark"] .panel-card,
+[data-theme="dark"] .section-card,
+[data-theme="dark"] .profile-card,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .report-box,
+[data-theme="dark"] .metric-box,
+[data-theme="dark"] .shortcut,
+[data-theme="dark"] .header-action,
+[data-theme="dark"] .user-pill,
+[data-theme="dark"] .mobile-bottom-nav {
+  background: var(--panel-strong);
+  border-color: var(--line);
+  box-shadow: none;
+}
+
+[data-theme="dark"] .sidebar {
+  background: rgba(27, 32, 52, 0.76);
+}
+
+[data-theme="dark"] .bottom-nav-item.active {
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
+[data-theme="dark"] .bottom-nav-cta,
+[data-theme="dark"] .bottom-nav-cta.active,
+[data-theme="dark"] .bottom-nav-cta:hover,
+[data-theme="dark"] .fab--ticket {
+  background: linear-gradient(135deg, #7569e5, #5147bc);
+  color: #fff;
+}
+
+[data-theme="dark"] .new-ticket-button {
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
+[data-theme="dark"] .table-row,
+[data-theme="dark"] .recent-ticket-item,
+[data-theme="dark"] .ticket-item.priority-card,
+[data-theme="dark"] .mini-item,
+[data-theme="dark"] .resource-row,
+[data-theme="dark"] .info-value {
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .recent-ticket-main h3 {
+  color: var(--text);
+}
+
+[data-theme="dark"] .field input,
+[data-theme="dark"] .field textarea,
+[data-theme="dark"] .field select,
+[data-theme="dark"] .form-group input,
+[data-theme="dark"] .form-group select,
+[data-theme="dark"] .form-group textarea {
+  background: var(--surface);
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+
+[data-theme="dark"] .search-bar,
+[data-theme="dark"] .ticket-form,
+[data-theme="dark"] .profile-modal,
+[data-theme="dark"] .user-menu,
+[data-theme="dark"] .modal-close {
+  background: var(--panel-strong);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+[data-theme="dark"] .search-bar input {
+  color: var(--text);
+}
+
+[data-theme="dark"] .data-table thead th,
+[data-theme="dark"] .data-table tbody td,
+[data-theme="dark"] th,
+[data-theme="dark"] td {
+  border-bottom-color: var(--line);
+}
+
+[data-theme="dark"] .data-table thead th {
+  color: var(--muted);
+}

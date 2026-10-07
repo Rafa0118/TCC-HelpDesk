@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Helpium | Direção</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,1,0" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: linear-gradient(135deg, #f4ecff 0%, #faf6ff 45%, #f1f0ff 100%);
+        --panel: rgba(255,255,255,0.78);
+        --primary: #7a4ae8;
+        --primary-dark: #5d2ad1;
+        --primary-soft: #efe6ff;
+        --text: #1c1b22;
+        --muted: #5e5a6d;
+        --line: rgba(42,31,74,0.12);
+        --shadow: 0 24px 48px rgba(77,48,123,0.12);
+        --success: #ebf9ee;
+        --success-text: #2f7d4a;
+        --warning: #fff3d7;
+        --warning-text: #9a6700;
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body { margin: 0; min-height: 100vh; font-family: "Inter", "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
+      button { font: inherit; cursor: pointer; }
+
+      .page-shell { --sidebar-width: 72px; min-height: 100vh; display: grid; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); transition: grid-template-columns 0.25s ease; }
+      .page-shell.is-expanded { --sidebar-width: 220px; }
+      .sidebar { width: 72px; padding: 18px 10px 16px; display: flex; flex-direction: column; gap: 12px; border-right: 1px solid rgba(42,31,74,0.08); transition: width 0.25s ease; }
+      .page-shell.is-expanded .sidebar { width: 220px; }
+      .brand { display: flex; align-items: center; justify-content: center; padding: 10px 8px 18px; }
+      .brand-mark { width: 24px; height: 24px; border-radius: 8px; background: linear-gradient(135deg, #1f1f20, #2a5f4d); position: relative; }
+      .brand-mark::before { content: ""; position: absolute; width: 12px; height: 12px; left: 8px; top: 5px; background: #fff; border-radius: 3px; transform: rotate(45deg); }
+      .nav { display: grid; gap: 8px; margin-top: 10px; }
+      .nav-item { display: flex; align-items: center; gap: 10px; width: 100%; height: 42px; padding: 0 12px; border: 1px solid transparent; border-radius: 12px; background: transparent; color: var(--text); font-size: 0.82rem; font-weight: 600; text-align: left; white-space: nowrap; transition: all 0.25s ease; }
+      .nav-item:hover, .nav-item:focus-visible, .nav-item.active { background: rgba(122,74,232,0.09); border-color: rgba(122,74,232,0.16); color: var(--primary-dark); outline: none; }
+      .nav-item-icon { width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 19px; font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+      .nav-item-text { max-width: 0; opacity: 0; transform: translateX(-8px); overflow: hidden; transition: max-width 0.22s ease, opacity 0.18s ease, transform 0.18s ease; }
+      .page-shell.is-expanded .nav-item-text { max-width: 180px; opacity: 1; transform: translateX(0); }
+
+      .content { min-width: 0; }
+      .header { min-height: 78px; display: flex; align-items: center; justify-content: flex-end; padding: 18px 28px 10px; }
+      .header-tools { display: flex; align-items: center; gap: 12px; }
+      .header-action { width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,0.78); color: var(--text); }
+      .header-action:hover, .header-action:focus-visible { border-color: rgba(122,74,232,0.28); box-shadow: 0 10px 22px rgba(116,84,181,0.12); outline: none; }
+      .material-symbols-outlined { font-size: 21px; line-height: 1; font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+      .user-pill { position: relative; display: inline-flex; align-items: center; gap: 8px; padding: 7px 10px 7px 8px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,0.8); font-size: 0.78rem; font-weight: 700; }
+      .avatar { width: 18px; height: 18px; border-radius: 50%; background: linear-gradient(135deg, #221d2a, #7a4ae8); }
+      .user-menu { position: absolute; top: calc(100% + 10px); right: 0; min-width: 150px; padding: 8px; border: 1px solid var(--line); border-radius: 14px; background: #fff; box-shadow: var(--shadow); opacity: 0; visibility: hidden; transform: translateY(-8px); transition: all 0.2s ease; z-index: 20; }
+      .user-menu.open { opacity: 1; visibility: visible; transform: translateY(0); }
+      .user-menu button { display: block; width: 100%; padding: 9px 10px; border: 0; border-radius: 10px; background: transparent; color: var(--text); text-align: left; font-size: 0.76rem; font-weight: 700; }
+      .user-menu button:hover { background: var(--primary-soft); }
+
+      .main-panel { padding: 0 28px 28px; }
+      .section { display: none; }
+      .section.active { display: block; }
+      .hero-box { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 18px; padding: 20px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,0.7); }
+      .eyebrow { margin: 0 0 7px; color: var(--primary); font-size: 0.68rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+      h1, h2, h3, p { margin-top: 0; }
+      .hero-title { margin-bottom: 6px; color: var(--primary-dark); font-size: clamp(1.8rem, 3vw, 2.65rem); font-weight: 900; letter-spacing: -0.08em; }
+      .hero-subtitle { margin-bottom: 0; color: var(--muted); font-size: 0.86rem; }
+      .date-badge { padding: 9px 12px; border: 1px solid rgba(122,74,232,0.15); border-radius: 10px; background: var(--primary-soft); color: var(--primary-dark); font-size: 0.7rem; font-weight: 700; white-space: nowrap; }
+
+      .stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+      .stat-card, .panel-card, .section-card { border: 1px solid var(--line); border-radius: 16px; background: var(--panel); box-shadow: inset 0 1px 0 rgba(255,255,255,0.4); }
+      .stat-card { padding: 15px 16px; }
+      .stat-top, .panel-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+      .stat-top { color: var(--muted); font-size: 0.67rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; }
+      .stat-icon { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 10px; background: var(--primary-soft); color: var(--primary-dark); }
+      .stat-value { margin: 14px 0 5px; font-size: 1.8rem; font-weight: 900; letter-spacing: -0.07em; }
+      .stat-change { color: var(--success-text); font-size: 0.68rem; font-weight: 700; }
+      .dashboard-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 18px; margin-bottom: 18px; }
+      .panel-card { padding: 16px; }
+      .panel-header { margin-bottom: 15px; }
+      .panel-header h2, .panel-header h3 { margin: 0; font-size: 0.98rem; letter-spacing: -0.05em; }
+      .panel-header span, .shortcut-link { color: var(--muted); font-size: 0.68rem; }
+      .shortcut-link { border: 0; background: transparent; color: var(--primary-dark); font-weight: 700; }
+      .donut-layout { display: flex; align-items: center; gap: 22px; min-height: 170px; }
+      .donut { width: 132px; height: 132px; flex-shrink: 0; display: grid; place-items: center; border-radius: 50%; background: conic-gradient(#7a4ae8 0 48%, #a98cf1 48% 77%, #d8caff 77% 100%); }
+      .donut::after { content: ""; width: 72px; height: 72px; border-radius: 50%; background: #fff; }
+      .legend { display: grid; gap: 12px; }
+      .legend-row { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 0.7rem; }
+      .legend-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--primary); }
+      .legend-dot.medium { background: #a98cf1; }
+      .legend-dot.low { background: #d8caff; }
+      .legend-row strong { margin-left: auto; color: var(--text); }
+      .bar-chart { height: 170px; display: flex; align-items: end; justify-content: space-around; gap: 14px; padding: 12px 8px 22px; border-bottom: 1px solid var(--line); background: repeating-linear-gradient(to top, transparent 0 41px, rgba(42,31,74,0.06) 42px 43px); }
+      .bar-item { display: flex; align-items: center; flex-direction: column; justify-content: end; gap: 6px; height: 100%; color: var(--muted); font-size: 0.62rem; }
+      .bar { width: 28px; height: var(--bar-height); border-radius: 7px 7px 2px 2px; background: linear-gradient(180deg, var(--primary), #b69cf5); }
+      .table-list { display: grid; gap: 10px; }
+      .table-row { display: grid; grid-template-columns: 1.2fr 0.8fr 0.7fr; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 10px; background: rgba(122,74,232,0.04); font-size: 0.72rem; }
+      .table-row span { color: var(--muted); }
+      .status { justify-self: end; padding: 6px 9px; border-radius: 999px; background: var(--success); color: var(--success-text); font-size: 0.61rem; font-weight: 800; white-space: nowrap; }
+      .status.pending { background: var(--warning); color: var(--warning-text); }
+      .shortcut-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+      .shortcut { display: flex; align-items: center; gap: 10px; min-height: 58px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,0.7); color: var(--text); text-align: left; }
+      .shortcut:hover, .shortcut:focus-visible { border-color: rgba(122,74,232,0.25); background: var(--primary-soft); outline: none; }
+      .shortcut .material-symbols-outlined { color: var(--primary-dark); }
+      .shortcut strong { display: block; font-size: 0.72rem; }
+      .shortcut small { color: var(--muted); font-size: 0.62rem; }
+      .section-card { padding: 20px; }
+      .section-title { margin-bottom: 16px; color: var(--primary-dark); font-size: 1.4rem; letter-spacing: -0.06em; }
+      .section-card .table-row { grid-template-columns: 1.4fr 1fr 0.7fr; min-height: 50px; }
+      .reports-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px; }
+      .report-box { padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: rgba(122,74,232,0.05); }
+      .report-box span { color: var(--muted); font-size: 0.7rem; }
+      .report-box strong { display: block; margin-top: 12px; font-size: 1.8rem; }
+      .management-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 18px; }
+      .form-grid { display: grid; gap: 10px; }
+      .form-grid.two-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .field { display: grid; gap: 5px; }
+      .field label { color: var(--muted); font-size: 0.68rem; font-weight: 700; }
+      .field input, .field select { width: 100%; min-height: 40px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 9px; background: #fff; color: var(--text); font: inherit; font-size: 0.76rem; }
+      .field input:focus, .field select:focus { border-color: var(--primary); outline: 2px solid rgba(122,74,232,0.14); }
+      .form-action { min-height: 40px; padding: 9px 13px; border: 0; border-radius: 9px; background: var(--primary); color: #fff; font-size: 0.74rem; font-weight: 800; }
+      .form-action:hover, .form-action:focus-visible { background: var(--primary-dark); outline: none; }
+      .form-feedback { min-height: 18px; margin: 10px 0 0; color: var(--success-text); font-size: 0.68rem; font-weight: 700; }
+      .resource-list { display: grid; gap: 8px; margin-top: 14px; }
+      .resource-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 10px; border-radius: 9px; background: rgba(122,74,232,0.05); font-size: 0.72rem; }
+      .resource-row span { color: var(--muted); font-size: 0.67rem; }
+
+      @media (max-width: 1050px) { .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .dashboard-grid, .management-grid { grid-template-columns: 1fr; } }
+      @media (max-width: 900px) {
+        body { padding-bottom: 78px; }
+        .page-shell, .page-shell.is-expanded { grid-template-columns: 1fr; }
+        .page-shell.is-expanded .sidebar { width: 100%; }
+        .header { padding: 14px 14px 8px; }
+        .sidebar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1000; width: 100%; padding: 7px 10px calc(7px + env(safe-area-inset-bottom)); flex-direction: row; border: 1px solid var(--line); border-radius: 18px 18px 0 0; background: rgba(255,255,255,0.98); box-shadow: var(--shadow); }
+        .brand { display: none; }
+        .nav { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); width: 100%; gap: 4px; margin: 0; }
+        .nav-item { height: 58px; min-width: 0; padding: 5px 2px; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 0.58rem; text-align: center; }
+        .nav-item-text { width: 100%; max-width: none; opacity: 1; transform: none; overflow: hidden; text-overflow: ellipsis; }
+        .main-panel { padding: 0 14px 18px; }
+        .hero-box { align-items: flex-start; flex-direction: column; }
+        .shortcut-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+      @media (max-width: 560px) { .stats-grid, .reports-grid { grid-template-columns: 1fr; } .donut-layout { flex-direction: column; justify-content: center; } .table-row { grid-template-columns: 1fr 1fr; } .table-row .status { grid-column: 2; } .shortcut-grid { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div class="page-shell">
+      <aside class="sidebar">
+        <div class="brand" aria-label="Marca do sistema"><span class="brand-mark" aria-hidden="true"></span></div>
+        <nav class="nav" aria-label="Menu principal">
+          <button class="nav-item active" type="button" data-target="inicio"><span class="material-symbols-outlined nav-item-icon">home</span><span class="nav-item-text">Início</span></button>
+          <button class="nav-item" type="button" data-target="chamados"><span class="material-symbols-outlined nav-item-icon">confirmation_number</span><span class="nav-item-text">Chamados</span></button>
+          <button class="nav-item" type="button" data-target="usuarios"><span class="material-symbols-outlined nav-item-icon">groups</span><span class="nav-item-text">Usuários</span></button>
+          <button class="nav-item" type="button" data-target="relatorios"><span class="material-symbols-outlined nav-item-icon">bar_chart</span><span class="nav-item-text">Relatórios</span></button>
+          <button class="nav-item" type="button" data-target="perfil"><span class="material-symbols-outlined nav-item-icon">person</span><span class="nav-item-text">Perfil</span></button>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <header class="header">
+          <div class="header-tools">
+            <button class="header-action" id="notificationsBtn" type="button" aria-label="Notificações"><span class="material-symbols-outlined">notifications</span></button>
+            <div class="user-pill" id="userMenuToggle" tabindex="0" aria-label="Menu de perfil">
+              <span class="avatar" aria-hidden="true"></span><span id="userName">Direção</span>
+              <div class="user-menu" id="userMenu"><button type="button" data-action="profile">Meu perfil</button><button type="button" data-action="logout">Sair</button></div>
+            </div>
+          </div>
+        </header>
+
+        <section class="main-panel">
+          <section id="inicio" class="section active">
+            <div class="hero-box"><div><p class="eyebrow">Painel executivo</p><h1 class="hero-title">Olá, Direção!</h1><p class="hero-subtitle">Aqui está o resumo geral do sistema e dos atendimentos.</p></div><span class="date-badge">Hoje, 01 de setembro</span></div>
+            <div class="stats-grid">
+              <article class="stat-card"><div class="stat-top"><span>Chamados totais</span><span class="stat-icon material-symbols-outlined">confirmation_number</span></div><div class="stat-value">42</div><div class="stat-change">+12% esta semana</div></article>
+              <article class="stat-card"><div class="stat-top"><span>Em andamento</span><span class="stat-icon material-symbols-outlined">pending_actions</span></div><div class="stat-value">18</div><div class="stat-change">5 precisam de atenção</div></article>
+              <article class="stat-card"><div class="stat-top"><span>Resolvidos</span><span class="stat-icon material-symbols-outlined">check_circle</span></div><div class="stat-value">12</div><div class="stat-change">97% de satisfação</div></article>
+              <article class="stat-card"><div class="stat-top"><span>Usuários ativos</span><span class="stat-icon material-symbols-outlined">groups</span></div><div class="stat-value">24</div><div class="stat-change">Todos conectados hoje</div></article>
+            </div>
+            <div class="dashboard-grid">
+              <article class="panel-card"><div class="panel-header"><h2>Chamados por prioridade</h2><span>Este mês</span></div><div class="donut-layout"><div class="donut" aria-label="48 por cento alta, 29 por cento média e 23 por cento baixa"></div><div class="legend"><div class="legend-row"><i class="legend-dot"></i><span>Alta</span><strong>48%</strong></div><div class="legend-row"><i class="legend-dot medium"></i><span>Média</span><strong>29%</strong></div><div class="legend-row"><i class="legend-dot low"></i><span>Baixa</span><strong>23%</strong></div></div></div></article>
+              <article class="panel-card"><div class="panel-header"><h2>Chamados por status</h2><span>Últimos 7 dias</span></div><div class="bar-chart" aria-label="Gráfico de chamados por status"><div class="bar-item"><div class="bar" style="--bar-height: 62%"></div><span>Abertos</span></div><div class="bar-item"><div class="bar" style="--bar-height: 86%"></div><span>Andamento</span></div><div class="bar-item"><div class="bar" style="--bar-height: 54%"></div><span>Resolvidos</span></div></div></article>
+            </div>
+            <div class="dashboard-grid">
+              <article class="panel-card"><div class="panel-header"><h2>Chamados recentes</h2><button class="shortcut-link" type="button" data-target="chamados">Ver todos</button></div><div class="table-list"><div class="table-row"><strong>#1047 · Projetor não liga</strong><span>Sala 12</span><b class="status pending">Em espera</b></div><div class="table-row"><strong>#1049 · Wi-Fi caiu no lab 03</strong><span>Laboratório 03</span><b class="status">Em andamento</b></div><div class="table-row"><strong>#1052 · Computador sem áudio</strong><span>Coordenação</span><b class="status">Concluído</b></div></div></article>
+              <article class="panel-card"><div class="panel-header"><h2>Desempenho da equipe</h2><span>Hoje</span></div><div class="table-list"><div class="table-row"><strong>Equipe técnica</strong><span>31 atendimentos</span><b class="status">92%</b></div><div class="table-row"><strong>Tempo médio</strong><span>42 minutos</span><b class="status">-8 min</b></div><div class="table-row"><strong>Satisfação</strong><span>Feedbacks recebidos</span><b class="status">97%</b></div></div></article>
+            </div>
+            <div class="shortcut-grid"><button class="shortcut" type="button" data-target="chamados"><span class="material-symbols-outlined">confirmation_number</span><span><strong>Todos os chamados</strong><small>Consultar atendimentos</small></span></button><button class="shortcut" type="button" data-target="relatorios"><span class="material-symbols-outlined">analytics</span><span><strong>Relatórios</strong><small>Analisar resultados</small></span></button><button class="shortcut" type="button" data-target="usuarios"><span class="material-symbols-outlined">groups</span><span><strong>Usuários</strong><small>Gerenciar acessos</small></span></button><button class="shortcut" type="button" data-target="perfil"><span class="material-symbols-outlined">person</span><span><strong>Meu perfil</strong><small>Ver seus dados</small></span></button></div>
+          </section>
+
+          <section id="chamados" class="section"><div class="section-card"><h2 class="section-title">Todos os chamados</h2><div class="table-list"><div class="table-row"><strong>#1047 · Projetor não liga</strong><span>Professor Rafael · Sala 12</span><b class="status pending">Em espera</b></div><div class="table-row"><strong>#1049 · Wi-Fi caiu no lab 03</strong><span>Professora Ana · Laboratório 03</span><b class="status">Em andamento</b></div><div class="table-row"><strong>#1052 · Computador sem áudio</strong><span>Coordenação · Bloco A</span><b class="status">Concluído</b></div><div class="table-row"><strong>#1054 · Monitor quebrado</strong><span>Professor João · Sala 14</span><b class="status pending">Aberto</b></div></div></div></section>
+          <section id="usuarios" class="section">
+            <div class="management-grid">
+              <article class="section-card">
+                <h2 class="section-title">Adicionar usuário</h2>
+                <form id="userForm" class="form-grid">
+                  <div class="form-grid two-columns"><div class="field"><label for="newUserName">Nome completo</label><input id="newUserName" required type="text" placeholder="Ex.: Rafael Santos" /></div><div class="field"><label for="newUserRole">Perfil</label><select id="newUserRole" required><option value="professor">Professor</option><option value="tecnico">Técnico</option></select></div></div>
+                  <div class="field"><label for="newUserEmail">E-mail de acesso</label><input id="newUserEmail" required type="email" placeholder="nome@escola.com" /></div>
+                  <button class="form-action" type="submit">Adicionar e gerar credencial</button>
+                </form>
+                <p id="userFeedback" class="form-feedback" role="status"></p>
+              </article>
+              <article class="section-card">
+                <h2 class="section-title">Adicionar espaço</h2>
+                <form id="resourceForm" class="form-grid">
+                  <div class="field"><label for="resourceName">Nome do espaço</label><input id="resourceName" required type="text" placeholder="Ex.: Laboratório 04" /></div>
+                  <div class="field"><label for="resourceType">Tipo</label><select id="resourceType" required><option value="Sala">Sala</option><option value="Laboratório">Laboratório</option></select></div>
+                  <button class="form-action" type="submit">Adicionar ao sistema geral</button>
+                </form>
+                <p id="resourceFeedback" class="form-feedback" role="status"></p>
+                <div id="resourceList" class="resource-list" aria-live="polite"></div>
+              </article>
+            </div>
+            <div class="section-card"><h2 class="section-title">Usuários do sistema</h2><div id="usersList" class="table-list"></div></div>
+          </section>
+          <section id="relatorios" class="section"><div class="section-card"><h2 class="section-title">Relatórios</h2><div class="reports-grid"><div class="report-box"><span>Atendimentos no mês</span><strong>128</strong></div><div class="report-box"><span>Tempo médio</span><strong>39m</strong></div><div class="report-box"><span>Taxa de resolução</span><strong>96%</strong></div></div><div class="bar-chart"><div class="bar-item"><div class="bar" style="--bar-height: 45%"></div><span>Mai</span></div><div class="bar-item"><div class="bar" style="--bar-height: 62%"></div><span>Jun</span></div><div class="bar-item"><div class="bar" style="--bar-height: 78%"></div><span>Jul</span></div><div class="bar-item"><div class="bar" style="--bar-height: 94%"></div><span>Ago</span></div></div></div></section>
+          <section id="perfil" class="section"><div class="section-card"><h2 class="section-title">Meu perfil</h2><div class="table-list"><div class="table-row"><strong id="profileName">Direção</strong><span id="profileEmail">direcao@helpium.com</span><b class="status">Ativa</b></div><div class="table-row"><strong>Função</strong><span>Gestão e acompanhamento do sistema</span><b class="status">Direção</b></div></div></div></section>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const user = JSON.parse(localStorage.getItem('helpium_logged_user') || 'null');
+      if (!user || user.role !== 'direcao') window.location.href = 'index.html';
+
+      const pageShell = document.querySelector('.page-shell');
+      const sidebar = document.querySelector('.sidebar');
+      const userMenuToggle = document.getElementById('userMenuToggle');
+      const userMenu = document.getElementById('userMenu');
+      const sections = document.querySelectorAll('.section');
+      const navigationButtons = document.querySelectorAll('[data-target]');
+
+      if (user) {
+        document.getElementById('userName').textContent = user.name || 'Direção';
+        document.getElementById('profileName').textContent = user.name || 'Direção';
+        document.getElementById('profileEmail').textContent = user.email || 'direcao@helpium.com';
+      }
+
+      function openSection(targetId) {
+        sections.forEach((section) => section.classList.toggle('active', section.id === targetId));
+        document.querySelectorAll('.nav-item').forEach((button) => button.classList.toggle('active', button.dataset.target === targetId));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      navigationButtons.forEach((button) => button.addEventListener('click', () => openSection(button.dataset.target)));
+
+      function setSidebarExpanded(isExpanded) {
+        if (window.innerWidth <= 900) return;
+        pageShell.classList.toggle('is-expanded', isExpanded);
+      }
+
+      sidebar.addEventListener('mouseenter', () => setSidebarExpanded(true));
+      sidebar.addEventListener('mouseleave', () => setSidebarExpanded(false));
+      userMenuToggle.addEventListener('click', () => userMenu.classList.toggle('open'));
+      document.addEventListener('click', (event) => {
+        if (!userMenuToggle.contains(event.target)) userMenu.classList.remove('open');
+      });
+      document.querySelector('[data-action="logout"]').addEventListener('click', () => {
+        localStorage.removeItem('helpium_logged_user');
+        window.location.href = 'index.html';
+      });
+      document.getElementById('notificationsBtn').addEventListener('click', () => alert('Nenhuma nova notificação no momento.'));
+      const usersStorageKey = 'helpium_users';
+      const resourcesStorageKey = 'helpium_resources';
+      const defaultUsers = [
+        { role: 'direcao', email: 'direcao@helpium.com', password: 'direcao123', name: 'Diretora Carla Mendes' },
+        { role: 'professor', email: 'professor@helpium.com', password: 'professor123', name: 'Prof. Ana Souza' },
+        { role: 'tecnico', email: 'tecnico@helpium.com', password: 'tecnico123', name: 'Técnico João Silva' }
+      ];
+      const readStorage = (key, fallback) => {
+        try { const value = JSON.parse(localStorage.getItem(key) || 'null'); return Array.isArray(value) ? value : fallback; } catch (error) { return fallback; }
+      };
+      const createPassword = (name) => `${name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 5)}${Math.floor(1000 + Math.random() * 9000)}`;
+      const renderManagementLists = () => {
+        const users = readStorage(usersStorageKey, defaultUsers);
+        document.getElementById('usersList').innerHTML = users.map((item) => `<div class="table-row"><strong>${item.name}</strong><span>${item.role === 'tecnico' ? 'Técnico' : item.role === 'direcao' ? 'Direção' : 'Professor'} · ${item.email} · Senha: ${item.password}</span><b class="status">Ativo</b></div>`).join('');
+        const resources = readStorage(resourcesStorageKey, []);
+        document.getElementById('resourceList').innerHTML = resources.length ? resources.map((item) => `<div class="resource-row"><strong>${item.name}</strong><span>${item.type}</span></div>`).join('') : '<span>Nenhum espaço cadastrado ainda.</span>';
+      };
+      document.getElementById('userForm').addEventListener('submit', (event) => {
+        event.preventDefault();
+        const name = document.getElementById('newUserName').value.trim();
+        const email = document.getElementById('newUserEmail').value.trim().toLowerCase();
+        const role = document.getElementById('newUserRole').value;
+        const users = readStorage(usersStorageKey, defaultUsers);
+        if (users.some((item) => item.email.toLowerCase() === email)) { document.getElementById('userFeedback').textContent = 'Este e-mail já está cadastrado.'; return; }
+        const password = createPassword(name);
+        users.push({ name, email, role, password });
+        localStorage.setItem(usersStorageKey, JSON.stringify(users));
+        document.getElementById('userFeedback').textContent = `Usuário criado. Login: ${email} · Senha: ${password}`;
+        event.target.reset();
+        renderManagementLists();
+      });
+      document.getElementById('resourceForm').addEventListener('submit', (event) => {
+        event.preventDefault();
+        const resources = readStorage(resourcesStorageKey, []);
+        resources.push({ name: document.getElementById('resourceName').value.trim(), type: document.getElementById('resourceType').value });
+        localStorage.setItem(resourcesStorageKey, JSON.stringify(resources));
+        document.getElementById('resourceFeedback').textContent = 'Espaço adicionado ao sistema geral.';
+        event.target.reset();
+        renderManagementLists();
+      });
+      renderManagementLists();
+      openSection('inicio');
+    </script>
+  </body>
+</html>

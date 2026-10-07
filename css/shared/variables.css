@@ -1,0 +1,141 @@
+/* ============================================
+   HELPIUM - Design Tokens (CSS Variables)
+   ============================================ */
+
+@property --sidebar-width {
+  syntax: '<length>';
+  initial-value: 72px;
+  inherits: true;
+}
+
+:root {
+  /* Backgrounds */
+  --bg: linear-gradient(135deg, #f3f6ff 0%, #f8f9ff 48%, #f1f3ff 100%);
+  --bg-strong: #e9edff;
+
+  /* Panels */
+  --panel: rgba(255, 255, 255, 0.92);
+  --panel-strong: #ffffff;
+
+  /* Surfaces */
+  --surface: #f5f6ff;
+  --surface-2: #eceeff;
+
+  /* Primary */
+  --primary: #6655df;
+  --primary-dark: #4f40c4;
+  --primary-soft: #efedff;
+  --primary-soft-strong: #dfdcff;
+
+  /* Secondary accent */
+  --accent-green: #22c55e;
+  --accent-blue: #3b82f6;
+  --accent-orange: #f59e0b;
+  --accent-rose: #f43f5e;
+
+  /* Text */
+  --text: #252844;
+  --muted: #626781;
+
+  /* Borders */
+  --line: rgba(50, 57, 112, 0.12);
+  --line-strong: rgba(50, 57, 112, 0.2);
+
+  /* Shadows */
+  --shadow: 0 22px 48px rgba(50, 58, 120, 0.12);
+  --shadow-soft: 0 10px 22px rgba(61, 69, 133, 0.09);
+  --shadow-hover: 0 28px 56px rgba(50, 58, 120, 0.16);
+
+  /* Status: Success */
+  --success: #ebf9ee;
+  --success-text: #2f7d4a;
+
+  /* Status: Progress */
+  --progress: #fff3bf;
+  --progress-text: #996b00;
+
+  /* Status: Waiting */
+  --waiting: #f2edff;
+  --waiting-text: #5b2ec4;
+
+  /* Status: Cancelled */
+  --cancelled: #ffe5e5;
+  --cancelled-text: #b33131;
+
+  /* Status: Warning */
+  --warning: #fff3d7;
+  --warning-text: #9a6700;
+
+  /* Priority */
+  --priority-low: #e0f7e9;
+  --priority-low-text: #1a7a3a;
+  --priority-medium: #fff7d6;
+  --priority-medium-text: #926400;
+  --priority-high: #ffe8d6;
+  --priority-high-text: #c44d10;
+  --priority-urgent: #ffe0e0;
+  --priority-urgent-text: #b71c1c;
+
+  /* Timing */
+  --ease-out: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---- Dark Mode ---- */
+[data-theme="dark"] {
+  --bg: linear-gradient(135deg, #101322 0%, #141827 48%, #111522 100%);
+  --bg-strong: #1b2034;
+
+  --panel: rgba(27, 32, 52, 0.94);
+  --panel-strong: #1b2034;
+
+  --surface: #20263d;
+  --surface-2: #272d47;
+
+  --primary: #a79bff;
+  --primary-dark: #c1baff;
+  --primary-soft: rgba(135, 123, 255, 0.16);
+  --primary-soft-strong: rgba(135, 123, 255, 0.24);
+
+  --accent-green: #34d399;
+  --accent-blue: #60a5fa;
+  --accent-orange: #fbbf24;
+  --accent-rose: #fb7185;
+
+  --text: #eef0ff;
+  --muted: #a6abc6;
+
+  --line: rgba(195, 202, 255, 0.13);
+  --line-strong: rgba(195, 202, 255, 0.22);
+
+  --shadow: 0 22px 48px rgba(0, 0, 0, 0.35);
+  --shadow-soft: 0 10px 22px rgba(0, 0, 0, 0.25);
+  --shadow-hover: 0 28px 56px rgba(0, 0, 0, 0.4);
+
+  --success: rgba(34, 197, 94, 0.12);
+  --success-text: #34d399;
+  --progress: rgba(245, 158, 11, 0.12);
+  --progress-text: #fbbf24;
+  --waiting: rgba(155, 122, 255, 0.12);
+  --waiting-text: #b59aff;
+  --cancelled: rgba(244, 63, 94, 0.12);
+  --cancelled-text: #fb7185;
+  --warning: rgba(245, 158, 11, 0.12);
+  --warning-text: #fbbf24;
+
+  --priority-low: rgba(34, 197, 94, 0.12);
+  --priority-low-text: #34d399;
+  --priority-medium: rgba(245, 158, 11, 0.12);
+  --priority-medium-text: #fbbf24;
+  --priority-high: rgba(249, 115, 22, 0.12);
+  --priority-high-text: #fb923c;
+  --priority-urgent: rgba(244, 63, 94, 0.15);
+  --priority-urgent-text: #fb7185;
+}
+
+/* Dark mode panel overrides */
+[data-theme="dark"] .toast { background: #2a2440; }
+[data-theme="dark"] .modal-close:hover { background: var(--cancelled); }
+[data-theme="dark"] .donut::after { background: var(--panel-strong); }
+[data-theme="dark"] .bar-chart { background: repeating-linear-gradient(to top, transparent 0 41px, rgba(200, 190, 230, 0.06) 42px 43px); }
+[data-theme="dark"] .hero-box-hero { background: linear-gradient(135deg, rgba(155, 122, 255, 0.08), rgba(155, 122, 255, 0.02)); }

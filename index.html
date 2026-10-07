@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Helpium Landing Page</title>
+    <meta
+      name="description"
+      content="Landing page inicial em visual moderno com foco em branco e roxo."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/legacy/styles.css" />
+  </head>
+  <body id="top">
+    <div class="topbar">
+      <div class="container topbar-inner">
+        <span class="topbar-tag">Helpium para escolas</span>
+        <span class="topbar-text">Chamados e suporte escolar em um só lugar.</span>
+      </div>
+    </div>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a href="#top" class="brand-wrap" aria-label="Helpium logo">
+          <div class="brand-mark">
+            <span class="brand-mark-inner"></span>
+          </div>
+          <span class="brand-name">helpium</span>
+        </a>
+
+        <button
+          class="mobile-menu-toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="mainNav"
+          aria-label="Abrir menu"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <nav class="main-nav" id="mainNav" aria-label="Navegação principal">
+          <a href="login.html" class="nav-link">Entrar</a>
+          <a href="cadastro.html" class="nav-link">Criar conta</a>
+        </nav>
+
+      </div>
+    </header>
+
+    <main class="hero-section">
+      <div class="container hero-shell">
+        <div class="hero-copy">
+          <p class="eyebrow">Suporte escolar, sem complicação</p>
+          <h1>O suporte que mantém sua escola em movimento.</h1>
+          <p class="hero-description">Professores acompanham chamados, a equipe técnica organiza os atendimentos e a direção visualiza a operação em um só lugar.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="login.html">Entrar no Helpium</a>
+            <a class="btn btn-secondary" href="cadastro.html">Criar uma conta</a>
+          </div>
+        </div>
+
+        <div class="hero-visual" aria-hidden="true">
+          <div class="visual-card"></div>
+        </div>
+      </div>
+    </main>
+    <script>
+      const navItems = document.querySelectorAll('.nav-item');
+      const mainNav = document.querySelector('.main-nav');
+      const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+
+      function closeAllNavItems() {
+        navItems.forEach((navItem) => {
+          navItem.classList.remove('open');
+          const toggle = navItem.querySelector('.nav-toggle');
+          if (toggle) {
+            toggle.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
+
+      navItems.forEach((item) => {
+        const toggle = item.querySelector('.nav-toggle');
+        if (!toggle) return;
+
+        toggle.addEventListener('mouseenter', () => {
+          if (window.innerWidth <= 860) {
+            return;
+          }
+
+          closeAllNavItems();
+          item.classList.add('open');
+          toggle.setAttribute('aria-expanded', 'true');
+        });
+
+        item.addEventListener('mouseleave', () => {
+          if (window.innerWidth <= 860) {
+            return;
+          }
+
+          item.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+        });
+
+        toggle.addEventListener('click', (event) => {
+          if (window.innerWidth > 860) {
+            return;
+          }
+
+          event.preventDefault();
+          const isOpen = item.classList.contains('open');
+
+          closeAllNavItems();
+
+          if (!isOpen) {
+            item.classList.add('open');
+            toggle.setAttribute('aria-expanded', 'true');
+          }
+        });
+      });
+
+      if (mobileMenuToggle && mainNav) {
+        mobileMenuToggle.addEventListener('click', () => {
+          const isOpen = mainNav.classList.toggle('is-open');
+          mobileMenuToggle.setAttribute('aria-expanded', String(isOpen));
+          mobileMenuToggle.setAttribute('aria-label', isOpen ? 'Fechar menu' : 'Abrir menu');
+        });
+
+        document.addEventListener('click', (event) => {
+          if (window.innerWidth > 860) {
+            return;
+          }
+
+          const clickedInsideMenu = mainNav.contains(event.target) || mobileMenuToggle.contains(event.target);
+          if (!clickedInsideMenu) {
+            mainNav.classList.remove('is-open');
+            mobileMenuToggle.setAttribute('aria-expanded', 'false');
+            mobileMenuToggle.setAttribute('aria-label', 'Abrir menu');
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
+

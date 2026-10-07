@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Helpium | Técnico</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,1,0" rel="stylesheet" />
+    <link rel="stylesheet" href="../css/shared/variables.css" />
+    <link rel="stylesheet" href="../css/shared/base.css" />
+    <link rel="stylesheet" href="../css/shared/components.css" />
+    <link rel="stylesheet" href="../css/shared/dashboard.css" />
+    <link rel="stylesheet" href="../css/shared/responsive.css" />
+    <link rel="stylesheet" href="../css/pages/tecnico.css" />
+    <link rel="stylesheet" href="../css/shared/refinements.css" />
+    <link rel="stylesheet" href="../css/shared/dark-mode.css" />
+  </head>
+<body>
+    <div class="page-shell">
+      <aside class="sidebar">
+        <div class="brand" aria-label="Marca do sistema">
+          <span class="brand-mark" aria-hidden="true"></span>
+        </div>
+
+        <nav class="nav" aria-label="Menu principal">
+          <button class="nav-item active" data-target="inicio" type="button">
+            <span class="material-symbols-outlined nav-item-icon" aria-hidden="true">home</span>
+            <span class="nav-item-text">Início</span>
+          </button>
+          <button class="nav-item" data-target="meus-chamados" type="button">
+            <span class="material-symbols-outlined nav-item-icon" aria-hidden="true">description</span>
+            <span class="nav-item-text">Meus chamados</span>
+          </button>
+          <button class="nav-item" data-target="todos-chamados" type="button">
+            <span class="material-symbols-outlined nav-item-icon" aria-hidden="true">list_alt</span>
+            <span class="nav-item-text">Todos os chamados</span>
+          </button>
+          <button class="nav-item" data-target="relatorios" type="button">
+            <span class="material-symbols-outlined nav-item-icon" aria-hidden="true">bar_chart</span>
+            <span class="nav-item-text">Relatórios</span>
+          </button>
+          <button class="nav-item" data-target="tecnico-perfil.html" type="button">
+            <span class="material-symbols-outlined nav-item-icon" aria-hidden="true">person</span>
+            <span class="nav-item-text">Perfil</span>
+          </button>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <header class="header">
+          <div class="header-tools">
+            <button class="header-action bell" id="notificationsBtn" type="button" aria-label="Notificações">
+              <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
+            <span class="notification-dot" aria-hidden="true"></span></button>
+
+            <div class="user-pill" id="userMenuToggle" tabindex="0" aria-label="Menu de perfil">
+              <span class="avatar" aria-hidden="true"></span>
+              <span id="userName">Técnico</span>
+              <div class="user-menu" id="userMenu" aria-label="Opções do usuário">
+                <button type="button" data-action="profile" data-target="tecnico-perfil.html">Perfil</button>
+                <button type="button" data-action="logout">Sair</button>
+              </div>
+            </div>
+
+            <button class="mobile-menu-button" type="button" aria-expanded="false" aria-label="Abrir menu">
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+          </div>
+        </header>
+
+        <section class="main-panel">
+          <section id="inicio" class="section active">
+            <div class="hero-box">
+              <h1 class="hero-title">Olá, Técnico!</h1>
+              <p class="hero-subtitle">Painel de operações técnicas, diagnóstico em funil e atendimento prioritário.</p>
+            </div>
+
+            <div class="stats-grid">
+              <article class="stat-card">
+                <div class="stat-top">
+                  <span>Total de Chamados</span>
+                  <span class="stat-icon material-symbols-outlined" aria-hidden="true">chat_bubble</span>
+                  <span class="stat-chevron material-symbols-outlined" aria-hidden="true">chevron_right</span>
+                </div>
+                <div class="stat-value" id="statTotalTickets">0</div>
+                <div class="stat-change">Total registrado</div>
+              </article>
+
+              <article class="stat-card">
+                <div class="stat-top">
+                  <span>Em andamento</span>
+                  <span class="stat-icon material-symbols-outlined" aria-hidden="true">schedule</span>
+                  <span class="stat-chevron material-symbols-outlined" aria-hidden="true">chevron_right</span>
+                </div>
+                <div class="stat-value" id="statProgressTickets">0</div>
+                <div class="stat-change">Em atendimento ativo</div>
+              </article>
+
+              <article class="stat-card">
+                <div class="stat-top">
+                  <span>Concluídos</span>
+                  <span class="stat-icon material-symbols-outlined" aria-hidden="true">check_circle</span>
+                </div>
+                <div class="stat-value" id="statDoneTickets">0</div>
+                <div class="stat-change">Soluções aplicadas</div>
+              </article>
+
+              <article class="stat-card">
+                <div class="stat-top">
+                  <span>Em espera</span>
+                  <span class="stat-icon material-symbols-outlined" aria-hidden="true">hourglass_top</span>
+                </div>
+                <div class="stat-value" id="statWaitingTickets">0</div>
+                <div class="stat-change">Aguardando atendimento</div>
+              </article>
+            </div>
+
+            <div class="cards-row">
+              <div class="panel-card">
+                <div class="panel-header">
+                  <h3>Chamados Prioritários da Fila</h3>
+                  <button class="link-button" type="button" onclick="Navigation.showSection('meus-chamados')">Ver todos</button>
+                </div>
+
+                <div class="ticket-list" id="priorityTicketsList">
+                  <!-- Injetado dinamicamente via JS -->
+                </div>
+              </div>
+
+              <div class="panel-card">
+                <div class="panel-header">
+                  <h3>Roteiro de Visitas e Prédios</h3>
+                </div>
+
+                <div class="mini-list">
+                  <div class="mini-item">
+                    <div>
+                      <strong>Bloco A - Salas 01 a 15</strong>
+                      <span>3 pendências ativas</span>
+                    </div>
+                    <span class="status waiting">Hoje</span>
+                  </div>
+
+                  <div class="mini-item">
+                    <div>
+                      <strong>Laboratórios de Informática</strong>
+                      <span>Labs 01 ao 04 • 2 chamados</span>
+                    </div>
+                    <span class="status progress">Rota</span>
+                  </div>
+
+                  <div class="mini-item">
+                    <div>
+                      <strong>Coordenação e Administrativo</strong>
+                      <span>1 atendimento recente</span>
+                    </div>
+                    <span class="status done">Ok</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="meus-chamados" class="section">
+            <div class="section-card">
+              <div class="section-header-row">
+                <div>
+                  <h2 class="section-title">Meus Chamados e Atendimentos</h2>
+                  <p class="section-subtitle">Gerencie status, diagnóstico em funil e registro detalhado de solução técnica</p>
+                </div>
+              </div>
+
+              <!-- Filter & Search Toolbar -->
+              <div class="technician-toolbar">
+                <div class="filter-tabs">
+                  <button type="button" class="filter-tab active" data-filter="Todos">Todos</button>
+                  <button type="button" class="filter-tab" data-filter="Em andamento">Em andamento</button>
+                  <button type="button" class="filter-tab" data-filter="Em espera">Em espera</button>
+                  <button type="button" class="filter-tab" data-filter="Concluído">Concluídos</button>
+                  <button type="button" class="filter-tab" data-filter="Cancelado">Cancelados</button>
+                </div>
+
+                <div class="filter-controls-group">
+                  <div class="search-box-wrap">
+                    <span class="material-symbols-outlined search-icon" aria-hidden="true">search</span>
+                    <input type="text" id="ticketSearchInput" placeholder="Buscar por título, sala, solicitante ou resolução..." aria-label="Buscar chamados">
+                  </div>
+
+                  <div class="category-select-wrap">
+                    <span class="material-symbols-outlined select-icon" aria-hidden="true">filter_alt</span>
+                    <select id="filterCategorySelect" aria-label="Filtrar por categoria">
+                      <option value="Todas">Todas as Categorias</option>
+                      <option value="Hardware">Hardware</option>
+                      <option value="Software">Software</option>
+                      <option value="Rede">Rede e Conectividade</option>
+                      <option value="Infraestrutura">Infraestrutura e Elétrica</option>
+                      <option value="Acesso">Acesso e Contas</option>
+                      <option value="Outros">Outros</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="technician-tickets-grid" id="myTicketsGrid">
+                <!-- Injetado dinamicamente via JS -->
+              </div>
+            </div>
+          </section>
+
+          <section id="todos-chamados" class="section">
+            <div class="section-card">
+              <div class="section-header-row">
+                <div>
+                  <h2 class="section-title">Todos os Chamados da Escola</h2>
+                  <p class="section-subtitle">Visão geral completa dos chamados de todas as salas, laboratórios e blocos</p>
+                </div>
+              </div>
+
+              <div class="technician-tickets-grid" id="allTicketsGrid">
+                <!-- Injetado dinamicamente via JS -->
+              </div>
+            </div>
+          </section>
+
+          <section id="relatorios" class="section">
+            <div class="section-card">
+              <div class="section-header-row">
+                <div>
+                  <h2 class="section-title">Relatórios e Métricas Técnicas</h2>
+                  <p class="section-subtitle">Estatísticas de atendimento, distribuição por funil e auditoria de resoluções</p>
+                </div>
+              </div>
+
+              <div class="metric-grid">
+                <div class="metric-box">
+                  <span class="metric-label">Atendimentos Concluídos</span>
+                  <div class="metric-value" id="reportCompletedCount">0</div>
+                  <small class="metric-trend">Fichas técnicas finalizadas</small>
+                </div>
+
+                <div class="metric-box">
+                  <span class="metric-label">Taxa de Resolução</span>
+                  <div class="metric-value" id="reportResolutionRate">0%</div>
+                  <small class="metric-trend">Chamados concluídos com sucesso</small>
+                </div>
+
+                <div class="metric-box">
+                  <span class="metric-label">Tempo Médio de Atendimento</span>
+                  <div class="metric-value" id="reportAvgTime">35m</div>
+                  <small class="metric-trend">Por intervenção técnica</small>
+                </div>
+              </div>
+
+              <h3 class="subsection-title">
+                <span class="material-symbols-outlined" aria-hidden="true">pie_chart</span>
+                Distribuição por Domínio do Funil
+              </h3>
+              <div class="category-breakdown-grid" id="categoryBreakdownGrid">
+                <!-- Injetado dinamicamente via JS -->
+              </div>
+
+              <h3 class="subsection-title subsection-title--spaced">
+                <span class="material-symbols-outlined" aria-hidden="true">history_edu</span>
+                Fichas Técnicas Recentes e Auditoria de Soluções
+              </h3>
+              <div class="recent-resolutions-list" id="recentResolutionsList">
+                <!-- Injetado dinamicamente via JS -->
+              </div>
+            </div>
+          </section>
+
+          <div class="support-bar">
+            <span>Precisa de ajuda para um atendimento urgente?</span>
+            <button id="supportBtn" type="button">Suporte</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    
+        <!-- Modal de Atendimento Técnico e Resolução em Funil -->
+    <div class="modal-overlay" id="resolutionModalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalDialogTitle" aria-hidden="true">
+      <div class="modal-card modal-lg">
+        <header class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="material-symbols-outlined modal-header-icon" aria-hidden="true">build_circle</span>
+            <div>
+              <div class="modal-title-row">
+                <h2 id="modalDialogTitle" class="modal-title">Ficha de Atendimento</h2>
+                <span class="ticket-id-pill" id="modalTicketId">#1049</span>
+              </div>
+              <span class="modal-subtitle">Diagnóstico estruturado e registro de resolução técnica</span>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn" id="closeResolutionModalBtn" aria-label="Fechar janela">
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+          </button>
+        </header>
+
+        <div class="modal-body-scrollable">
+          <!-- Compact Solicitation Context Box -->
+          <div class="ticket-context-strip">
+            <div class="context-meta-row">
+              <div class="context-requester">
+                <span class="material-symbols-outlined context-icon" aria-hidden="true">person</span>
+                <strong id="modalTicketRequester">Profª. Ana Souza</strong>
+                <span class="context-divider">•</span>
+                <span class="context-room" id="modalTicketRoom">Laboratório 03</span>
+              </div>
+              <div class="context-badges">
+                <span class="priority-pill priority-high" id="modalTicketPriority">Alta prioridade</span>
+                <span class="context-datetime" id="modalTicketDate">24/09/2026 às 09:30</span>
+                <span class="cover-badge modal-badge-hidden" id="modalTicketStatusBadge">Em andamento</span>
+              </div>
+            </div>
+
+            <div class="context-problem-box">
+              <div class="problem-text-wrap">
+                <h3 class="problem-title" id="modalTicketTitle">Wi-Fi oscilando e caindo no Lab 03</h3>
+                <p id="modalTicketDescription" class="problem-desc">Durante as aulas práticas, 6 computadores perdem conexão com a internet simultaneamente.</p>
+              </div>
+              <div class="problem-photo-wrap" id="modalTicketPhotoWrap" style="display: none;">
+                <img id="modalTicketPhoto" src="" alt="Anexo do chamado" class="problem-thumbnail">
+              </div>
+            </div>
+          </div>
+
+          <!-- Form de Resolução e Funil Técnico -->
+          <form id="technicianResolutionForm" class="resolution-form">
+            <input type="hidden" id="selectedStatusInput" value="Em andamento">
+
+            <!-- 1. Status Selection (Clean Compact Segmented Bar) -->
+            <div class="form-section">
+              <label class="section-label">
+                <span class="material-symbols-outlined" aria-hidden="true">flag</span>
+                Status do Chamado
+              </label>
+              <div class="status-segmented-bar">
+                <button type="button" class="status-segment progress active" data-status="Em andamento">
+                  <span class="status-dot"></span>
+                  <span>Em andamento</span>
+                </button>
+                <button type="button" class="status-segment done" data-status="Concluído">
+                  <span class="status-dot"></span>
+                  <span>Concluído</span>
+                </button>
+                <button type="button" class="status-segment waiting" data-status="Em espera">
+                  <span class="status-dot"></span>
+                  <span>Em espera</span>
+                </button>
+                <button type="button" class="status-segment cancelled" data-status="Cancelado">
+                  <span class="status-dot"></span>
+                  <span>Cancelado</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 2. Referência de Resolução em três níveis -->
+            <div class="funnel-connected-card">
+              <div class="funnel-card-header">
+                <span class="material-symbols-outlined" aria-hidden="true">account_tree</span>
+                <div>
+                  <strong>Referência da resolução</strong>
+                  <small>Escolha o caminho técnico para registrar o atendimento.</small>
+                </div>
+              </div>
+
+              <div class="funnel-pipeline">
+                <div class="funnel-col">
+                  <label for="resolutionCategorySelect" class="funnel-col-label">
+                    <span class="pipeline-step-badge">1</span>
+                    Domínio Principal
+                  </label>
+                  <select id="resolutionCategorySelect" class="funnel-select-input" required>
+                    <option value="" disabled selected>Selecione a categoria principal...</option>
+                    <option value="Hardware">Hardware (Equipamentos e Peças)</option>
+                    <option value="Software">Software (Sistemas, Programas e Drivers)</option>
+                    <option value="Rede e Conectividade">Rede e Conectividade (Wi-Fi, Cabos e Internet)</option>
+                    <option value="Infraestrutura e Elétrica">Infraestrutura e Elétrica (Energia e Instalações)</option>
+                    <option value="Acesso e Contas">Acesso e Contas (Senhas e Credenciais)</option>
+                    <option value="Outros">Outros (Triagem e Operacional)</option>
+                  </select>
+                </div>
+
+                <div class="funnel-link-arrow" aria-hidden="true">
+                  <span class="material-symbols-outlined">arrow_forward</span>
+                </div>
+
+                <div class="funnel-col">
+                  <label for="resolutionActionSelect" class="funnel-col-label">
+                    <span class="pipeline-step-badge">2</span>
+                    Ação específica
+                  </label>
+                  <select id="resolutionActionSelect" class="funnel-select-input" disabled>
+                    <option value="" disabled selected>Selecione o domínio primeiro...</option>
+                  </select>
+                </div>
+
+                <div class="funnel-link-arrow" aria-hidden="true">
+                  <span class="material-symbols-outlined">arrow_forward</span>
+                </div>
+
+                <div class="funnel-col">
+                  <label for="resolutionSubcategorySelect" class="funnel-col-label">
+                    <span class="pipeline-step-badge">3</span>
+                    Visão detalhada
+                  </label>
+                  <select id="resolutionSubcategorySelect" class="funnel-select-input" disabled required>
+                    <option value="" disabled selected>Selecione a ação primeiro...</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Recursos & Tempo de Atendimento -->
+            <div class="form-row-2col">
+              <div class="form-col">
+                <label for="resolutionTimeSpent" class="field-label">
+                  <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+                  Tempo de Atendimento
+                </label>
+                <select id="resolutionTimeSpent" class="form-control">
+                  <option value="Até 15 minutos">Até 15 minutos</option>
+                  <option value="30 minutos" selected>30 minutos</option>
+                  <option value="45 minutos">45 minutos</option>
+                  <option value="1 hora">1 hora</option>
+                  <option value="1h30">1h30</option>
+                  <option value="2 horas">2 horas</option>
+                  <option value="Mais de 2 horas">Mais de 2 horas</option>
+                </select>
+              </div>
+
+              <div class="form-col">
+                <label for="resolutionParts" class="field-label">
+                  <span class="material-symbols-outlined" aria-hidden="true">inventory_2</span>
+                  Peças Utilizadas <small>(opcional)</small>
+                </label>
+                <input type="text" id="resolutionParts" class="form-control" placeholder="Ex: 1x Cabo HDMI, 1x Teclado USB, 1x Conector RJ-45">
+              </div>
+            </div>
+
+            <!-- 4. Espaço Detalhado para Descrever a Resolução -->
+            <div class="form-section">
+              <div class="textarea-header-bar">
+                <label for="resolutionDetailsTextarea" class="field-label">
+                  <span class="material-symbols-outlined" aria-hidden="true">description</span>
+                  Procedimento Técnico e Resolução Aplicada
+                </label>
+                <span class="char-counter" id="charCounter">0 caracteres</span>
+              </div>
+
+
+              <textarea id="resolutionDetailsTextarea" class="form-control resolution-textarea" rows="3" placeholder="Descreva os procedimentos executados, diagnósticos e testes efetuados no local..." required></textarea>
+
+              <div class="quick-chips-bar">
+                <span class="quick-chips-label">Templates rápidos:</span>
+                <button type="button" class="quick-chip" data-template="Verificado em bancada com dispositivo conhecido. Componentes reseatados e cabos reConectados. Equipamento funcionando normalmente após testes.">Teste de bancada</button>
+                <button type="button" class="quick-chip" data-template="Reiniciado o serviço afetado. Monitorando estabilidade durante a atividade. Instruído o solicitante sobre procedimento de desligamento correto.">Reinício + orientação</button>
+                <button type="button" class="quick-chip" data-template="Realizada formatação completa e reinstalação limpa do SO. Softwares pedagógicos institucionais reconfigurados e ativados.">Formatação + SO</button>
+                <button type="button" class="quick-chip" data-template="Limpeza de poeira em componentes internos e conectores. Verificada alimentação e cabos. Teste pós-limpeza bem-sucedido.">Manutenção física</button>
+              </div>
+            </div>
+
+            <!-- 5. Observação para o Solicitante (opcional) -->
+            <div class="form-section">
+              <label for="resolutionUserNote" class="field-label">
+                <span class="material-symbols-outlined" aria-hidden="true">chat</span>
+                Mensagem de Entrega / Orientação ao Solicitante <small>(opcional)</small>
+              </label>
+              <input type="text" id="resolutionUserNote" class="form-control" placeholder="Ex: Equipamento liberado e testado. Evite desligar direto na tomada.">
+            </div>
+
+            <!-- Modal Footer Actions -->
+            <footer class="modal-actions-footer">
+              <button type="button" class="btn-modal-cancel" id="cancelResolutionBtn">Cancelar</button>
+              <button type="submit" class="btn-modal-save">
+                <span class="material-symbols-outlined" aria-hidden="true">check</span>
+                <span>Salvar Atendimento</span>
+              </button>
+            </footer>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" aria-live="polite"></div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav" aria-label="Navegação principal">
+      <button type="button" class="bottom-nav-item" data-target="inicio">
+        <span class="material-symbols-outlined" aria-hidden="true">home</span>
+        <span class="nav-label">Início</span>
+      </button>
+      <button type="button" class="bottom-nav-item" data-target="meus-chamados">
+        <span class="material-symbols-outlined" aria-hidden="true">description</span>
+        <span class="nav-label">Chamados</span>
+      </button>
+      <button type="button" class="bottom-nav-item" data-target="relatorios">
+        <span class="material-symbols-outlined" aria-hidden="true">bar_chart</span>
+        <span class="nav-label">Relatórios</span>
+      </button>
+      <button type="button" class="bottom-nav-item" data-target="tecnico-perfil.html">
+        <span class="material-symbols-outlined" aria-hidden="true">person</span>
+        <span class="nav-label">Perfil</span>
+      </button>
+    </nav>
+
+    <script src="../js/core/dark-mode.js"></script>
+    <script src="../js/core/auth.js"></script>
+    <script src="../js/core/toast.js"></script>
+    <script src="../js/core/skeleton.js"></script>
+    <script src="../js/components/sidebar.js"></script>
+    <script src="../js/components/user-menu.js"></script>
+    <script src="../js/components/navigation.js"></script>
+    <script src="../js/pages/tecnico.js"></script>
+    <script>
+      DarkMode.init();
+          TecnicoPage.init();
+    </script>
+
+  </body>
+
+</html>

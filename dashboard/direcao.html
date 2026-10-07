@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Helpium | Direção</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,1,0" rel="stylesheet" />
+        <link rel="stylesheet" href="../css/shared/variables.css" />
+    <link rel="stylesheet" href="../css/shared/base.css" />
+    <link rel="stylesheet" href="../css/shared/components.css" />
+    <link rel="stylesheet" href="../css/shared/dashboard.css" />
+    <link rel="stylesheet" href="../css/shared/responsive.css" />
+    <link rel="stylesheet" href="../css/pages/direcao.css" />
+    
+
+    <link rel="stylesheet" href="../css/shared/refinements.css" />
+    <link rel="stylesheet" href="../css/shared/dark-mode.css" />
+  </head>
+<body>
+    <div class="page-shell">
+      <aside class="sidebar">
+        <div class="brand" aria-label="Marca do sistema"><span class="brand-mark" aria-hidden="true"></span></div>
+        <nav class="nav" aria-label="Menu principal">
+          <button class="nav-item active" type="button" data-target="inicio"><span class="material-symbols-outlined nav-item-icon">home</span><span class="nav-item-text">Início</span></button>
+          <button class="nav-item" type="button" data-target="chamados"><span class="material-symbols-outlined nav-item-icon">confirmation_number</span><span class="nav-item-text">Chamados</span></button>
+          <button class="nav-item" type="button" data-target="usuarios"><span class="material-symbols-outlined nav-item-icon">groups</span><span class="nav-item-text">Usuários</span></button>
+          <button class="nav-item" type="button" data-target="relatorios"><span class="material-symbols-outlined nav-item-icon">bar_chart</span><span class="nav-item-text">Relatórios</span></button>
+          <button class="nav-item" type="button" data-target="perfil"><span class="material-symbols-outlined nav-item-icon">person</span><span class="nav-item-text">Perfil</span></button>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <header class="header">
+          <div class="header-tools">
+            <button class="header-action" id="notificationsBtn" type="button" aria-label="Notificações"><span class="material-symbols-outlined">notifications</span><span class="notification-dot" aria-hidden="true"></span></button>
+            <div class="user-pill" id="userMenuToggle" tabindex="0" aria-label="Menu de perfil">
+              <span class="avatar" aria-hidden="true"></span><span id="userName">Direção</span>
+              <div class="user-menu" id="userMenu"><button type="button" data-action="profile">Meu perfil</button><button type="button" data-action="logout">Sair</button></div>
+            </div>
+          </div>
+        </header>
+
+        <section class="main-panel">
+          <section id="inicio" class="section active">
+            <div class="hero-box"><div><p class="eyebrow">Painel executivo</p><h1 class="hero-title">Olá, Direção!</h1><p class="hero-subtitle">Aqui está o resumo geral do sistema e dos atendimentos.</p></div><span class="date-badge">Hoje, 01 de setembro</span></div>
+            <div class="stats-grid">
+              <article class="stat-card stat--purple"><div class="stat-top"><span>Chamados totais</span><span class="stat-icon material-symbols-outlined">confirmation_number</span></div><div class="stat-value">42</div><div class="stat-change">+12% esta semana</div></article>
+              <article class="stat-card stat--orange"><div class="stat-top"><span>Em andamento</span><span class="stat-icon material-symbols-outlined">pending_actions</span></div><div class="stat-value">18</div><div class="stat-change">5 precisam de atenção</div></article>
+              <article class="stat-card stat--green"><div class="stat-top"><span>Resolvidos</span><span class="stat-icon material-symbols-outlined">check_circle</span></div><div class="stat-value">12</div><div class="stat-change">97% de satisfação</div></article>
+              <article class="stat-card stat--blue"><div class="stat-top"><span>Usuários ativos</span><span class="stat-icon material-symbols-outlined">groups</span></div><div class="stat-value">24</div><div class="stat-change">Todos conectados hoje</div></article>
+            </div>
+            <div class="dashboard-grid">
+              <article class="panel-card"><div class="panel-header"><h2>Chamados por prioridade</h2><span>Este mês</span></div><div class="donut-layout"><div class="donut" aria-label="48 por cento alta, 29 por cento média e 23 por cento baixa"></div><div class="legend"><div class="legend-row"><i class="legend-dot"></i><span>Alta</span><strong>48%</strong></div><div class="legend-row"><i class="legend-dot medium"></i><span>Média</span><strong>29%</strong></div><div class="legend-row"><i class="legend-dot low"></i><span>Baixa</span><strong>23%</strong></div></div></div></article>
+              <article class="panel-card"><div class="panel-header"><h2>Chamados por status</h2><span>Últimos 7 dias</span></div><div class="bar-chart" aria-label="Gráfico de chamados por status"><div class="bar-item"><div class="bar" style="--bar-height: 62%"></div><span>Abertos</span></div><div class="bar-item"><div class="bar" style="--bar-height: 86%"></div><span>Andamento</span></div><div class="bar-item"><div class="bar" style="--bar-height: 54%"></div><span>Resolvidos</span></div></div></article>
+            </div>
+            <div class="dashboard-grid">
+              <article class="panel-card"><div class="panel-header"><h2>Chamados recentes</h2><button class="shortcut-link" type="button" data-target="chamados">Ver todos</button></div><div class="table-list"><div class="table-row"><strong>#1047 · Projetor não liga</strong><span>Sala 12</span><b class="status pending">Em espera</b></div><div class="table-row"><strong>#1049 · Wi-Fi caiu no lab 03</strong><span>Laboratório 03</span><b class="status">Em andamento</b></div><div class="table-row"><strong>#1052 · Computador sem áudio</strong><span>Coordenação</span><b class="status">Concluído</b></div></div></article>
+              <article class="panel-card"><div class="panel-header"><h2>Desempenho da equipe</h2><span>Hoje</span></div><div class="table-list"><div class="table-row"><strong>Equipe técnica</strong><span>31 atendimentos</span><b class="status">92%</b></div><div class="table-row"><strong>Tempo médio</strong><span>42 minutos</span><b class="status">-8 min</b></div><div class="table-row"><strong>Satisfação</strong><span>Feedbacks recebidos</span><b class="status">97%</b></div></div></article>
+            </div>
+            <div class="shortcut-grid"><button class="shortcut" type="button" data-target="chamados"><span class="material-symbols-outlined">confirmation_number</span><span><strong>Todos os chamados</strong><small>Consultar atendimentos</small></span></button><button class="shortcut" type="button" data-target="relatorios"><span class="material-symbols-outlined">analytics</span><span><strong>Relatórios</strong><small>Analisar resultados</small></span></button><button class="shortcut" type="button" data-target="usuarios"><span class="material-symbols-outlined">groups</span><span><strong>Usuários</strong><small>Gerenciar acessos</small></span></button><button class="shortcut" type="button" data-target="perfil"><span class="material-symbols-outlined">person</span><span><strong>Meu perfil</strong><small>Ver seus dados</small></span></button></div>
+          </section>
+
+          <section id="chamados" class="section"><div class="section-card"><h2 class="section-title">Todos os chamados</h2><div class="table-list"><div class="table-row"><strong>#1047 · Projetor não liga</strong><span>Professor Rafael · Sala 12</span><b class="status pending">Em espera</b></div><div class="table-row"><strong>#1049 · Wi-Fi caiu no lab 03</strong><span>Professora Ana · Laboratório 03</span><b class="status">Em andamento</b></div><div class="table-row"><strong>#1052 · Computador sem áudio</strong><span>Coordenação · Bloco A</span><b class="status">Concluído</b></div><div class="table-row"><strong>#1054 · Monitor quebrado</strong><span>Professor João · Sala 14</span><b class="status pending">Aberto</b></div></div></div></section>
+          <section id="usuarios" class="section">
+            <div class="management-grid">
+              <article class="section-card">
+                <h2 class="section-title">Adicionar usuário</h2>
+                <form id="userForm" class="form-grid">
+                  <div class="form-grid two-columns"><div class="field"><label for="newUserName">Nome completo</label><input id="newUserName" required type="text" placeholder="Ex.: Rafael Santos" /></div><div class="field"><label for="newUserRole">Perfil</label><select id="newUserRole" required><option value="professor">Professor</option><option value="tecnico">Técnico</option></select></div></div>
+                  <div class="field"><label for="newUserEmail">E-mail de acesso</label><input id="newUserEmail" required type="email" placeholder="nome@escola.com" /></div>
+                  <button class="form-action" type="submit">Adicionar e gerar credencial</button>
+                </form>
+                <p id="userFeedback" class="form-feedback" role="status"></p>
+              </article>
+              <article class="section-card">
+                <h2 class="section-title">Adicionar espaço</h2>
+                <form id="resourceForm" class="form-grid">
+                  <div class="field"><label for="resourceName">Nome do espaço</label><input id="resourceName" required type="text" placeholder="Ex.: Laboratório 04" /></div>
+                  <div class="field"><label for="resourceType">Tipo</label><select id="resourceType" required><option value="Sala">Sala</option><option value="Laboratório">Laboratório</option></select></div>
+                  <button class="form-action" type="submit">Adicionar ao sistema geral</button>
+                </form>
+                <p id="resourceFeedback" class="form-feedback" role="status"></p>
+                <div id="resourceList" class="resource-list" aria-live="polite"></div>
+              </article>
+            </div>
+            <div class="section-card"><h2 class="section-title">Usuários do sistema</h2><div id="usersList" class="table-list"></div></div>
+          </section>
+          <section id="relatorios" class="section"><div class="section-card"><h2 class="section-title">Relatórios</h2><div class="reports-grid"><div class="report-box"><span>Atendimentos no mês</span><strong>128</strong></div><div class="report-box"><span>Tempo médio</span><strong>39m</strong></div><div class="report-box"><span>Taxa de resolução</span><strong>96%</strong></div></div><div class="bar-chart"><div class="bar-item"><div class="bar" style="--bar-height: 45%"></div><span>Mai</span></div><div class="bar-item"><div class="bar" style="--bar-height: 62%"></div><span>Jun</span></div><div class="bar-item"><div class="bar" style="--bar-height: 78%"></div><span>Jul</span></div><div class="bar-item"><div class="bar" style="--bar-height: 94%"></div><span>Ago</span></div></div></div></section>
+          <section id="perfil" class="section"><div class="section-card"><h2 class="section-title">Meu perfil</h2><div class="table-list"><div class="table-row"><strong id="profileName">Direção</strong><span id="profileEmail">direcao@helpium.com</span><b class="status">Ativa</b></div><div class="table-row"><strong>Função</strong><span>Gestão e acompanhamento do sistema</span><b class="status">Direção</b></div></div></div></section>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" aria-live="polite"></div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav" aria-label="Navegação principal">
+      <button type="button" class="bottom-nav-item" data-target="inicio">
+        <span class="material-symbols-outlined" aria-hidden="true">home</span>
+        <span class="nav-label">Início</span>
+      </button>
+      <button type="button" class="bottom-nav-item" data-target="chamados">
+        <span class="material-symbols-outlined" aria-hidden="true">confirmation_number</span>
+        <span class="nav-label">Chamados</span>
+      </button>
+      <button type="button" class="bottom-nav-item" data-target="usuarios">
+        <span class="material-symbols-outlined" aria-hidden="true">groups</span>
+        <span class="nav-label">Usuários</span>
+      </button>
+      <button type="button" class="bottom-nav-item" data-target="relatorios">
+        <span class="material-symbols-outlined" aria-hidden="true">bar_chart</span>
+        <span class="nav-label">Relatórios</span>
+      </button>
+      <button type="button" class="bottom-nav-item" data-target="perfil">
+        <span class="material-symbols-outlined" aria-hidden="true">person</span>
+        <span class="nav-label">Perfil</span>
+      </button>
+    </nav>
+
+    <script src="../js/core/dark-mode.js"></script>
+    <script src="../js/core/auth.js"></script>
+    <script src="../js/core/toast.js"></script>
+    <script src="../js/core/skeleton.js"></script>
+    <script src="../js/components/sidebar.js"></script>
+    <script src="../js/components/user-menu.js"></script>
+    <script src="../js/components/navigation.js"></script>
+    <script src="../js/pages/direcao.js"></script>
+    <script>
+      DarkMode.init();
+          DirecaoPage.init();
+    </script>
+
+  </body>
+
+</html>

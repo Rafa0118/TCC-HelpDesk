@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Helpium | Login</title>
+    <meta
+      name="description"
+      content="Tela de login moderna e inspirada em landing page de SaaS."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="login-page">
+    <div class="login-shell">
+      <aside class="login-visual" aria-label="Área promocional de login">
+        <div class="login-visual-inner">
+          <div class="login-copy">
+            <p class="login-kicker">Você pode facilmente</p>
+            <h1>Organizar seu trabalho<br />com nosso Helpdesk</h1>
+          </div>
+
+          
+        </div>
+      </aside>
+
+      <main class="login-panel">
+        <div class="login-form-wrap">
+          <h2>Comece agora</h2>
+          <p class="login-subtitle">Faça login na sua conta para continuar.</p>
+
+          <form class="login-form" action="#" method="post">
+            <div class="login-field">
+              <label for="email">E-mail corporativo</label>
+              <input id="email" type="email" placeholder="seuemail@empresa.com" />
+            </div>
+
+            <div class="login-field">
+              <label for="password">Senha</label>
+              <div class="input-wrap">
+                <input id="password" type="password" placeholder="••••••••••" />
+                <button class="password-toggle" type="button" aria-label="Mostrar senha">◌</button>
+              </div>
+            </div>
+
+            <button class="login-submit" type="submit">Entrar</button>
+          </form>
+
+          <button class="support-btn" type="button" onclick="window.location.href='mailto:suporte@helpium.com?subject=Solicita%C3%A7%C3%A3o%20de%20suporte'">
+            Entrar em contato com o suporte
+          </button>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      const passwordInput = document.getElementById('password');
+      const toggleButton = document.querySelector('.password-toggle');
+
+      toggleButton.addEventListener('click', () => {
+        const isHidden = passwordInput.type === 'password';
+        passwordInput.type = isHidden ? 'text' : 'password';
+        toggleButton.textContent = isHidden ? '◉' : '◌';
+      });
+
+      const defaultUsers = [
+        { role: 'professor', email: 'professor@helpium.com', password: 'professor123', name: 'Prof. Ana Souza' },
+        { role: 'tecnico', email: 'tecnico@helpium.com', password: 'tecnico123', name: 'Técnico João Silva' },
+        { role: 'direcao', email: 'direcao@helpium.com', password: 'direcao123', name: 'Diretora Carla Mendes' }
+      ];
+
+      const getUsers = () => {
+        try {
+          const saved = JSON.parse(localStorage.getItem('helpium_users') || '[]');
+          const normalized = Array.isArray(saved) ? saved : [];
+
+          const hasRoleData = normalized.some((user) => user && user.role);
+          const users = hasRoleData ? normalized : defaultUsers;
+
+          const merged = [...defaultUsers];
+          users.forEach((user) => {
+            if (!user || !user.email || !user.password) return;
+            const match = merged.find((item) => item.email.toLowerCase() === user.email.toLowerCase());
+            if (!match) {
+              merged.push({
+                role: user.role || 'professor',
+                email: user.email,
+                password: user.password,
+                name: user.name || user.email
+              });
+            }
+          });
+
+          localStorage.setItem('helpium_users', JSON.stringify(merged));
+          return merged;
+        } catch (error) {
+          localStorage.setItem('helpium_users', JSON.stringify(defaultUsers));
+          return defaultUsers;
+        }
+      };
+
+      const detectRoleFromEmail = (email) => {
+        const normalized = String(email || '').trim().toLowerCase();
+
+        if (!normalized) return null;
+        if (normalized.includes('professor')) return 'professor';
+        if (normalized.includes('tecnico')) return 'tecnico';
+        if (normalized.includes('direcao') || normalized.includes('direção')) return 'direcao';
+
+        return null;
+      };
+
+      const form = document.querySelector('.login-form');
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const users = getUsers();
+        const role = detectRoleFromEmail(email) || users.find((item) => item.email.toLowerCase() === email.toLowerCase())?.role;
+
+        if (!role) {
+          alert('Use um e-mail válido para acessar o sistema.');
+          return;
+        }
+
+        const user = users.find(
+          (item) =>
+            item.role === role &&
+            item.email.toLowerCase() === email.toLowerCase() &&
+            item.password === password
+        );
+
+        if (!user) {
+          alert('E-mail ou senha inválidos para esse acesso.');
+          return;
+        }
+
+        localStorage.setItem(
+          'helpium_logged_user',
+          JSON.stringify({ name: user.name, email: user.email, role: user.role })
+        );
+
+        if (role === 'professor') {
+          window.location.href = 'professor.html';
+        } else if (role === 'tecnico') {
+          window.location.href = 'tecnico.html';
+        } else {
+          window.location.href = 'direcao.html';
+        }
+      });
+    </script>
+  </body>
+</html>

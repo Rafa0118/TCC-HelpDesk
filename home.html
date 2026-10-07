@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Helpium | Início</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="css/shared/variables.css" />
+    <link rel="stylesheet" href="css/shared/base.css" />
+    <style>
+      body {
+        display: grid;
+        place-items: center;
+        background: var(--bg);
+      }
+
+      .home-card {
+        width: min(600px, calc(100% - 40px));
+        background: var(--panel-strong);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+        padding: 48px 32px;
+        text-align: center;
+        animation: fadeInUp 0.5s ease;
+      }
+
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .home-card h1 {
+        margin: 0 0 10px;
+        font-size: clamp(2rem, 4vw, 3rem);
+        letter-spacing: -0.06em;
+      }
+
+      .home-card p {
+        margin: 0 0 24px;
+        color: var(--muted);
+        font-size: 1rem;
+      }
+
+      .home-redirect-text {
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin-top: 14px;
+      }
+
+      .home-redirect-text span {
+        color: var(--primary);
+        font-weight: 700;
+      }
+
+      .logout-btn {
+        border: none;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.9rem 1.4rem;
+        font-size: 0.96rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 10px 20px rgba(122, 74, 232, 0.25);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .logout-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 24px rgba(122, 74, 232, 0.32);
+      }
+
+      .home-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .home-spinner {
+        width: 36px;
+        height: 36px;
+        border: 3px solid var(--line);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="home-card" id="homeCard">
+      <div class="home-loading" id="loadingState">
+        <div class="home-spinner"></div>
+        <p>Redirecionando...</p>
+      </div>
+
+      <div id="welcomeState" style="display:none;">
+        <h1>Bem-vindo</h1>
+        <p id="welcome-text"></p>
+        <button class="logout-btn" type="button" onclick="Auth.logout()">Sair</button>
+        <p class="home-redirect-text">Você será redirecionado para <span id="redirect-target"></span></p>
+      </div>
+
+      <div id="noUserState" style="display:none;">
+        <h1>Bem-vindo ao Helpium</h1>
+        <p>Faça login para acessar o sistema.</p>
+        <button class="logout-btn" type="button" onclick="window.location.href='login.html'">Ir para o Login</button>
+      </div>
+    </div>
+
+    <script src="js/core/auth.js"></script>
+    <script>
+      const user = Auth.getCurrentUser();
+      const loadingState = document.getElementById('loadingState');
+      const welcomeState = document.getElementById('welcomeState');
+      const noUserState = document.getElementById('noUserState');
+
+      if (!user) {
+        loadingState.style.display = 'none';
+        noUserState.style.display = '';
+      } else {
+        const role = user.role || 'professor';
+        const pages = {
+          professor: 'dashboard/professor.html',
+          tecnico: 'dashboard/tecnico.html',
+          direcao: 'dashboard/direcao.html'
+        };
+        const roleLabels = {
+          professor: 'Painel do Professor',
+          tecnico: 'Painel do Técnico',
+          direcao: 'Painel da Direção'
+        };
+        const targetPage = pages[role] || 'dashboard/professor.html';
+        const targetLabel = roleLabels[role] || 'seu painel';
+
+        loadingState.style.display = 'none';
+        welcomeState.style.display = '';
+        document.getElementById('welcome-text').textContent = `Olá, ${user.name || user.email}!`;
+        document.getElementById('redirect-target').textContent = targetLabel;
+
+        // Auto-redirect after 2s
+        setTimeout(() => {
+          window.location.href = targetPage;
+        }, 2000);
+      }
+    </script>
+  </body>
+</html>
+
+

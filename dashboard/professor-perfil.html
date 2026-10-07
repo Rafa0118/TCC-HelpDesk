@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Helpium | Meu Perfil</title>
+        <link rel="stylesheet" href="../css/shared/variables.css" />
+    <link rel="stylesheet" href="../css/shared/base.css" />
+    <link rel="stylesheet" href="../css/shared/components.css" />
+    <link rel="stylesheet" href="../css/shared/dashboard.css" />
+    <link rel="stylesheet" href="../css/shared/responsive.css" />
+    <link rel="stylesheet" href="../css/pages/perfil.css" />
+    
+
+    <link rel="stylesheet" href="../css/shared/refinements.css" />
+    <link rel="stylesheet" href="../css/shared/dark-mode.css" />
+  </head>
+<body>
+    <div class="page-shell">
+      <aside class="sidebar">
+        <div class="brand" aria-label="Marca do sistema">
+          <span class="brand-mark" aria-hidden="true"></span>
+        </div>
+
+        <nav class="nav" aria-label="Menu principal">
+          <button class="nav-item" data-target="professor.html#inicio" type="button">
+            <span class="nav-icon home" aria-hidden="true"></span>
+            <span class="nav-item-text">Início</span>
+          </button>
+          <button class="nav-item" data-target="professor.html#meus-chamados" type="button">
+            <span class="nav-icon list" aria-hidden="true"></span>
+            <span class="nav-item-text">Meus chamados</span>
+          </button>
+          <button class="nav-item" data-target="professor.html#abrir-chamado" type="button">
+            <span class="nav-icon plus" aria-hidden="true"></span>
+            <span class="nav-item-text">Abrir chamado</span>
+          </button>
+          <button class="nav-item active" data-target="professor-perfil.html" type="button">
+            <span class="nav-icon user" aria-hidden="true"></span>
+            <span class="nav-item-text">Perfil</span>
+          </button>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <header class="header">
+          <div class="header-tools">
+            <button class="bell" id="notificationsBtn" type="button" aria-label="Notificações"><span class="notification-dot" aria-hidden="true"></span></button>
+            <div class="user-pill" id="userMenuToggle" tabindex="0" aria-label="Menu de perfil">
+              <span class="avatar" aria-hidden="true"></span>
+              <span id="userName">Professor</span>
+            </div>
+          </div>
+        </header>
+
+        <section class="main-panel">
+          <button class="back-button" onclick="window.history.back()">← Voltar</button>
+
+          <div class="profile-container">
+            <div class="profile-header">
+              <h1>Meu Perfil</h1>
+            </div>
+
+            <div class="profile-card">
+              <div class="profile-content">
+                <div class="profile-avatar-section">
+                  <div class="profile-avatar-wrapper">
+                    <img id="profileAvatarImage" class="profile-avatar" src="" alt="Foto de perfil" />
+                    <label class="avatar-upload-label" for="profilePhotoInput" aria-label="Alterar foto de perfil"></label>
+                    <input id="profilePhotoInput" type="file" accept="image/*" hidden />
+                  </div>
+                  <div class="profile-avatar-actions">
+                    <button id="uploadPhotoBtn" class="secondary-btn" type="button">Alterar foto</button>
+                    <button id="removePhotoBtn" class="danger-btn" type="button">Remover foto</button>
+                  </div>
+                </div>
+
+                <div class="profile-info-section">
+                  <div class="info-group">
+                    <label>Nome Completo</label>
+                    <p id="profileName" class="info-value">—</p>
+                  </div>
+                  <div class="info-group">
+                    <label>Email</label>
+                    <p id="profileEmail" class="info-value">—</p>
+                  </div>
+                  <div class="info-group">
+                    <label>Função</label>
+                    <p id="profileRole" class="info-value">Professor</p>
+                  </div>
+                  <div class="info-group">
+                    <label>Status</label>
+                    <p id="profileStatus" class="info-value status-active">Ativo</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" aria-live="polite"></div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav" aria-label="Navegação principal">
+      <button type="button" class="bottom-nav-item" data-target="professor.html#inicio">
+        <span class="material-symbols-outlined" aria-hidden="true">home</span>
+        <span class="nav-label">Início</span>
+      </button>
+      <button type="button" class="bottom-nav-item" data-target="professor.html#meus-chamados">
+        <span class="material-symbols-outlined" aria-hidden="true">description</span>
+        <span class="nav-label">Chamados</span>
+      </button>
+      <button type="button" class="bottom-nav-item active">
+        <span class="material-symbols-outlined" aria-hidden="true">person</span>
+        <span class="nav-label">Perfil</span>
+      </button>
+    </nav>
+
+    <script src="../js/core/dark-mode.js"></script>
+    <script src="../js/core/auth.js"></script>
+    <script src="../js/core/toast.js"></script>
+    <script src="../js/core/skeleton.js"></script>
+    <script src="../js/components/sidebar.js"></script>
+    <script src="../js/components/user-menu.js"></script>
+    <script src="../js/components/navigation.js"></script>
+    <script src="../js/components/profile.js"></script>
+    <script>
+      DarkMode.init();
+          ProfilePage.init();
+    </script>
+
+  </body>
+
+</html>

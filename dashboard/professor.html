@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Helpium | Professor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet" />
+        <link rel="stylesheet" href="../css/shared/variables.css" />
+    <link rel="stylesheet" href="../css/shared/base.css" />
+    <link rel="stylesheet" href="../css/shared/components.css" />
+    <link rel="stylesheet" href="../css/shared/dashboard.css" />
+    <link rel="stylesheet" href="../css/shared/responsive.css" />
+    <link rel="stylesheet" href="../css/pages/professor.css" />
+    
+
+    <link rel="stylesheet" href="../css/shared/refinements.css" />
+    <link rel="stylesheet" href="../css/shared/dark-mode.css" />
+  </head>
+<body class="professor-dashboard">
+    <div class="page-shell">
+      <aside class="sidebar">
+        <div class="brand" aria-label="Marca do sistema">
+          <span class="brand-mark" aria-hidden="true"></span>
+        </div>
+
+        <nav class="nav" aria-label="Menu principal">
+          <button class="nav-item active" data-target="inicio" type="button">
+            <span class="material-symbols-outlined nav-item-icon" aria-hidden="true">home</span>
+            <span class="nav-item-text">Início</span>
+          </button>
+          <button class="nav-item" data-target="meus-chamados" type="button">
+            <span class="material-symbols-outlined nav-item-icon" aria-hidden="true">description</span>
+            <span class="nav-item-text">Meus chamados</span>
+          </button>
+          <button class="nav-item" data-target="abrir-chamado" type="button">
+            <span class="material-symbols-outlined nav-item-icon" aria-hidden="true">add_circle</span>
+            <span class="nav-item-text">Abrir chamado</span>
+          </button>
+          <button class="nav-item" data-target="perfil" type="button">
+            <span class="material-symbols-outlined nav-item-icon" aria-hidden="true">person</span>
+            <span class="nav-item-text">Perfil</span>
+          </button>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <header class="header">
+          <div class="header-tools">
+            <button class="header-action bell" id="notificationsBtn" type="button" aria-label="Notificações">
+              <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
+            <span class="notification-dot" aria-hidden="true"></span></button>
+            <div class="user-pill" id="userMenuToggle" tabindex="0" aria-label="Menu de perfil">
+              <span class="avatar" aria-hidden="true"></span>
+              <span id="userName">Professor</span>
+              <div class="user-menu" id="userMenu" aria-label="Opções do usuário">
+                <button type="button" data-action="profile">Perfil</button>
+                <button type="button" data-action="logout">Sair</button>
+              </div>
+            </div>
+            <button class="mobile-menu-button" type="button" aria-expanded="false" aria-label="Abrir menu">
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+          </div>
+        </header>
+
+        <section class="main-panel">
+          <section id="inicio" class="section">
+            <div class="hero-box">
+              <h1 class="hero-title">Olá, Professor!</h1>
+              <p class="hero-subtitle">Como podemos ajudar hoje?</p>
+            </div>
+
+            <button class="new-ticket-button" id="newTicketButton" type="button">
+              <span class="material-symbols-outlined" aria-hidden="true">add_circle</span>
+              <span>Abrir novo chamado</span>
+            </button>
+
+            <section class="recent-ticket-preview content-card" aria-labelledby="recentTicketsTitle">
+              <div class="tickets-header">
+                <h2 id="recentTicketsTitle">Chamados recentes</h2>
+                <button class="link-button" id="viewAllBtn" data-target="meus-chamados" type="button">Ver todos</button>
+              </div>
+              <div class="recent-ticket-list" id="recentTicketsPreview" aria-live="polite"></div>
+            </section>
+          </section>
+
+          <div class="modal-overlay" id="ticketModalOverlay" aria-hidden="true">
+            <section id="abrir-chamado" class="section ticket-form" aria-label="Formulário de novo chamado">
+              <div class="modal-header">
+                <h3>Registrar novo chamado</h3>
+                <button class="modal-close" id="closeTicketModalBtn" type="button" aria-label="Fechar formulário">×</button>
+              </div>
+              <form id="ticketForm">
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="ticketTitle">Título</label>
+                    <input id="ticketTitle" name="title" type="text" placeholder="Ex: Projetor não liga" required />
+                  </div>
+
+                  <div class="field">
+                    <label for="ticketRoom">Sala <span class="required-dot">*</span></label>
+                    <select id="ticketRoom" name="room" required>
+                      <option value="" disabled selected>Selecione uma sala...</option>
+                    </select>
+                  </div>
+
+                  <div class="field full">
+                    <label for="ticketCategory">Categoria</label>
+                    <select id="ticketCategory" name="category">
+                      <option value="Hardware">Hardware</option>
+                      <option value="Software">Software</option>
+                      <option value="Rede">Rede</option>
+                      <option value="Projetor/Audiovisual">Projetor/Audiovisual</option>
+                      <option value="Impressora">Impressora</option>
+                      <option value="Sala de Aula">Sala de Aula</option>
+                      <option value="Acesso/Credencial">Acesso/Credencial</option>
+                      <option value="Outros" selected>Outros</option>
+                    </select>
+                  </div>
+
+                  <div class="field">
+                    <label for="ticketLocationDetails">Localização detalhada <small>(opcional)</small></label>
+                    <input id="ticketLocationDetails" name="location_details" type="text" placeholder="Ex: Prateleira 2, gaveta 3" />
+                  </div>
+
+                  <div class="field full">
+                    <label for="ticketDescription">Descrição</label>
+                    <textarea id="ticketDescription" name="description" placeholder="Descreva o problema..." required></textarea>
+                  </div>
+
+                  <div class="field full">
+                    <label for="ticketPhoto">Foto da situação</label>
+                    <div class="image-upload">
+                      <input id="ticketPhoto" name="photo" type="file" accept="image/*" />
+                      <div class="image-preview" id="ticketPhotoPreviewWrap">
+                        <img id="ticketPhotoPreview" src="" alt="Pré-visualização da situação" />
+                        <button class="image-remove-btn" id="removeTicketPhotoBtn" type="button">Remover</button>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                <div class="form-actions">
+                  <button class="secondary-btn" type="button" id="cancelTicketBtn">Cancelar</button>
+                  <button class="primary-btn" type="submit">Salvar chamado</button>
+                </div>
+              </form>
+            </section>
+          </div>
+
+          <section id="meus-chamados" class="section tickets-card">
+            <div class="tickets-header">
+              <h3>Meus chamados</h3>
+              <button class="link-button" id="viewAllBtn" type="button">Ver todos</button>
+            </div>
+
+            <nav class="tickets-filter-bar" aria-label="Filtrar chamados por status">
+              <button class="filter-tab active" type="button" data-filter="Todos">Todos</button>
+              <button class="filter-tab" type="button" data-filter="Em espera">Em espera</button>
+              <button class="filter-tab" type="button" data-filter="Em andamento">Em andamento</button>
+              <button class="filter-tab" type="button" data-filter="Concluído">Concluído</button>
+              <button class="filter-tab" type="button" data-filter="Cancelado">Cancelado</button>
+            </nav>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Nº</th>
+                  <th>Título</th>
+                  <th>Sala</th>
+                  <th>Data</th>
+                  <th>Localização</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="ticketsTableBody"></tbody>
+            </table>
+          </section>
+
+
+          <div class="support-bar">
+            <span>Precisa de ajuda?</span>
+            <button id="supportBtn" type="button">Suporte</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Mobile FAB: quick access to new ticket -->
+    <button class="fab fab--ticket" id="fabNewTicket" type="button" aria-label="Abrir novo chamado">
+      <span class="material-symbols-outlined" aria-hidden="true">add</span>
+    </button>
+
+    <!-- Profile Modal -->
+    <div class="modal-overlay" id="profileModalOverlay" aria-hidden="true">
+      <div class="profile-modal">
+          <div class="profile-modal-cover" aria-hidden="true"></div>
+        <div class="modal-header">
+          <h3>Meu Perfil</h3>
+          <button class="modal-close" id="closeProfileModalBtn" type="button" aria-label="Fechar perfil">×</button>
+        </div>
+
+        <div class="profile-content">
+          <div class="profile-avatar-section">
+            <div class="profile-avatar-wrapper">
+              <img id="profileAvatarImage" class="profile-avatar" src="" alt="Foto de perfil" />
+              <label class="avatar-upload-label" for="profilePhotoInput" aria-label="Alterar foto de perfil"></label>
+              <input id="profilePhotoInput" type="file" accept="image/*" hidden />
+            </div>
+            <div class="profile-avatar-actions">
+              <button id="uploadPhotoBtn" class="secondary-btn" type="button">Alterar foto</button>
+              <button id="removePhotoBtn" class="danger-btn" type="button">Remover</button>
+            </div>
+          </div>
+
+          <div class="profile-info-section">
+            <div class="info-group">
+              <label>Nome</label>
+              <p id="profileName" class="info-value">—</p>
+            </div>
+            <div class="info-group">
+              <label>Email</label>
+              <p id="profileEmail" class="info-value">—</p>
+            </div>
+            <div class="info-group">
+              <label>Função</label>
+              <p id="profileRole" class="info-value">—</p>
+            </div>
+            <div class="info-group">
+              <label>Status</label>
+              <p id="profileStatus" class="info-value status-active">Ativo</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" aria-live="polite"></div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav" aria-label="Navegação principal">
+      <button type="button" class="bottom-nav-item" data-target="inicio">
+        <span class="material-symbols-outlined" aria-hidden="true">home</span>
+        <span class="nav-label">Início</span>
+      </button>
+      <button type="button" class="bottom-nav-item" data-target="meus-chamados">
+        <span class="material-symbols-outlined" aria-hidden="true">description</span>
+        <span class="nav-label">Chamados</span>
+      </button>
+      <button type="button" class="bottom-nav-item" data-target="perfil">
+        <span class="material-symbols-outlined" aria-hidden="true">person</span>
+        <span class="nav-label">Perfil</span>
+      </button>
+    </nav>
+
+    <script src="../js/core/dark-mode.js"></script>
+    <script src="../js/core/auth.js"></script>
+    <script src="../js/core/toast.js"></script>
+    <script src="../js/core/skeleton.js"></script>
+    <script src="../js/components/sidebar.js"></script>
+    <script src="../js/components/user-menu.js"></script>
+    <script src="../js/components/navigation.js"></script>
+    <script src="../js/pages/professor.js"></script>
+    <script>
+      DarkMode.init();
+          ProfessorPage.init();
+    </script>
+
+  </body>
+
+</html>
