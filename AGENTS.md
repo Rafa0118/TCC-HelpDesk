@@ -23,6 +23,8 @@ helpium/
 │   │   ├── components.css
 │   │   ├── dashboard.css
 │   │   ├── responsive.css
+│   │   ├── mobile.css          Camada mobile-first (<=1024px): header, bottom nav, cards, sheets
+│   │   ├── mobile-public.css   Mobile de index/login/cadastro/home
 │   │   └── dark-mode.css
 │   ├── pages/            Page-specific styles
 │   │   ├── direcao.css
@@ -41,6 +43,7 @@ helpium/
 │   │   ├── sidebar.js    Sidebar: desktop expand/collapse + mobile toggle
 │   │   ├── user-menu.js  UserMenu: dropdown + click-outside/Escape
 │   │   ├── navigation.js Navigation: section switching + hash routing
+│   │   ├── responsive-tables.js  Adiciona data-label nas células (tabelas viram cards no mobile)
 │   │   └── profile.js    ProfilePage: photo management + info display
 │   └── pages/            Page-specific logic
 │       ├── tecnico.js    TecnicoPage: ticket attendance & funnel resolution
@@ -60,7 +63,9 @@ helpium/
 4. `css/shared/dashboard.css` — dashboard widgets (stat cards, tables, forms)
 5. `css/shared/responsive.css` — breakpoints
 6. `css/pages/{page}.css` — page-specific overrides
-7. `css/shared/dark-mode.css` — last (guarantees cascade wins)
+7. `css/shared/refinements.css`
+8. `css/shared/mobile.css` — mobile layer (wins over page CSS on <=1024px)
+9. `css/shared/dark-mode.css` — last (guarantees cascade wins)
 
 ### JS Loading Order (dashboard pages)
 1. `js/core/dark-mode.js`

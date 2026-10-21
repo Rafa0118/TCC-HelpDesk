@@ -34,9 +34,18 @@
   margin-left: 0;
   width: 72px;
   transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: visible;
+  overflow: hidden;
   position: relative;
   z-index: 20;
+}
+
+@media (min-width: 1025px) {
+  .sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
 }
 
 .page-shell.is-expanded .sidebar { width: 220px; }

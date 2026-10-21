@@ -6,6 +6,8 @@
 const TecnicoPage = {
   STORAGE_KEY: 'helpium_tickets',
   LEGACY_KEY: 'helpium_professor_tickets',
+  myTicketsLimit: 4,
+  allTicketsLimit: 4,
 
   EISENHOWER_MATRIX: {
     'Hardware': 3,
@@ -26,17 +28,48 @@ const TecnicoPage = {
     'Baixa': 1
   },
 
-  calculatePriority(ticket) {
-    const category = ticket.type || ticket.category || 'Outros';
-    const userPriority = ticket.priority || 'Média';
-    const catWeight = this.EISENHOWER_MATRIX[category] || 1;
-    const prioWeight = this.PRIORITY_WEIGHTS[userPriority] || 2;
-    const total = catWeight + prioWeight;
+  CATEGORY_MAP: {
+    'Rede': 'Rede e Conectividade',
+    'Infraestrutura': 'Infraestrutura e Elétrica',
+    'Acesso': 'Acesso e Contas',
+    'Acesso/Credencial': 'Acesso e Contas',
+    'Projetor/Audiovisual': 'Hardware',
+    'Impressora': 'Hardware',
+    'Sala de Aula': 'Hardware'
+  },
 
+  normalizeCategory(category) {
+    if (!category) return '';
+    return this.CATEGORY_MAP[category] || category;
+  },
+
+  calculatePriority(ticket) {
+    if (ticket.priority && typeof TicketConfig !== 'undefined' && TicketConfig?.PRIORITIES?.includes(ticket.priority)) {
+      return ticket.priority;
+    }
+    const cat = (typeof TicketConfig !== 'undefined' ? (TicketConfig.CATEGORY_ALIASES[ticket.category || ticket.type] || ticket.category || ticket.type) : (ticket.category || ticket.type)) || 'Outros';
+    const catWeight = (typeof TicketConfig !== 'undefined' && TicketConfig.CATEGORY_WEIGHTS[cat]) || 1;
+    const prioWeight = (typeof TicketConfig !== 'undefined' && TicketConfig.PRIORITY_WEIGHTS[ticket.priority]) || 2;
+    const total = catWeight + prioWeight;
     if (total >= 6) return 'Urgente';
     if (total >= 4) return 'Alta';
     if (total >= 3) return 'Média';
     return 'Baixa';
+  },
+
+  formatSla(ticket) {
+    if (!ticket.slaDueAt) return '';
+    const now = Date.now();
+    const due = new Date(ticket.slaDueAt).getTime();
+    const diff = due - now;
+    const absDiff = Math.abs(diff);
+    const hours = Math.floor(absDiff / 3600000);
+    const minutes = Math.floor((absDiff % 3600000) / 60000);
+    if (diff < 0) {
+      return `<span class="sla-overdue" style="color: #dc2626; font-weight: 700; font-size: 0.72rem; display: inline-flex; align-items: center; gap: 3px;"><span class="material-symbols-outlined" style="font-size: 13px;">error</span> Atrasado há ${hours}h ${minutes}m</span>`;
+    } else {
+      return `<span class="sla-due" style="color: #059669; font-weight: 700; font-size: 0.72rem; display: inline-flex; align-items: center; gap: 3px;"><span class="material-symbols-outlined" style="font-size: 13px;">schedule</span> Vence em ${hours}h ${minutes}m</span>`;
+    }
   },
 
   getPriorityLabel(priority) {
@@ -221,6 +254,7 @@ const TecnicoPage = {
       description: 'O projetor não emite sinal de luz e o led frontal fica piscando na cor laranja intermitente.',
       photo: '',
       resolutionCategory: '',
+      resolutionAction: '',
       resolutionSubcategory: '',
       resolutionDetails: '',
       resolutionTimeSpent: '',
@@ -242,6 +276,7 @@ const TecnicoPage = {
       description: 'Durante as aulas práticas, 6 computadores perdem conexão com a internet simultaneamente.',
       photo: '',
       resolutionCategory: 'Rede e Conectividade',
+      resolutionAction: 'Equipamentos de Rede e Wi-Fi',
       resolutionSubcategory: 'Reconfiguração / reinicialização de Access Point Wi-Fi ou Roteador',
       resolutionDetails: 'Identificada sobrecarga no canal 6 do Access Point Unifi. Realizada a migração para canal 11.',
       resolutionTimeSpent: '45 minutos',
@@ -263,6 +298,7 @@ const TecnicoPage = {
       description: 'Caixas de som não reproduzem o áudio dos vídeos exibidos na aula.',
       photo: '',
       resolutionCategory: 'Software',
+      resolutionAction: 'Atualização e Drivers',
       resolutionSubcategory: 'Atualização ou reinstalação de drivers de dispositivos (Áudio, Vídeo, Rede)',
       resolutionDetails: 'Reinstalado o pacote de drivers Realtek High Definition Audio. Realizados testes com áudio estéreo perfeito.',
       resolutionTimeSpent: '30 minutos',
@@ -284,6 +320,7 @@ const TecnicoPage = {
       description: 'Aparelho liga porém ventila apenas em temperatura ambiente.',
       photo: '',
       resolutionCategory: 'Infraestrutura e Elétrica',
+      resolutionAction: 'Proteção Elétrica e Climatização',
       resolutionSubcategory: 'Limpeza de filtros ou manutenção básica de ar-condicionado',
       resolutionDetails: 'Realizada a higienização dos filtros de ar primários e checagem do disjuntor.',
       resolutionTimeSpent: '30 minutos',
@@ -305,6 +342,7 @@ const TecnicoPage = {
       description: 'Monitor da bancada apresenta listras coloridas e aquecimento.',
       photo: '',
       resolutionCategory: '',
+      resolutionAction: '',
       resolutionSubcategory: '',
       resolutionDetails: '',
       resolutionTimeSpent: '',
@@ -326,6 +364,7 @@ const TecnicoPage = {
       description: 'Sensor de fim de curso descalibrado, impedindo fechamento.',
       photo: '',
       resolutionCategory: 'Infraestrutura e Elétrica',
+      resolutionAction: '',
       resolutionSubcategory: 'Outro reparo de infraestrutura',
       resolutionDetails: 'Reaperto dos ímãs do sensor fim de curso e lubrificação das roldanas com graxa branca.',
       resolutionTimeSpent: '45 minutos',
@@ -347,6 +386,7 @@ const TecnicoPage = {
       description: 'Catraca 02 apresentava tela congelada.',
       photo: '',
       resolutionCategory: 'Outros',
+      resolutionAction: 'Tratativas Operacionais',
       resolutionSubcategory: 'Cancelado por duplicidade ou fora de escopo técnico',
       resolutionDetails: 'Chamado duplicado. O suporte da empresa terceirizada realizou a troca da placa minutos antes.',
       resolutionTimeSpent: 'Até 15 minutos',
@@ -360,57 +400,14 @@ const TecnicoPage = {
   currentCategoryFilter: 'Todas',
   searchQuery: '',
   activeEditingTicketId: null,
+  activeWaitingTicketId: null,
 
   getTickets() {
-    try {
-      const saved = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || 'null');
-      if (Array.isArray(saved) && saved.length > 0) return saved;
-
-      const legacy = JSON.parse(localStorage.getItem(this.LEGACY_KEY) || 'null');
-      if (Array.isArray(legacy) && legacy.length > 0) {
-        const merged = [...this.defaultTickets];
-        legacy.forEach((lt) => {
-          if (!merged.some((t) => t.id === lt.id)) {
-            merged.push({
-              id: lt.id,
-              title: lt.title || 'Chamado Solicitado',
-              room: lt.room || 'Sala',
-              requester: lt.requester || 'Professor',
-              date: lt.date || new Date().toLocaleDateString('pt-BR'),
-              time: '10:00',
-              type: lt.type || 'Hardware',
-              priority: lt.priority || 'Média',
-              status: lt.status || 'Em espera',
-              description: lt.description || 'Sem descrição.',
-              photo: lt.photo || '',
-              resolutionCategory: lt.resolutionCategory || '',
-              resolutionSubcategory: lt.resolutionSubcategory || '',
-              resolutionDetails: lt.resolutionDetails || '',
-              resolutionTimeSpent: lt.resolutionTimeSpent || '',
-              resolutionParts: lt.resolutionParts || '',
-              resolutionUserNote: lt.resolutionUserNote || '',
-              technicianName: lt.technicianName || '',
-              resolvedAt: lt.resolvedAt || ''
-            });
-          }
-        });
-        this.saveTickets(merged);
-        return merged;
-      }
-    } catch (e) {
-      console.warn('Erro ao carregar chamados:', e);
-    }
-    this.saveTickets(this.defaultTickets);
-    return [...this.defaultTickets];
+    return typeof Tickets !== 'undefined' && typeof Tickets.getAll === 'function' ? Tickets.getAll() : [];
   },
 
   saveTickets(tickets) {
-    try {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(tickets));
-      localStorage.setItem(this.LEGACY_KEY, JSON.stringify(tickets));
-    } catch (e) {
-      console.error('Erro ao salvar chamados:', e);
-    }
+    return typeof Tickets !== 'undefined' && typeof Tickets.save === 'function' ? Tickets.save(tickets) : tickets;
   },
 
   getTicketById(id) {
@@ -427,23 +424,42 @@ const TecnicoPage = {
     return true;
   },
 
+  claimTicket(ticketId) {
+    const user = typeof Auth !== 'undefined' ? Auth.getCurrentUser() : null;
+    const ticket = this.getTicketById(ticketId);
+    if (!ticket) {
+      Toast.error('Chamado não encontrado.');
+      return;
+    }
+    const assignee = (ticket.assignee || ticket.technicianName || '').trim().toLowerCase();
+    const myName = (user?.name || '').trim().toLowerCase();
+    if (assignee && myName && assignee !== myName) {
+      Toast.warning(`Este chamado já foi assumido por ${ticket.assignee || ticket.technicianName}.`);
+      return;
+    }
+    try {
+      if (typeof Tickets !== 'undefined' && typeof Tickets.assign === 'function') {
+        Tickets.assign(ticketId, user || { name: 'Técnico' }, user || {});
+      } else {
+        this.updateTicket(ticketId, { assignee: user?.name || 'Técnico', technicianName: user?.name || 'Técnico', status: 'Em andamento' });
+      }
+      Toast.success(`Chamado ${ticketId} assumido com sucesso!`);
+      const all = this.getTickets();
+      this.renderStats(all);
+      this.renderPriorityTickets(all);
+      this.renderMyTickets(all);
+      this.renderAllTickets(all);
+    } catch (err) {
+      Toast.error(err.message || 'Erro ao assumir chamado.');
+    }
+  },
+
   init() {
     const user = Auth.requireAuth();
     if (!user || user.role !== 'tecnico') {
-      window.location.href = 'login.html';
+      window.location.href = Auth.loginUrl();
       return;
     }
-
-    if (window.location.hash === '#perfil') {
-      window.location.replace('tecnico-perfil.html');
-      return;
-    }
-
-    window.addEventListener('hashchange', (event) => {
-      if (window.location.hash !== '#perfil') return;
-      event.stopImmediatePropagation();
-      window.location.replace('tecnico-perfil.html');
-    }, true);
 
     if (user.name) {
       const nameEl = document.getElementById('userName');
@@ -454,6 +470,10 @@ const TecnicoPage = {
     UserMenu.init();
     Navigation.init();
     Navigation.initBottomNav();
+    ProfilePage.initEmbedded();
+    if (typeof Notifications !== 'undefined' && typeof Notifications.bindBell === 'function') {
+      Notifications.bindBell();
+    }
 
     // Bottom nav CTA: atender primeiro chamado pendente
     document.addEventListener('bottomNavNewTicket', () => {
@@ -463,15 +483,10 @@ const TecnicoPage = {
         pending.sort((a, b) => {
           return (priorityOrder[this.calculatePriority(a)] || 4) - (priorityOrder[this.calculatePriority(b)] || 4);
         });
-        this.attendTicket(pending[0].id);
+        this.openResolutionModal(pending[0].id);
       } else {
         Toast.info('Nenhum chamado pendente na fila.');
       }
-    });
-
-    document.getElementById('notificationsBtn')?.addEventListener('click', () => {
-      Navigation.ringBell();
-      Toast.info('Você tem chamados prioritários na sua fila de atendimento.');
     });
 
     document.getElementById('supportBtn')?.addEventListener('click', () => {
@@ -479,6 +494,8 @@ const TecnicoPage = {
     });
 
     this.bindResolutionModal();
+    this.bindWaitingModal();
+    this.bindTicketInfoModal();
     this.bindFiltersAndSearch();
     this.renderStats(this.getTickets());
     this.renderAllSections(true);
@@ -530,6 +547,9 @@ const TecnicoPage = {
       .filter((t) => t.status !== 'Concluído' && t.status !== 'Cancelado')
       .map((t) => ({ ...t, calculatedPriority: this.calculatePriority(t) }))
       .sort((a, b) => {
+        const slaA = a.slaDueAt ? new Date(a.slaDueAt).getTime() : 0;
+        const slaB = b.slaDueAt ? new Date(b.slaDueAt).getTime() : 0;
+        if (slaA && slaB) return slaA - slaB;
         const pa = priorityOrder[a.calculatedPriority] ?? 4;
         const pb = priorityOrder[b.calculatedPriority] ?? 4;
         return pa - pb;
@@ -550,6 +570,7 @@ const TecnicoPage = {
       .map((ticket) => {
         const statusClass = this.getStatusClass(ticket.status);
         const priorityClass = this.getPriorityClass(ticket.calculatedPriority);
+        const slaBadge = this.formatSla(ticket);
         return `
         <div class="ticket-item priority-card" data-ticket-id="${ticket.id}">
           <div class="priority-card-heading">
@@ -557,6 +578,7 @@ const TecnicoPage = {
               <span class="material-symbols-outlined" aria-hidden="true">flag</span>
               ${this.getPriorityLabel(ticket.calculatedPriority)}
             </span>
+            ${slaBadge}
             <span class="status ${statusClass}">${ticket.status}</span>
           </div>
           <div class="ticket-meta">
@@ -568,10 +590,10 @@ const TecnicoPage = {
               <span class="material-symbols-outlined" aria-hidden="true">calendar_today</span>
               <span>${this.escapeHtml(ticket.date || 'Data não informada')}${ticket.time ? ` · ${this.escapeHtml(ticket.time)}` : ''}</span>
             </span>
-            <button type="button" class="btn-attend-ticket" data-open-ticket="${ticket.id}" title="Atender chamado">
-              <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
-              <span>Atender</span>
-            </button>
+            <div style="display: flex; gap: 6px;">
+              <button type="button" class="btn btn-secondary btn-sm" data-open-ticket="${ticket.id}" title="Ver ficha" style="padding: 4px 10px; font-size: 0.75rem;">Ver</button>
+              ${ticket.status === 'Em espera' || ticket.status === 'Aberto' ? `<button type="button" class="btn btn-primary btn-sm" data-claim-ticket="${ticket.id}" title="Assumir chamado" style="padding: 4px 10px; font-size: 0.75rem;">Assumir</button>` : ''}
+            </div>
           </div>
         </div>
       `;
@@ -581,7 +603,14 @@ const TecnicoPage = {
     container.querySelectorAll('[data-open-ticket]').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        this.attendTicket(btn.dataset.openTicket);
+        this.openResolutionModal(btn.dataset.openTicket);
+      });
+    });
+
+    container.querySelectorAll('[data-claim-ticket]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.claimTicket(btn.dataset.claimTicket);
       });
     });
 
@@ -598,38 +627,153 @@ const TecnicoPage = {
 
     const filtered = this.filterTicketList(tickets);
 
+    const statusOrder = { 'Em espera': 0, 'Em andamento': 1, 'Concluído': 2, 'Cancelado': 3 };
+    const priorityOrder = { 'Urgente': 0, 'Alta': 1, 'Média': 2, 'Baixa': 3 };
+
+    filtered.sort((a, b) => {
+      const sa = statusOrder[a.status] ?? 4;
+      const sb = statusOrder[b.status] ?? 4;
+      if (sa !== sb) return sa - sb;
+      if (a.status === 'Em espera' && b.status === 'Em espera') {
+        const pa = priorityOrder[this.calculatePriority(a)] ?? 4;
+        const pb = priorityOrder[this.calculatePriority(b)] ?? 4;
+        if (pa !== pb) return pa - pb;
+        const slaA = a.slaDueAt ? new Date(a.slaDueAt).getTime() : 0;
+        const slaB = b.slaDueAt ? new Date(b.slaDueAt).getTime() : 0;
+        if (slaA && slaB) return slaA - slaB;
+      }
+      return 0;
+    });
+
     if (filtered.length === 0) {
       container.innerHTML = `
-        <div class="empty-ticket-hint">
-          <span class="material-symbols-outlined" aria-hidden="true">search_off</span>
-          <p>Nenhum chamado encontrado com os filtros selecionados.</p>
+        <div class="empty-ticket-hint" style="grid-column: 1 / -1;">
+          <span class="material-symbols-outlined" aria-hidden="true">assignment_turned_in</span>
+          <p>Nenhum chamado encontrado na fila de atendimento.</p>
         </div>
       `;
       return;
     }
 
-    container.innerHTML = filtered.map((ticket) => this.buildTicketCardHtml(ticket)).join('');
+    const visibleTickets = filtered.slice(0, this.myTicketsLimit);
+    let html = visibleTickets.map((ticket) => this.buildTicketCardHtml(ticket)).join('');
+
+    if (filtered.length > this.myTicketsLimit) {
+      const remaining = filtered.length - this.myTicketsLimit;
+      html += `
+        <div class="load-more-wrap" style="grid-column: 1 / -1; text-align: center; margin-top: 12px; margin-bottom: 8px;">
+          <button type="button" class="btn btn-secondary load-more-btn" id="loadMoreMyTickets" style="padding: 10px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--line); color: var(--text);">
+            <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
+            <span>Ver mais chamados (${remaining} restantes)</span>
+          </button>
+        </div>
+      `;
+    }
+
+    container.innerHTML = html;
     this.attachTicketCardEvents(container);
+
+    const loadMoreBtn = document.getElementById('loadMoreMyTickets');
+    loadMoreBtn?.addEventListener('click', () => {
+      this.myTicketsLimit += 4;
+      this.renderMyTickets(tickets);
+    });
   },
 
   renderAllTickets(tickets) {
     const container = document.getElementById('allTicketsGrid');
     if (!container) return;
 
-    const filtered = this.filterTicketList(tickets);
+    const completedOnly = tickets.filter((t) => t.status === 'Concluído');
+    const filtered = this.filterTicketList(completedOnly);
 
     if (filtered.length === 0) {
       container.innerHTML = `
-        <div class="empty-ticket-hint">
-          <span class="material-symbols-outlined" aria-hidden="true">filter_list_off</span>
-          <p>Nenhum chamado corresponde aos critérios de busca.</p>
+        <div class="empty-ticket-hint" style="grid-column: 1 / -1;">
+          <span class="material-symbols-outlined" aria-hidden="true">history</span>
+          <p>Nenhum chamado concluído para consulta no momento.</p>
         </div>
       `;
       return;
     }
 
-    container.innerHTML = filtered.map((ticket) => this.buildTicketCardHtml(ticket)).join('');
-    this.attachTicketCardEvents(container);
+    const visibleTickets = filtered.slice(0, this.allTicketsLimit);
+    let html = visibleTickets.map((ticket) => {
+      const statusClass = this.getStatusClass(ticket.status);
+      const priorityClass = this.getPriorityClass(this.calculatePriority(ticket));
+      return `
+        <article class="technician-ticket-card status-border-${statusClass}" data-ticket-id="${ticket.id}">
+          <header class="tech-card-header">
+            <div class="tech-card-tags">
+              <span class="ticket-badge-id">${ticket.id}</span>
+              <span class="priority-pill ${priorityClass}">
+                <span class="material-symbols-outlined" aria-hidden="true">flag</span>
+                ${this.getPriorityLabel(this.calculatePriority(ticket))}
+              </span>
+              <span class="room-pill">
+                <span class="material-symbols-outlined" aria-hidden="true">meeting_room</span>
+                ${this.escapeHtml(ticket.room)}
+              </span>
+            </div>
+            <span class="status ${statusClass}">${ticket.status}</span>
+          </header>
+
+          <div class="tech-card-body">
+            <h3 class="tech-card-title">${this.escapeHtml(ticket.title)}</h3>
+            <div class="tech-card-meta">
+              <span class="meta-inline"><span class="material-symbols-outlined" aria-hidden="true">person</span> ${this.escapeHtml(ticket.requester || 'Solicitante')}</span>
+              <span class="meta-inline"><span class="material-symbols-outlined" aria-hidden="true">calendar_today</span> ${this.escapeHtml(ticket.date || 'Data')}</span>
+            </div>
+            <p class="preview-text">${this.escapeHtml(ticket.description || 'Sem detalhes informados.')}</p>
+            ${ticket.resolutionDetails ? `<div class="resolution-text-snippet"><strong>Resolução:</strong><p>${this.escapeHtml(ticket.resolutionDetails)}</p></div>` : ''}
+          </div>
+
+          <footer class="tech-card-footer" style="display: flex; gap: 8px; justify-content: flex-end; align-items: center; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line);">
+            <button type="button" class="btn btn-primary btn-sm" data-download-pdf="${ticket.id}" style="padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; background: var(--primary); color: white; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+              <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 16px;">download</span> Baixar Relatório
+            </button>
+          </footer>
+        </article>
+      `;
+    }).join('');
+
+    if (filtered.length > this.allTicketsLimit) {
+      const remaining = filtered.length - this.allTicketsLimit;
+      html += `
+        <div class="load-more-wrap" style="grid-column: 1 / -1; text-align: center; margin-top: 12px; margin-bottom: 8px;">
+          <button type="button" class="btn btn-secondary load-more-btn" id="loadMoreAllTickets" style="padding: 10px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--line); color: var(--text);">
+            <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
+            <span>Ver mais chamados (${remaining} restantes)</span>
+          </button>
+        </div>
+      `;
+    }
+
+    container.innerHTML = html;
+
+    container.querySelectorAll('[data-download-pdf]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const tid = btn.dataset.downloadPdf;
+        const t = this.getTicketById(tid);
+        if (t) this.generateTicketPDF(t);
+      });
+    });
+
+    container.querySelectorAll('.technician-ticket-card').forEach((card) => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('button')) return;
+        const tid = card.dataset.ticketId;
+        const t = this.getTicketById(tid);
+        if (t) this.generateTicketPDF(t);
+      });
+    });
+
+    const loadMoreBtn = document.getElementById('loadMoreAllTickets');
+    loadMoreBtn?.addEventListener('click', () => {
+      this.allTicketsLimit += 4;
+      this.renderAllTickets(tickets);
+    });
   },
 
   renderReports(tickets) {
@@ -728,6 +872,9 @@ const TecnicoPage = {
     const statusClass = this.getStatusClass(ticket.status);
     const priorityClass = this.getPriorityClass(this.calculatePriority(ticket));
     const hasResolution = Boolean(ticket.resolutionCategory || ticket.resolutionDetails);
+    const currentUser = typeof Auth !== 'undefined' ? Auth.getCurrentUser() : null;
+    const isAssignedToMe = (ticket.assignee || ticket.technicianName || '').trim().toLowerCase() === (currentUser?.name || '').trim().toLowerCase();
+    const isAssigned = Boolean(ticket.assignee || ticket.technicianName);
 
     return `
       <article class="technician-ticket-card status-border-${statusClass}" data-ticket-id="${ticket.id}">
@@ -750,14 +897,9 @@ const TecnicoPage = {
           <h3 class="tech-card-title">${this.escapeHtml(ticket.title)}</h3>
           
           <div class="tech-card-meta">
-            <span class="meta-inline">
-              <span class="material-symbols-outlined" aria-hidden="true">person</span>
-              ${this.escapeHtml(ticket.requester || 'Solicitante')}
-            </span>
-            <span class="meta-inline">
-              <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
-              ${ticket.date} ${ticket.time ? 'às ' + ticket.time : ''}
-            </span>
+            <span class="meta-inline"><span class="material-symbols-outlined" aria-hidden="true">person</span> ${this.escapeHtml(ticket.requester || 'Solicitante')}</span>
+            <span class="meta-inline"><span class="material-symbols-outlined" aria-hidden="true">schedule</span> ${ticket.date}</span>
+            ${isAssigned ? `<span class="meta-inline" style="color: var(--primary); font-weight: 600;"><span class="material-symbols-outlined" aria-hidden="true">badge</span> ${this.escapeHtml(ticket.assignee || ticket.technicianName)}</span>` : ''}
           </div>
 
           <div class="solicitation-preview-box">
@@ -770,61 +912,51 @@ const TecnicoPage = {
               ? `
             <div class="resolution-preview-card">
               <div class="resolution-badge-bar">
-                <span class="funnel-cat-badge">
-                  <span class="material-symbols-outlined" aria-hidden="true">category</span>
-                  ${this.escapeHtml(ticket.resolutionCategory || 'Geral')}
-                </span>
-                ${
-                  ticket.resolutionSubcategory
-                    ? `<span class="funnel-subcat-badge">${this.escapeHtml(ticket.resolutionSubcategory)}</span>`
-                    : ''
-                }
+                <span class="funnel-cat-badge"><span class="material-symbols-outlined" aria-hidden="true">category</span> ${this.escapeHtml(ticket.resolutionCategory || 'Geral')}</span>
+                ${ticket.resolutionSubcategory ? `<span class="funnel-subcat-badge">${this.escapeHtml(ticket.resolutionSubcategory)}</span>` : ''}
               </div>
-
-              ${
-                ticket.resolutionDetails
-                  ? `
-                <div class="resolution-text-snippet">
-                  <strong>Resolução Técnica:</strong>
-                  <p>${this.escapeHtml(ticket.resolutionDetails)}</p>
-                </div>
-              `
-                  : ''
-              }
-
+              ${ticket.resolutionDetails ? `<div class="resolution-text-snippet"><strong>Resolução:</strong><p>${this.escapeHtml(ticket.resolutionDetails)}</p></div>` : ''}
               <div class="resolution-footer-tags">
-                ${
-                  ticket.resolutionTimeSpent
-                    ? `<span><span class="material-symbols-outlined" aria-hidden="true">timer</span> ${this.escapeHtml(ticket.resolutionTimeSpent)}</span>`
-                    : ''
-                }
-                ${
-                  ticket.technicianName
-                    ? `<span><span class="material-symbols-outlined" aria-hidden="true">badge</span> ${this.escapeHtml(ticket.technicianName)}</span>`
-                    : ''
-                }
-                ${
-                  ticket.resolvedAt
-                    ? `<span><span class="material-symbols-outlined" aria-hidden="true">event_available</span> ${ticket.resolvedAt}</span>`
-                    : ''
-                }
+                ${ticket.resolutionTimeSpent ? `<span><span class="material-symbols-outlined" aria-hidden="true">timer</span> ${this.escapeHtml(ticket.resolutionTimeSpent)}</span>` : ''}
+                ${ticket.resolvedAt ? `<span><span class="material-symbols-outlined" aria-hidden="true">event_available</span> ${ticket.resolvedAt}</span>` : ''}
               </div>
             </div>
           `
               : `
             <div class="pending-resolution-notice">
               <span class="material-symbols-outlined" aria-hidden="true">hourglass_top</span>
-              <span>Aguardando atendimento e diagnóstico do técnico</span>
+              <span>${isAssigned ? (isAssignedToMe ? 'Você assumiu. Clique em Resolver.' : `Atribuído a ${ticket.assignee}`) : 'Aguardando atendimento'}</span>
             </div>
           `
           }
         </div>
 
-        <footer class="tech-card-footer">
-          <button type="button" class="btn-attend-action" data-open-ticket="${ticket.id}">
-            <span class="material-symbols-outlined" aria-hidden="true">build_circle</span>
-            <span>${ticket.status === 'Concluído' ? 'Ver / Editar Resolução' : 'Atender Chamado'}</span>
-          </button>
+        <footer class="tech-card-footer" style="display: flex; gap: 8px; justify-content: flex-end; align-items: center; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line);">
+          ${
+            ticket.status === 'Concluído' || ticket.status === 'Cancelado'
+              ? `
+            <button type="button" class="btn btn-primary btn-sm" data-download-pdf="${ticket.id}" style="padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; background: var(--primary); color: white; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+              <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 16px;">download</span> Baixar Relatório PDF
+            </button>
+            `
+              : ticket.status === 'Em espera' || ticket.status === 'Aberto'
+              ? `
+            <button type="button" class="btn btn-secondary btn-sm" data-open-ticket="${ticket.id}" style="padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+              <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 16px;">visibility</span> Ver Ficha
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" data-claim-ticket="${ticket.id}" style="padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+              <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 16px;">assignment_ind</span> ${isAssignedToMe ? 'Atendendo' : (isAssigned ? 'Reatribuir' : 'Assumir')}
+            </button>
+            `
+              : `
+            <button type="button" class="btn btn-secondary btn-sm" data-open-ticket="${ticket.id}" style="padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+              <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 16px;">visibility</span> Ver Ficha
+            </button>
+            <button type="button" class="btn-attend-action" data-resolve-ticket="${ticket.id}" style="padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; background: var(--primary); color: white; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+              <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 16px;">build_circle</span> Finalizar Chamado
+            </button>
+            `
+          }
         </footer>
       </article>
     `;
@@ -838,10 +970,43 @@ const TecnicoPage = {
       });
     });
 
+    container.querySelectorAll('[data-resolve-ticket]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.openResolutionModal(btn.dataset.resolveTicket);
+      });
+    });
+
+    container.querySelectorAll('[data-claim-ticket]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.claimTicket(btn.dataset.claimTicket);
+      });
+    });
+
+    container.querySelectorAll('[data-download-pdf]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const tid = btn.dataset.downloadPdf;
+        const t = this.getTicketById(tid);
+        if (t) this.generateTicketPDF(t);
+      });
+    });
+
     container.querySelectorAll('.technician-ticket-card').forEach((card) => {
       card.addEventListener('click', (e) => {
         if (e.target.closest('button')) return;
-        this.openResolutionModal(card.dataset.ticketId);
+        const ticketId = card.dataset.ticketId;
+        const ticket = this.getTicketById(ticketId);
+        if (!ticket) return;
+        const statusLower = (ticket.status || '').toLowerCase();
+        if (statusLower === 'concluído' || statusLower === 'concluido' || statusLower === 'cancelado') {
+          this.generateTicketPDF(ticket);
+        } else if (ticket.status === 'Em espera' || ticket.status === 'Aberto') {
+          this.openWaitingModal(ticketId);
+        } else {
+          this.openTicketInfoModal(ticketId);
+        }
       });
     });
   },
@@ -853,7 +1018,7 @@ const TecnicoPage = {
       }
 
       if (this.currentCategoryFilter !== 'Todas') {
-        const cat = ticket.resolutionCategory || ticket.type || '';
+        const cat = this.normalizeCategory(ticket.resolutionCategory || ticket.type || '');
         if (!cat.toLowerCase().includes(this.currentCategoryFilter.toLowerCase())) {
           return false;
         }
@@ -884,6 +1049,8 @@ const TecnicoPage = {
         document.querySelectorAll('.filter-tab').forEach((t) => t.classList.remove('active'));
         tab.classList.add('active');
         this.currentFilter = tab.dataset.filter || 'Todos';
+        this.myTicketsLimit = 4;
+        this.allTicketsLimit = 4;
         this.renderMyTickets(this.getTickets());
         this.renderAllTickets(this.getTickets());
       });
@@ -892,6 +1059,8 @@ const TecnicoPage = {
     const catSelect = document.getElementById('filterCategorySelect');
     catSelect?.addEventListener('change', (e) => {
       this.currentCategoryFilter = e.target.value;
+      this.myTicketsLimit = 4;
+      this.allTicketsLimit = 4;
       this.renderMyTickets(this.getTickets());
       this.renderAllTickets(this.getTickets());
     });
@@ -899,6 +1068,8 @@ const TecnicoPage = {
     const searchInput = document.getElementById('ticketSearchInput');
     searchInput?.addEventListener('input', (e) => {
       this.searchQuery = e.target.value.trim();
+      this.myTicketsLimit = 4;
+      this.allTicketsLimit = 4;
       this.renderMyTickets(this.getTickets());
       this.renderAllTickets(this.getTickets());
     });
@@ -919,6 +1090,14 @@ const TecnicoPage = {
 
     closeBtn?.addEventListener('click', () => this.closeResolutionModal());
     cancelBtn?.addEventListener('click', () => this.closeResolutionModal());
+
+    const exportPdfBtn = document.getElementById('exportPdfBtn');
+    exportPdfBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.exportCurrentTicketToPDF();
+    });
+
     overlay?.addEventListener('click', (e) => {
       if (e.target === overlay) this.closeResolutionModal();
     });
@@ -1037,11 +1216,149 @@ const TecnicoPage = {
     }
 
     if (ticket.status === 'Em espera' || ticket.status === 'Aberto') {
-      this.updateTicket(ticketId, { status: 'Em andamento' });
-      Toast.success('Chamado ' + ticket.id + ' colocado em andamento.');
+      this.openWaitingModal(ticketId);
+    } else {
+      this.openTicketInfoModal(ticketId);
+    }
+  },
+
+  openTicketInfoModal(ticketId) {
+    const ticket = this.getTicketById(ticketId);
+    if (!ticket) {
+      Toast.error('Chamado não encontrado.');
+      return;
+    }
+    this.activeInfoTicketId = ticket.id;
+
+    document.getElementById('ticketInfoModalTicketId').textContent = ticket.id;
+    document.getElementById('ticketInfoModalTitleText').textContent = ticket.title;
+    document.getElementById('ticketInfoModalRequester').textContent = ticket.requester || 'Professor(a)';
+    document.getElementById('ticketInfoModalRoom').textContent = ticket.room || 'Ambiente';
+    document.getElementById('ticketInfoModalDate').textContent = (ticket.date || '') + (ticket.time ? ' às ' + ticket.time : '');
+    
+    const typeEl = document.getElementById('ticketInfoModalType');
+    if (typeEl) {
+      typeEl.textContent = ticket.category || ticket.type || 'Geral';
+    }
+    
+    const priority = this.calculatePriority(ticket);
+    const priorityPill = document.getElementById('ticketInfoModalPriority');
+    if (priorityPill) {
+      priorityPill.textContent = this.getPriorityLabel(priority);
+      priorityPill.className = 'priority-pill ' + this.getPriorityClass(priority);
     }
 
-    this.openResolutionModal(ticketId);
+    document.getElementById('ticketInfoModalDescription').textContent = ticket.description || 'Sem descrição fornecida.';
+
+    const photoWrap = document.getElementById('ticketInfoModalPhotoWrap');
+    const photoImg = document.getElementById('ticketInfoModalPhoto');
+    if (ticket.photo && photoWrap && photoImg) {
+      photoImg.src = ticket.photo;
+      photoWrap.style.display = 'block';
+    } else if (photoWrap) {
+      photoWrap.style.display = 'none';
+    }
+
+    const overlay = document.getElementById('ticketInfoModalOverlay');
+    const pdfBtn = document.getElementById('ticketInfoDownloadPdfBtn');
+    if (pdfBtn) {
+      if (ticket.status === 'Concluído') {
+        pdfBtn.style.display = 'inline-flex';
+        pdfBtn.onclick = () => {
+          this.closeTicketInfoModal();
+          this.generateTicketPDF(ticket);
+        };
+      } else {
+        pdfBtn.style.display = 'none';
+        pdfBtn.onclick = null;
+      }
+    }
+
+    overlay?.classList.add('open');
+    overlay?.setAttribute('aria-hidden', 'false');
+  },
+
+  closeTicketInfoModal() {
+    const overlay = document.getElementById('ticketInfoModalOverlay');
+    overlay?.classList.remove('open');
+    overlay?.setAttribute('aria-hidden', 'true');
+    this.activeInfoTicketId = null;
+  },
+
+  bindTicketInfoModal() {
+    const overlay = document.getElementById('ticketInfoModalOverlay');
+    const closeBtn = document.getElementById('closeTicketInfoModalBtn');
+    const closeBtn2 = document.getElementById('closeTicketInfoBtn');
+
+    closeBtn?.addEventListener('click', () => this.closeTicketInfoModal());
+    closeBtn2?.addEventListener('click', () => this.closeTicketInfoModal());
+    overlay?.addEventListener('click', (e) => {
+      if (e.target === overlay) this.closeTicketInfoModal();
+    });
+  },
+
+  openWaitingModal(ticketId) {
+    const ticket = this.getTicketById(ticketId);
+    if (!ticket) {
+      Toast.error('Chamado não encontrado.');
+      return;
+    }
+    this.activeWaitingTicketId = ticket.id;
+
+    document.getElementById('waitingModalTicketId').textContent = ticket.id;
+    document.getElementById('waitingModalTitleText').textContent = ticket.title;
+    document.getElementById('waitingModalRequester').textContent = ticket.requester || 'Professor(a)';
+    document.getElementById('waitingModalRoom').textContent = ticket.room || 'Ambiente';
+    document.getElementById('waitingModalDate').textContent = (ticket.date || '') + (ticket.time ? ' às ' + ticket.time : '');
+    
+    const priority = this.calculatePriority(ticket);
+    const priorityPill = document.getElementById('waitingModalPriority');
+    if (priorityPill) {
+      priorityPill.textContent = this.getPriorityLabel(priority);
+      priorityPill.className = 'priority-pill ' + this.getPriorityClass(priority);
+    }
+
+    document.getElementById('waitingModalDescription').textContent = ticket.description || 'Sem descrição fornecida.';
+
+    const photoWrap = document.getElementById('waitingModalPhotoWrap');
+    const photoImg = document.getElementById('waitingModalPhoto');
+    if (ticket.photo && photoWrap && photoImg) {
+      photoImg.src = ticket.photo;
+      photoWrap.style.display = 'block';
+    } else if (photoWrap) {
+      photoWrap.style.display = 'none';
+    }
+
+    const overlay = document.getElementById('waitingModalOverlay');
+    overlay?.classList.add('open');
+    overlay?.setAttribute('aria-hidden', 'false');
+  },
+
+  closeWaitingModal() {
+    const overlay = document.getElementById('waitingModalOverlay');
+    overlay?.classList.remove('open');
+    overlay?.setAttribute('aria-hidden', 'true');
+    this.activeWaitingTicketId = null;
+  },
+
+  bindWaitingModal() {
+    const overlay = document.getElementById('waitingModalOverlay');
+    const closeBtn = document.getElementById('closeWaitingModalBtn');
+    const closeBtn2 = document.getElementById('closeWaitingBtn');
+    const acceptBtn = document.getElementById('acceptWaitingTicketBtn');
+
+    closeBtn?.addEventListener('click', () => this.closeWaitingModal());
+    closeBtn2?.addEventListener('click', () => this.closeWaitingModal());
+    overlay?.addEventListener('click', (e) => {
+      if (e.target === overlay) this.closeWaitingModal();
+    });
+
+    acceptBtn?.addEventListener('click', () => {
+      if (!this.activeWaitingTicketId) return;
+      const tid = this.activeWaitingTicketId;
+      this.closeWaitingModal();
+      this.claimTicket(tid);
+    });
   },
 
   openResolutionModal(ticketId) {
@@ -1085,10 +1402,13 @@ const TecnicoPage = {
       categorySelect.value = detectedCategory;
     }
 
-    const detectedGroup = this.RESOLUTION_FUNNEL[detectedCategory]?.groups?.find((group) =>
-      group.options?.some((option) => option.label === ticket.resolutionSubcategory || option.id === ticket.resolutionSubcategory)
-    )?.group || '';
+    const detectedGroup = (ticket.resolutionAction || '') ||
+      (this.RESOLUTION_FUNNEL[detectedCategory]?.groups?.find((group) =>
+        group.options?.some((option) => option.label === ticket.resolutionSubcategory || option.id === ticket.resolutionSubcategory)
+      )?.group) || '';
+    const actionSelect = document.getElementById('resolutionActionSelect');
     this.populateActionGroups(detectedCategory, detectedGroup);
+    if (actionSelect) actionSelect.value = detectedGroup;
     this.populateSubcategories(detectedCategory, detectedGroup, ticket.resolutionSubcategory || '');
 
     const timeSpentSelect = document.getElementById('resolutionTimeSpent');
@@ -1118,12 +1438,14 @@ const TecnicoPage = {
     const overlay = document.getElementById('resolutionModalOverlay');
     overlay?.classList.add('open');
     overlay?.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
   },
 
   closeResolutionModal() {
     const overlay = document.getElementById('resolutionModalOverlay');
     overlay?.classList.remove('open');
     overlay?.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
     this.activeEditingTicketId = null;
     document.getElementById('technicianResolutionForm')?.reset();
 
@@ -1205,6 +1527,7 @@ const TecnicoPage = {
     const updated = this.updateTicket(this.activeEditingTicketId, {
       status: newStatus,
       resolutionCategory: category,
+      resolutionAction: action,
       resolutionSubcategory: subcategory,
       resolutionTimeSpent: timeSpent,
       resolutionParts: parts,
@@ -1262,5 +1585,257 @@ const TecnicoPage = {
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  },
+
+  /* ============================================================
+     PDF Report Generation
+     Emits a complete ticket resolution report as a PDF.
+     Uses html2canvas + jsPDF (loaded via CDN in tecnico.html).
+     ============================================================ */
+  exportCurrentTicketToPDF() {
+    if (!this.activeEditingTicketId) {
+      Toast.warning("Nenhum chamado selecionado para exportar.");
+      return;
+    }
+    const ticket = this.getTicketById(this.activeEditingTicketId);
+    if (!ticket) {
+      Toast.error("Chamado não encontrado.");
+      return;
+    }
+
+    const merged = this.mergeFormIntoTicket(ticket);
+    this.generateTicketPDF(merged);
+  },
+
+  mergeFormIntoTicket(ticket) {
+    const category = document.getElementById('resolutionCategorySelect')?.value || ticket.resolutionCategory || '';
+    const action = document.getElementById('resolutionActionSelect')?.value || ticket.resolutionAction || '';
+    const subcategory = document.getElementById('resolutionSubcategorySelect')?.value || ticket.resolutionSubcategory || '';
+    const timeSpent = document.getElementById('resolutionTimeSpent')?.value || ticket.resolutionTimeSpent || '';
+    const parts = (document.getElementById('resolutionParts')?.value.trim()) || ticket.resolutionParts || '';
+    const details = (document.getElementById('resolutionDetailsTextarea')?.value.trim()) || ticket.resolutionDetails || '';
+    const userNote = (document.getElementById('resolutionUserNote')?.value.trim()) || ticket.resolutionUserNote || '';
+    const status = document.getElementById('selectedStatusInput')?.value || ticket.status || '';
+    const technicianName = ticket.technicianName || Auth.getCurrentUser()?.name || "Técnico";
+
+    return {
+      ...ticket,
+      status,
+      resolutionCategory: category,
+      resolutionAction: action,
+      resolutionSubcategory: subcategory,
+      resolutionTimeSpent: timeSpent,
+      resolutionParts: parts,
+      resolutionDetails: details,
+      resolutionUserNote: userNote,
+      technicianName
+    };
+  },
+
+  buildTicketReportHtml(ticket) {
+    const priority = this.calculatePriority(ticket);
+    const priorityLabel = this.getPriorityLabel(priority);
+    const openedDate = (ticket.date || "—") + (ticket.time ? " às " + ticket.time : "");
+    const resolvedAt = ticket.resolvedAt || "—";
+    const requester = ticket.requester || "Solicitante";
+    const room = ticket.room || "Ambiente não informado";
+    const ticketType = ticket.type || "Geral";
+    const category = ticket.resolutionCategory || ticketType || "—";
+    const action = ticket.resolutionAction || "—";
+    const subcategory = ticket.resolutionSubcategory || "—";
+    const timeSpent = ticket.resolutionTimeSpent || "Não informado";
+    const parts = ticket.resolutionParts || "Nenhuma peça utilizada.";
+    const details = ticket.resolutionDetails || "Sem detalhes de resolução registrados.";
+    const userNote = ticket.resolutionUserNote || "Nenhuma mensagem para o solicitante.";
+    const photoNote = ticket.photo ? "Anexo fotográfico: presente" : "Anexo fotográfico: sem anexo";
+    const technicianName = ticket.technicianName || "—";
+    const generatedAt = new Date().toLocaleString('pt-BR', {
+      day: "2-digit", month: "2-digit", year: "numeric",
+      hour: "2-digit", minute: "2-digit"
+    });
+    const id = ticket.id || "—";
+    const e = (s) => this.escapeHtml(s);
+
+    return `
+      <div class="pdf-report">
+        <header class="pdf-header">
+          <div class="pdf-header-left">
+            <div class="pdf-vendor">Helpium</div>
+            <div class="pdf-report-title">Relatório de Atendimento Técnico</div>
+            <div class="pdf-meta-sub">Sistema de Help Desk Escolar</div>
+          </div>
+          <div class="pdf-header-right">
+            <div class="pdf-call-id">CHAMADO Nº ${e(id)}</div>
+          </div>
+        </header>
+        <hr class="pdf-rule">
+
+        <section class="pdf-section">
+          <div class="pdf-section-title">1. DADOS DO CHAMADO</div>
+          <table class="pdf-table">
+            <tbody>
+              <tr class="pdf-row"><td class="pdf-cell-full"><span class="pdf-lbl">Título do chamado</span><span class="pdf-val">${e(ticket.title || "—")}</span></td></tr>
+              <tr class="pdf-row">
+                <td><span class="pdf-lbl">Status atual</span><span class="pdf-val">${e(ticket.status || "Em andamento")}</span></td>
+                <td><span class="pdf-lbl">Prioridade calculada</span><span class="pdf-val pdf-priority-${priorityLabel}">${e(priorityLabel)}</span></td>
+              </tr>
+              <tr class="pdf-row">
+                <td><span class="pdf-lbl">Categoria</span><span class="pdf-val">${e(category)}</span></td>
+                <td><span class="pdf-lbl">Sala / Local</span><span class="pdf-val">${e(room)}</span></td>
+              </tr>
+              <tr class="pdf-row">
+                <td><span class="pdf-lbl">Solicitante</span><span class="pdf-val">${e(requester)}</span></td>
+                <td><span class="pdf-lbl">Aberto em</span><span class="pdf-val">${e(openedDate)}</span></td>
+              </tr>
+              <tr class="pdf-row"><td class="pdf-cell-full"><span class="pdf-lbl">Concluído em</span><span class="pdf-val">${e(resolvedAt)}</span></td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="pdf-section">
+          <div class="pdf-section-title">2. DESCRIÇÃO DO PROBLEMA RELATADO</div>
+          <div class="pdf-callout">
+            <div class="pdf-callout-text">${e(ticket.description || "Sem descrição detalhada fornecida pelo solicitante.")}</div>
+          </div>
+          <div class="pdf-meta-line">${photoNote} · Tipo de chamado: ${e(ticketType)}</div>
+        </section>
+
+        <section class="pdf-section">
+          <div class="pdf-section-title">3. RESOLUÇÃO TÉCNICA APLICADA</div>
+          <table class="pdf-table">
+            <tbody>
+              <tr class="pdf-row">
+                <td><span class="pdf-lbl">Domínio principal</span><span class="pdf-val">${e(category)}</span></td>
+                <td><span class="pdf-lbl">Ação específica</span><span class="pdf-val">${e(action)}</span></td>
+              </tr>
+              <tr class="pdf-row">
+                <td><span class="pdf-lbl">Visão detalhada</span><span class="pdf-val">${e(subcategory)}</span></td>
+                <td><span class="pdf-lbl">Tempo de atendimento</span><span class="pdf-val">${e(timeSpent)}</span></td>
+              </tr>
+              <tr class="pdf-row"><td class="pdf-cell-full"><span class="pdf-lbl">Peças utilizadas</span><span class="pdf-val">${e(parts)}</span></td></tr>
+            </tbody>
+          </table>
+          <div class="pdf-observation">
+            <div class="pdf-observation-text">${e(details)}</div>
+          </div>
+        </section>
+
+        <section class="pdf-section">
+          <div class="pdf-section-title">4. MENSAGEM DE ENTREGA AO SOLICITANTE</div>
+          <div class="pdf-callout">
+            <div class="pdf-callout-text">${e(userNote)}</div>
+          </div>
+        </section>
+
+        <div class="pdf-signature-bar">
+          <div class="pdf-sig">
+            <span class="pdf-sig-label">Técnico responsável</span>
+            <span class="pdf-sig-value">${e(technicianName)}</span>
+          </div>
+          <div class="pdf-sig">
+            <span class="pdf-sig-label">Data de emissão</span>
+            <span class="pdf-sig-value">${e(generatedAt)}</span>
+          </div>
+          <div class="pdf-sig">
+            <span class="pdf-sig-label">Número do chamado</span>
+            <span class="pdf-sig-value">${e(id)}</span>
+          </div>
+        </div>
+
+        <hr class="pdf-rule">
+        <footer class="pdf-footer">
+          <span>Helpium — Sistema de Help Desk Escolar</span>
+          <span class="pdf-footer-right">Gerado em: ${e(generatedAt)} · CHAMADO ${e(id)}</span>
+        </footer>
+      </div>
+    `;
+  },
+
+  generateTicketPDF(ticket) {
+    const pdfBtn = document.getElementById('exportPdfBtn');
+    const setBusy = (busy) => {
+      if (pdfBtn) {
+        pdfBtn.disabled = busy;
+        pdfBtn.classList.toggle("exporting", busy);
+      }
+    };
+    setBusy(true);
+
+    const reportHtml = this.buildTicketReportHtml(ticket);
+    const container = document.createElement("div");
+    container.id = "ticket-report-pdf";
+    container.innerHTML = reportHtml;
+    Object.assign(container.style, {
+      position: "absolute",
+      left: "-9999px",
+      top: "0px",
+      width: "794px",
+      background: "#ffffff",
+      margin: "0",
+      padding: "0"
+    });
+    document.body.appendChild(container);
+
+    if (!window.html2canvas) {
+      Toast.error("Falha ao carregar o gerador de PDF.");
+      document.body.removeChild(container);
+      setBusy(false);
+      return;
+    }
+
+    html2canvas(container, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      logging: false,
+      windowWidth: 794,
+      windowHeight: container.scrollHeight
+    })
+      .then((canvas) => {
+        this.savePdfFromCanvas(canvas, ticket.id);
+      })
+      .catch((err) => {
+        console.error("Falha ao gerar PDF:", err);
+        Toast.error("Não foi possível gerar o PDF do chamado.");
+      })
+      .finally(() => {
+        document.body.removeChild(container);
+        setBusy(false);
+      });
+  },
+
+  savePdfFromCanvas(canvas, ticketId) {
+    if (!window.jspdf) {
+      Toast.error("Falha ao carregar a biblioteca de PDF.");
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF("p", "pt", "a4");
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth;
+    const marginLeft = 0;
+
+    const imgData = canvas.toDataURL("image/jpeg", 0.92);
+    const imgProps = pdf.getImageProperties(imgData);
+    const ratio = imgProps.height / imgProps.width;
+    const imgHeight = imgWidth * ratio;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, "JPEG", marginLeft, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "JPEG", marginLeft, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    const safeId = (ticketId || "chamado").replace(/[^a-zA-Z0-9]/g, "");
+    pdf.save("CHAMADO_" + safeId + "_Helpium.pdf");
+    Toast.success("PDF do chamado " + (ticketId || "") + " gerado com sucesso.");
   }
 };

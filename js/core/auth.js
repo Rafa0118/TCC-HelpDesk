@@ -15,15 +15,20 @@ const Auth = {
     }
   },
 
+  // As páginas ficam em /dashboard/, então o login está um nível acima
+  loginUrl() {
+    return window.location.pathname.includes('/dashboard/') ? '../login.html' : 'login.html';
+  },
+
   logout() {
     localStorage.removeItem(this.STORAGE_KEY);
-    window.location.href = 'login.html';
+    window.location.href = this.loginUrl();
   },
 
   requireAuth() {
     const user = this.getCurrentUser();
     if (!user) {
-      window.location.href = 'login.html';
+      window.location.href = this.loginUrl();
       return null;
     }
     return user;

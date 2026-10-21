@@ -18,6 +18,21 @@ const ProfessorPage = {
     'Concluído': 'done', 'Cancelado': 'cancelled'
   },
 
+  CATEGORY_MAP: {
+    'Rede': 'Rede e Conectividade',
+    'Infraestrutura': 'Infraestrutura e Elétrica',
+    'Acesso': 'Acesso e Contas',
+    'Acesso/Credencial': 'Acesso e Contas',
+    'Projetor/Audiovisual': 'Hardware',
+    'Impressora': 'Hardware',
+    'Sala de Aula': 'Hardware'
+  },
+
+  normalizeCategory(category) {
+    if (!category) return '';
+    return this.CATEGORY_MAP[category] || category;
+  },
+
   getTicketPriority(ticket) {
     const categoryWeights = {
       Hardware: 3,
@@ -31,7 +46,7 @@ const ProfessorPage = {
       Outros: 1
     };
     const priorityWeights = { Urgente: 4, Alta: 3, Média: 2, Baixa: 1 };
-    const category = ticket.type || ticket.category || 'Outros';
+    const category = this.normalizeCategory(ticket.type || ticket.category || 'Outros');
     const priority = ticket.priority || 'Média';
     const total = (categoryWeights[category] || 1) + (priorityWeights[priority] || 2);
 
@@ -51,6 +66,54 @@ const ProfessorPage = {
       .replace(/'/g, '&#39;');
   },
   currentFilter: 'Todos',
+  currentCategoryFilter: 'Todas',
+  searchQuery: '',
+
+  filterTicketList(tickets) {
+    return tickets.filter((ticket) => {
+      if (this.currentFilter !== 'Todos' && ticket.status !== this.currentFilter) {
+        return false;
+      }
+      if (this.currentCategoryFilter !== 'Todas') {
+        const cat = this.normalizeCategory(ticket.category || ticket.type || '');
+        if (!cat.toLowerCase().includes(this.currentCategoryFilter.toLowerCase())) {
+          return false;
+        }
+      }
+      if (this.searchQuery) {
+        const q = this.searchQuery.toLowerCase();
+        const matchTitle = (ticket.title || '').toLowerCase().includes(q);
+        const matchId = (ticket.id || '').toLowerCase().includes(q);
+        const matchRoom = (ticket.room || '').toLowerCase().includes(q);
+        const matchCat = (ticket.category || ticket.type || '').toLowerCase().includes(q);
+        if (!matchTitle && !matchId && !matchRoom && !matchCat) return false;
+      }
+      return true;
+    });
+  },
+
+  bindFiltersAndSearch() {
+    document.querySelectorAll('.filter-tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.filter-tab').forEach((t) => t.classList.remove('active'));
+        tab.classList.add('active');
+        this.currentFilter = tab.dataset.filter || 'Todos';
+        this.renderTickets();
+      });
+    });
+
+    const catSelect = document.getElementById('filterCategorySelect');
+    catSelect?.addEventListener('change', (e) => {
+      this.currentCategoryFilter = e.target.value;
+      this.renderTickets();
+    });
+
+    const searchInput = document.getElementById('ticketSearchInput');
+    searchInput?.addEventListener('input', (e) => {
+      this.searchQuery = e.target.value.trim();
+      this.renderTickets();
+    });
+  },
 
   getTickets() {
     try {
@@ -88,20 +151,76 @@ const ProfessorPage = {
     } catch {}
   },
 
+  updateStats(tickets) {
+    const total = tickets.length;
+    const pending = tickets.filter(t => t.status === 'Em andamento' || t.status === 'Em espera').length;
+    const completed = tickets.filter(t => t.status === 'Concluído').length;
+
+    const totalEl = document.getElementById('statTotalTickets');
+    const pendingEl = document.getElementById('statPendingTickets');
+    const completedEl = document.getElementById('statCompletedTickets');
+
+    if (totalEl) totalEl.textContent = total;
+    if (pendingEl) pendingEl.textContent = pending;
+    if (completedEl) completedEl.textContent = completed;
+  },
+
   renderTickets(showSkeleton) {
     const tbody = document.getElementById('ticketsTableBody');
     if (!tbody) return;
     if (showSkeleton) {
-      SkeletonLoader.show('#ticketsTableBody', { rows: 3, columns: 6 });
+      SkeletonLoader.show('#ticketsTableBody', { rows: 3, columns: 11 });
       setTimeout(() => this.renderTickets(), 350);
       return;
     }
     const tickets = this.getTickets();
+    this.updateStats(tickets);
     this.renderRecentTickets(tickets);
-    const filtered = this.currentFilter === 'Todos' ? tickets : tickets.filter(t => t.status === this.currentFilter);
+    const filtered = this.filterTicketList(tickets);
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 24px; color: var(--muted);">Nenhum chamado encontrado.</td></tr>';
+      return;
+    }
+
     tbody.innerHTML = filtered.map(ticket => {
       const cls = this.statusClassMap[ticket.status] || 'waiting';
-      return '<tr><td>' + this.escapeHtml(ticket.id) + '</td><td>' + this.escapeHtml(ticket.title) + '</td><td>' + this.escapeHtml(ticket.room) + '</td><td>' + this.escapeHtml(ticket.date) + '</td><td>' + (ticket.locationDetails ? this.escapeHtml(ticket.locationDetails) : '<span class="text-muted">Não informado</span>') + '</td><td><span class="status ' + cls + '">' + this.escapeHtml(ticket.status) + '</span></td><td><div class="ticket-actions"><button class="cancel-ticket-btn" type="button" data-ticket-id="' + this.escapeHtml(ticket.id) + '">Cancelar</button></div></td></tr>';
+      let actionHtml = '';
+      if (ticket.status === 'Concluído') {
+        if (ticket.rating) {
+          actionHtml = '<span class="status done">Avaliado (' + ticket.rating.score + '★)</span>';
+        } else {
+          actionHtml = '<button class="btn btn--primary" type="button" style="padding: 4px 10px; font-size: 0.85rem;" onclick="ProfessorPage.openRatingModalById(\'' + this.escapeHtml(ticket.id) + '\')">Avaliar ⭐</button>';
+        }
+      } else if (ticket.status !== 'Cancelado') {
+        actionHtml = '<button class="cancel-ticket-btn" type="button" data-ticket-id="' + this.escapeHtml(ticket.id) + '">Cancelar</button>';
+      } else {
+        actionHtml = '<span class="text-muted">—</span>';
+      }
+
+      const resolvedAt = ticket.resolvedAt || (ticket.resolvedAtIso ? new Date(ticket.resolvedAtIso).toLocaleDateString('pt-BR') : '—');
+      const resolvedBy = ticket.technicianName || ticket.assignee || '—';
+      const dateStr = ticket.date || (ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString('pt-BR') : '—');
+      const category = ticket.category || ticket.type || 'Outros';
+      const priority = ticket.priority || 'Média';
+      const requester = ticket.requester || 'Professor(a)';
+      const room = ticket.room || '—';
+
+      return `
+        <tr>
+          <td data-label="Nº">${this.escapeHtml(ticket.id)}</td>
+          <td data-label="Título">${this.escapeHtml(ticket.title)}</td>
+          <td data-label="Categoria">${this.escapeHtml(category)}</td>
+          <td data-label="Prioridade">${this.escapeHtml(priority)}</td>
+          <td data-label="Solicitante">${this.escapeHtml(requester)}</td>
+          <td data-label="Sala">${this.escapeHtml(room)}</td>
+          <td data-label="Aberto em">${this.escapeHtml(dateStr)}</td>
+          <td data-label="Status"><span class="status ${cls}">${this.escapeHtml(ticket.status || 'Aberto')}</span></td>
+          <td data-label="Resolvido em">${this.escapeHtml(resolvedAt)}</td>
+          <td data-label="Resolvido por">${this.escapeHtml(resolvedBy)}</td>
+          <td data-label="Ações"><div class="ticket-actions">${actionHtml}</div></td>
+        </tr>
+      `;
     }).join('');
 
     tbody.querySelectorAll('.cancel-ticket-btn').forEach(button => {
@@ -150,11 +269,14 @@ const ProfessorPage = {
 
   init() {
     const user = Auth.requireAuth();
-    if (!user || user.role !== 'professor') { window.location.href = 'login.html'; return; }
+    if (!user || user.role !== 'professor') { window.location.href = Auth.loginUrl(); return; }
     if (user.name) document.getElementById('userName').textContent = user.name;
     Sidebar.init(); UserMenu.init(); Navigation.init(); Navigation.initBottomNav();
-    this.bindTicketModal(); this.bindProfileModal();
-    this.loadProfileData(user); this.renderTickets(true);
+    ProfilePage.initEmbedded();
+    this.bindTicketModal(); this.bindFiltersAndSearch();
+    this.renderTickets(true);
+    this.bindRatingModal();
+    this.checkUnratedTickets();
     document.addEventListener('bottomNavNewTicket', () => this.openTicketModal());
     document.getElementById('notificationsBtn')?.addEventListener('click', () => {
       Navigation.ringBell();
@@ -163,12 +285,20 @@ const ProfessorPage = {
     document.getElementById('supportBtn')?.addEventListener('click', () => {
       window.location.href = 'mailto:suporte@helpium.com?subject=Solicita\u00e7\u00e3o%20de%20suporte%20-%20Professor';
     });
-    document.querySelector('[data-action="profile"]')?.addEventListener('click', () => this.openProfileModal());
+    document.querySelectorAll('[data-action="profile"]').forEach((button) => {
+      button.addEventListener('click', () => {
+        Navigation.showSection('perfil');
+        window.location.hash = '#perfil';
+      });
+    });
     document.querySelectorAll('.nav-item').forEach(button => {
       button.addEventListener('click', () => {
         const target = button.dataset.target;
         if (target === 'abrir-chamado') this.openTicketModal();
-        else if (target === 'perfil') this.openProfileModal();
+        else if (target && target.includes('.html')) {
+          window.location.href = target;
+          return;
+        }
         else if (target && !target.includes('.html')) {
           Navigation.showSection(target);
         }
@@ -176,14 +306,13 @@ const ProfessorPage = {
       });
     });
 
+    Navigation.openFromHash();
+
     // Ensure the Início section is visible (it is hidden by default via .section { display: none })
     const initialTarget = window.location.hash.slice(1);
     if (initialTarget === 'abrir-chamado') {
       Navigation.showSection('inicio');
       this.openTicketModal();
-    } else if (initialTarget === 'perfil') {
-      Navigation.showSection('inicio');
-      this.openProfileModal();
     }
     else if (document.getElementById(initialTarget)) Navigation.showSection(initialTarget);
     else Navigation.showSection('inicio');
@@ -244,12 +373,14 @@ const ProfessorPage = {
   openTicketModal() {
     const o = document.getElementById('ticketModalOverlay');
     o?.classList.add('open'); o?.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
     this.loadRooms();
   },
 
   closeTicketModal() {
     const o = document.getElementById('ticketModalOverlay');
     o?.classList.remove('open'); o?.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
     document.getElementById('ticketForm')?.reset(); this.resetPhotoPreview();
     Navigation.showSection('inicio');
   },
@@ -273,18 +404,125 @@ const ProfessorPage = {
     document.querySelectorAll('.nav-item').forEach((b) => b.classList.toggle('active', b.dataset.target === 'perfil'));
   },
 
-  closeProfileModal() {
-    const o = document.getElementById('profileModalOverlay');
-    o?.classList.remove('open'); o?.setAttribute('aria-hidden', 'true');
-    Navigation.showSection('inicio');
+  bindRatingModal() {
+    const overlay = document.getElementById('ratingModalOverlay');
+    const closeBtn = document.getElementById('closeRatingModalBtn');
+    const skipBtn = document.getElementById('skipRatingBtn');
+    const form = document.getElementById('ratingForm');
+    const starBtns = document.querySelectorAll('.star-btn');
+    const scoreInput = document.getElementById('selectedRatingScore');
+    const ratingBadgeText = document.getElementById('ratingBadgeText');
+
+    const ratingLabelsMap = {
+      1: '1 estrela - Precisa melhorar',
+      2: '2 estrelas - Regular',
+      3: '3 estrelas - Bom',
+      4: '4 estrelas - Muito bom',
+      5: '5 estrelas - Excelente ⭐'
+    };
+
+    closeBtn?.addEventListener('click', () => this.closeRatingModal());
+    skipBtn?.addEventListener('click', () => this.closeRatingModal());
+    overlay?.addEventListener('click', (e) => {
+      if (e.target === overlay) this.closeRatingModal();
+    });
+
+    starBtns.forEach(btn => {
+      const score = parseInt(btn.dataset.score, 10);
+      btn.addEventListener('click', () => {
+        if (scoreInput) scoreInput.value = score;
+        if (ratingBadgeText) ratingBadgeText.textContent = ratingLabelsMap[score];
+        starBtns.forEach((b, idx) => {
+          b.style.color = idx < score ? '#f59e0b' : '#cbd5e1';
+        });
+      });
+      btn.addEventListener('mouseenter', () => {
+        starBtns.forEach((b, idx) => {
+          b.style.color = idx < score ? '#f59e0b' : '#cbd5e1';
+        });
+        if (ratingBadgeText) ratingBadgeText.textContent = ratingLabelsMap[score];
+      });
+    });
+
+    const starPicker = document.getElementById('starRatingPicker');
+    starPicker?.addEventListener('mouseleave', () => {
+      const currentScore = parseInt(scoreInput?.value || '5', 10);
+      starBtns.forEach((b, idx) => {
+        b.style.color = idx < currentScore ? '#f59e0b' : '#cbd5e1';
+      });
+      if (ratingBadgeText) ratingBadgeText.textContent = ratingLabelsMap[currentScore];
+    });
+
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const ticketId = document.getElementById('ratingTicketId').value;
+      const score = parseInt(scoreInput?.value || '5', 10);
+      const comment = document.getElementById('ratingComment')?.value.trim() || '';
+
+      const tickets = this.getTickets();
+      const updated = tickets.map(t => {
+        if (t.id === ticketId) {
+          return {
+            ...t,
+            rating: {
+              score,
+              comment,
+              ratedAt: new Date().toISOString()
+            }
+          };
+        }
+        return t;
+      });
+      this.saveTickets(updated);
+      this.renderTickets();
+      this.closeRatingModal();
+      Toast.success('Avaliação enviada com sucesso! Obrigado.');
+      
+      this.checkUnratedTickets();
+    });
   },
 
-  loadProfileData(user) {
-    document.getElementById('profileName').textContent = user.name || '\u2014';
-    document.getElementById('profileEmail').textContent = user.email || '\u2014';
-    document.getElementById('profileRole').textContent = user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : '\u2014';
-    const saved = localStorage.getItem('helpium_professor_photo');
-    const img = document.getElementById('profileAvatarImage');
-    if (saved && img) img.src = saved;
-  }
+  openRatingModal(ticket) {
+    const overlay = document.getElementById('ratingModalOverlay');
+    const idInput = document.getElementById('ratingTicketId');
+    const infoEl = document.getElementById('ratingTicketInfo');
+    const scoreInput = document.getElementById('selectedRatingScore');
+    const starBtns = document.querySelectorAll('.star-btn');
+
+    if (idInput) idInput.value = ticket.id;
+    if (infoEl) {
+      infoEl.innerHTML = 'O chamado <strong>' + this.escapeHtml(ticket.id) + '</strong> ("' + this.escapeHtml(ticket.title) + '") atendido por <strong>' + this.escapeHtml(ticket.technicianName || 'Técnico') + '</strong> foi concluído! Por favor, avalie o atendimento.';
+    }
+    if (scoreInput) scoreInput.value = '5';
+    starBtns.forEach(b => b.style.color = '#f59e0b');
+
+    overlay?.classList.add('open');
+    overlay?.setAttribute('aria-hidden', 'false');
+  },
+
+  openRatingModalById(id) {
+    const tickets = this.getTickets();
+    const ticket = tickets.find(t => t.id === id);
+    if (ticket) {
+      this.openRatingModal(ticket);
+    }
+  },
+
+  closeRatingModal() {
+    const overlay = document.getElementById('ratingModalOverlay');
+    overlay?.classList.remove('open');
+    overlay?.setAttribute('aria-hidden', 'true');
+    document.getElementById('ratingForm')?.reset();
+  },
+
+  checkUnratedTickets() {
+    const tickets = this.getTickets();
+    const unratedCompleted = tickets.find(t => t.status === 'Concluído' && !t.rating);
+    if (unratedCompleted) {
+      setTimeout(() => {
+        this.openRatingModal(unratedCompleted);
+      }, 500);
+    }
+  },
+
 };

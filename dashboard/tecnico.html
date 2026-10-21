@@ -2,7 +2,8 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#6655df" />
     <title>Helpium | Técnico</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,8 +14,12 @@
     <link rel="stylesheet" href="../css/shared/dashboard.css" />
     <link rel="stylesheet" href="../css/shared/responsive.css" />
     <link rel="stylesheet" href="../css/pages/tecnico.css" />
+    <link rel="stylesheet" href="../css/pages/perfil.css" />
     <link rel="stylesheet" href="../css/shared/refinements.css" />
+    <link rel="stylesheet" href="../css/shared/mobile.css" />
     <link rel="stylesheet" href="../css/shared/dark-mode.css" />
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   </head>
 <body>
     <div class="page-shell">
@@ -40,7 +45,7 @@
             <span class="material-symbols-outlined nav-item-icon" aria-hidden="true">bar_chart</span>
             <span class="nav-item-text">Relatórios</span>
           </button>
-          <button class="nav-item" data-target="tecnico-perfil.html" type="button">
+          <button class="nav-item" data-target="perfil" type="button">
             <span class="material-symbols-outlined nav-item-icon" aria-hidden="true">person</span>
             <span class="nav-item-text">Perfil</span>
           </button>
@@ -49,6 +54,10 @@
 
       <main class="content">
         <header class="header">
+          <div class="header-brand" aria-label="Helpium">
+            <span class="header-brand-mark" aria-hidden="true"></span>
+            <span class="header-brand-name">helpium</span>
+          </div>
           <div class="header-tools">
             <button class="header-action bell" id="notificationsBtn" type="button" aria-label="Notificações">
               <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
@@ -58,7 +67,7 @@
               <span class="avatar" aria-hidden="true"></span>
               <span id="userName">Técnico</span>
               <div class="user-menu" id="userMenu" aria-label="Opções do usuário">
-                <button type="button" data-action="profile" data-target="tecnico-perfil.html">Perfil</button>
+                <button type="button" data-action="profile" data-target="perfil">Perfil</button>
                 <button type="button" data-action="logout">Sair</button>
               </div>
             </div>
@@ -272,16 +281,331 @@
             </div>
           </section>
 
-          <div class="support-bar">
-            <span>Precisa de ajuda para um atendimento urgente?</span>
-            <button id="supportBtn" type="button">Suporte</button>
-          </div>
+
+
+          <section id="perfil" class="section">
+            <div class="profile-container">
+              <div class="profile-header-breadcrumb">
+                <span>Configurações</span>
+                <span class="material-symbols-outlined" style="font-size: 14px;">chevron_right</span>
+                <span style="color: var(--text-main); font-weight: 600;">Meu perfil</span>
+              </div>
+              <div class="profile-header-main">
+                <h1>Meu perfil e preferências</h1>
+                <p class="profile-subtitle">Gerencie suas informações pessoais e a configuração da sua conta.</p>
+              </div>
+
+              <div class="profile-main-layout">
+                <!-- Left Column -->
+                <div class="profile-col-left">
+                  <div class="profile-card">
+                    <h3 class="profile-card-title">Perfil da conta</h3>
+                    <div class="profile-avatar-box">
+                      <div class="profile-avatar-wrapper">
+                        <img id="profileAvatarImage" class="profile-avatar" src="" alt="Foto de perfil" />
+                        <div class="avatar-placeholder" id="profileAvatarPlaceholder" aria-hidden="true">
+                          <span class="material-symbols-outlined">person</span>
+                        </div>
+                        <label class="avatar-upload-label" for="profilePhotoInput" aria-label="Alterar foto de perfil"></label>
+                        <input id="profilePhotoInput" type="file" accept="image/*" hidden />
+                      </div>
+                      <div class="profile-avatar-info">
+                        <h4 id="profileName" class="profile-user-name">Técnico(a)</h4>
+                        <div class="profile-status-badge">
+                          <span class="status-dot"></span>
+                          <span>Conta ativa</span>
+                        </div>
+                        <button id="uploadPhotoBtn" class="secondary-btn btn-sm" type="button">
+                          <span class="material-symbols-outlined" style="font-size: 16px;">photo_camera</span>
+                          Alterar foto
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="profile-details-list">
+                      <div class="profile-detail-item">
+                        <span class="material-symbols-outlined detail-icon">work</span>
+                        <div>
+                          <label>Função</label>
+                          <p id="profileRole" class="detail-val">Técnico(a)</p>
+                        </div>
+                      </div>
+                      <div class="profile-detail-item">
+                        <span class="material-symbols-outlined detail-icon">mail</span>
+                        <div>
+                          <label>E-mail</label>
+                          <p id="profileEmail" class="detail-val">—</p>
+                        </div>
+                      </div>
+                      <div class="profile-detail-item">
+                        <span class="material-symbols-outlined detail-icon">shield</span>
+                        <div>
+                          <label>Acesso</label>
+                          <p class="detail-val">Suporte Técnico</p>
+                        </div>
+                      </div>
+                    </div>
+
+
+                  </div>
+
+                  <div class="profile-card">
+                    <h3 class="profile-card-title">Resumo da conta</h3>
+                    <div class="profile-summary-list">
+                      <div class="profile-summary-item">
+                        <div class="summary-icon-wrap"><span class="material-symbols-outlined">calendar_today</span></div>
+                        <div>
+                          <label>Perfil criado</label>
+                          <p>12 fev. 2026</p>
+                        </div>
+                      </div>
+                      <div class="profile-summary-item">
+                        <div class="summary-icon-wrap"><span class="material-symbols-outlined">schedule</span></div>
+                        <div>
+                          <label>Último acesso</label>
+                          <p>Hoje, 08:42</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="profile-col-right">
+                  <div class="profile-settings-card">
+                    <div class="settings-card-header">
+                      <span class="settings-icon"><span class="material-symbols-outlined">lock</span></span>
+                      <div><h3>Segurança e acesso</h3></div>
+                    </div>
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <span class="material-symbols-outlined row-icon">key</span>
+                        <div><h4>Alterar senha</h4><p>Atualize sua senha periodicamente.</p></div>
+                      </div>
+                      <button id="openPasswordModalBtn" class="secondary-btn" type="button">Alterar senha</button>
+                    </div>
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <span class="material-symbols-outlined row-icon">verified_user</span>
+                        <div>
+                          <div style="display: flex; align-items: center; gap: 8px;">
+                            <h4>Autenticação em duas etapas</h4>
+                            <span class="badge-recommended">Recomendado</span>
+                          </div>
+                          <p>Adicione uma camada extra de segurança à sua conta.</p>
+                        </div>
+                      </div>
+                      <label class="switch"><input type="checkbox" id="twoFaToggle"><span class="slider round"></span></label>
+                    </div>
+                  </div>
+
+                  <div class="profile-settings-card">
+                    <div class="settings-card-header">
+                      <span class="settings-icon"><span class="material-symbols-outlined">tune</span></span>
+                      <div><h3>Preferências do usuário</h3></div>
+                    </div>
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <span class="material-symbols-outlined row-icon">light_mode</span>
+                        <div><h4>Aparência</h4><p>Escolha o tema da interface.</p></div>
+                      </div>
+                      <div style="display: flex; align-items: center; gap: 10px;">
+                        <select id="themeSelect" class="settings-select">
+                          <option value="light">Claro</option>
+                          <option value="dark">Escuro</option>
+                          <option value="system">Sistema</option>
+                        </select>
+                        <button id="themeToggleQuickBtn" class="theme-quick-pill" type="button" aria-label="Alternar tema">
+                          <span class="material-symbols-outlined">light_mode</span>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <span class="material-symbols-outlined row-icon">language</span>
+                        <div><h4>Idioma</h4><p>Selecione o idioma da interface.</p></div>
+                      </div>
+                      <select class="settings-select"><option value="pt-BR">Português (Brasil)</option><option value="en">English</option></select>
+                    </div>
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <span class="material-symbols-outlined row-icon">text_fields</span>
+                        <div><h4>Tamanho do texto</h4><p>Defina o tamanho do texto na plataforma.</p></div>
+                      </div>
+                      <select class="settings-select"><option value="normal">Padrão</option><option value="large">Grande</option></select>
+                    </div>
+                  <div class="profile-settings-card">
+                    <div class="settings-card-header">
+                      <span class="settings-icon"><span class="material-symbols-outlined">notifications</span></span>
+                      <div><h3>Notificações</h3></div>
+                    </div>
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <span class="material-symbols-outlined row-icon">notifications_active</span>
+                        <div><h4>Atualizações dos chamados</h4><p>Receba notificações sobre novos status e atualizações.</p></div>
+                      </div>
+                      <label class="switch"><input type="checkbox" id="notifTicketsToggle" checked><span class="slider round"></span></label>
+                    </div>
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <span class="material-symbols-outlined row-icon">mail</span>
+                        <div><h4>Avisos técnicos por e-mail</h4><p>Receba comunicados importantes da escola.</p></div>
+                      </div>
+                      <label class="switch"><input type="checkbox" id="notifEmailToggle" checked><span class="slider round"></span></label>
+                    </div>
+                  </div>
+
+                  <div class="profile-settings-card">
+                    <div class="settings-card-header">
+                      <span class="settings-icon"><span class="material-symbols-outlined">security</span></span>
+                      <div><h3>Privacidade e sessões</h3></div>
+                    </div>
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <span class="material-symbols-outlined row-icon">devices</span>
+                        <div><h4>Sessões ativas</h4><p>1 sessão neste dispositivo</p></div>
+                      </div>
+                      <button class="secondary-btn" type="button" id="manageSessionsBtn">Gerenciar</button>
+                    </div>
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <span class="material-symbols-outlined row-icon">logout</span>
+                        <div><h4>Sair de todos os dispositivos</h4><p>Encerrar sua sessão em todos os dispositivos.</p></div>
+                      </div>
+                      <button class="secondary-btn" type="button" id="logoutAllBtn">Sair de todos</button>
+                    </div>
+                  </div>
+
+
+                </div>
+              </div>
+            </div>
+          </section>
         </section>
       </main>
     </div>
 
     
-        <!-- Modal de Atendimento Técnico e Resolução em Funil -->
+        <!-- Modal de Informações / Aceitar Chamado em Espera -->
+    <div class="modal-overlay" id="waitingModalOverlay" role="dialog" aria-modal="true" aria-labelledby="waitingModalTitle" aria-hidden="true">
+      <div class="modal-card modal-lg">
+        <header class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="material-symbols-outlined modal-header-icon" aria-hidden="true">hourglass_top</span>
+            <div>
+              <div class="modal-title-row">
+                <h2 id="waitingModalTitle" class="modal-title">Chamado em Espera - Informações</h2>
+                <span class="ticket-id-pill" id="waitingModalTicketId">#1047</span>
+              </div>
+              <span class="modal-subtitle">Analise os detalhes do chamado antes de decidir aceitá-lo</span>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn" id="closeWaitingModalBtn" aria-label="Fechar janela">
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+          </button>
+        </header>
+
+        <div class="modal-body-scrollable" style="padding: 20px;">
+          <div class="ticket-context-strip" style="background: var(--surface-alt); padding: 16px; border-radius: 12px; margin-bottom: 20px;">
+            <div class="context-meta-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <div class="context-requester">
+                <span class="material-symbols-outlined context-icon" aria-hidden="true">person</span>
+                <strong id="waitingModalRequester">Professor</strong>
+                <span class="context-divider">•</span>
+                <span class="context-room" id="waitingModalRoom">Sala</span>
+              </div>
+              <div class="context-badges" style="display: flex; gap: 8px; align-items: center;">
+                <span class="priority-pill" id="waitingModalPriority">Média prioridade</span>
+                <span class="context-datetime" id="waitingModalDate">Data</span>
+              </div>
+            </div>
+
+            <div class="context-problem-box">
+              <div class="problem-text-wrap">
+                <h3 class="problem-title" id="waitingModalTitleText" style="font-size: 1.1rem; margin-bottom: 8px;">Título</h3>
+                <p id="waitingModalDescription" class="problem-desc" style="color: var(--muted); line-height: 1.5;">Descrição</p>
+              </div>
+              <div class="problem-photo-wrap" id="waitingModalPhotoWrap" style="display: none; margin-top: 12px;">
+                <img id="waitingModalPhoto" src="" alt="Anexo" class="problem-thumbnail" style="max-height: 200px; border-radius: 8px;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="modal-footer" style="display: flex; justify-content: flex-end; gap: 12px; padding: 16px 20px; border-top: 1px solid var(--line);">
+          <button type="button" class="btn btn-secondary" id="closeWaitingBtn">Voltar / Fechar</button>
+          <button type="button" class="btn btn-primary" id="acceptWaitingTicketBtn" style="display: inline-flex; align-items: center; gap: 6px;">
+            <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+            <span>Aceitar e Assumir Chamado</span>
+          </button>
+        </footer>
+      </div>
+    </div>
+
+    <!-- Modal de Informações do Chamado (Ver Ficha) -->
+    <div class="modal-overlay" id="ticketInfoModalOverlay" role="dialog" aria-modal="true" aria-labelledby="ticketInfoModalTitle" aria-hidden="true">
+      <div class="modal-card modal-lg">
+        <header class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="material-symbols-outlined modal-header-icon" aria-hidden="true">info</span>
+            <div>
+              <div class="modal-title-row">
+                <h2 id="ticketInfoModalTitle" class="modal-title">Informações do Chamado</h2>
+                <span class="ticket-id-pill" id="ticketInfoModalTicketId">#1049</span>
+              </div>
+              <span class="modal-subtitle">Consulta detalhada das informações solicitadas</span>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn" id="closeTicketInfoModalBtn" aria-label="Fechar janela">
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+          </button>
+        </header>
+
+        <div class="modal-body-scrollable" style="padding: 20px;">
+          <div class="ticket-context-strip" style="background: var(--surface-alt); padding: 16px; border-radius: 12px; margin-bottom: 20px;">
+            <div class="context-meta-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <div class="context-requester">
+                <span class="material-symbols-outlined context-icon" aria-hidden="true">person</span>
+                <strong id="ticketInfoModalRequester">Professor</strong>
+                <span class="context-divider">•</span>
+                <span class="context-room" id="ticketInfoModalRoom">Sala</span>
+              </div>
+              <div class="context-badges" style="display: flex; gap: 8px; align-items: center;">
+                <span class="priority-pill" id="ticketInfoModalPriority">Média prioridade</span>
+                <span class="context-datetime" id="ticketInfoModalDate">Data</span>
+              </div>
+            </div>
+
+            <div class="context-type-row" style="margin-bottom: 12px; font-size: 0.9rem; color: var(--text);">
+              <strong>Tipo de problema:</strong> <span id="ticketInfoModalType">Categoria</span>
+            </div>
+
+            <div class="context-problem-box">
+              <div class="problem-text-wrap">
+                <h3 class="problem-title" id="ticketInfoModalTitleText" style="font-size: 1.1rem; margin-bottom: 8px;">Título</h3>
+                <p id="ticketInfoModalDescription" class="problem-desc" style="color: var(--muted); line-height: 1.5;">Descrição</p>
+              </div>
+              <div class="problem-photo-wrap" id="ticketInfoModalPhotoWrap" style="display: none; margin-top: 12px;">
+                <h4 style="font-size: 0.85rem; margin-bottom: 6px; color: var(--text);">Anexo:</h4>
+                <img id="ticketInfoModalPhoto" src="" alt="Anexo" class="problem-thumbnail" style="max-height: 200px; border-radius: 8px;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-top: 1px solid var(--line);">
+          <div>
+            <button type="button" class="btn btn-primary btn-sm" id="ticketInfoDownloadPdfBtn" style="display: none; align-items: center; gap: 6px;">
+              <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 18px;">picture_as_pdf</span>
+              <span>Baixar Relatório PDF</span>
+            </button>
+          </div>
+          <button type="button" class="btn btn-secondary" id="closeTicketInfoBtn">Fechar</button>
+        </footer>
+      </div>
+    </div>
+
+    <!-- Modal de Atendimento Técnico e Resolução em Funil -->
     <div class="modal-overlay" id="resolutionModalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalDialogTitle" aria-hidden="true">
       <div class="modal-card modal-lg">
         <header class="modal-header">
@@ -473,9 +797,12 @@
               <input type="text" id="resolutionUserNote" class="form-control" placeholder="Ex: Equipamento liberado e testado. Evite desligar direto na tomada.">
             </div>
 
-            <!-- Modal Footer Actions -->
             <footer class="modal-actions-footer">
               <button type="button" class="btn-modal-cancel" id="cancelResolutionBtn">Cancelar</button>
+              <button type="button" class="btn-modal-pdf" id="exportPdfBtn" aria-label="Exportar chamado como PDF">
+                <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
+                <span>Emitir PDF</span>
+              </button>
               <button type="submit" class="btn-modal-save">
                 <span class="material-symbols-outlined" aria-hidden="true">check</span>
                 <span>Salvar Atendimento</span>
@@ -485,6 +812,47 @@
         </div>
       </div>
     </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal-overlay" id="passwordModalOverlay" aria-hidden="true">
+      <div class="password-modal-card">
+        <div class="password-modal-header">
+          <h3>Alterar senha</h3>
+          <button class="password-modal-close" id="closePasswordModalBtn" type="button" aria-label="Fechar modal">×</button>
+        </div>
+        <form id="changePasswordForm">
+          <div id="passwordFeedback" class="form-feedback" style="margin-bottom: 16px;"></div>
+          <div class="password-form-group">
+            <label for="currentPassword">Senha atual</label>
+            <div class="password-input-wrap">
+              <input type="password" id="currentPassword" name="currentPassword" required placeholder="Digite sua senha atual">
+              <button type="button" class="field-toggle-btn" data-target="currentPassword"><span class="material-symbols-outlined">visibility</span></button>
+            </div>
+          </div>
+          <div class="password-form-group">
+            <label for="newPassword">Nova senha</label>
+            <div class="password-input-wrap">
+              <input type="password" id="newPassword" name="newPassword" required placeholder="Mínimo de 6 caracteres">
+              <button type="button" class="field-toggle-btn" data-target="newPassword"><span class="material-symbols-outlined">visibility</span></button>
+            </div>
+            <div id="passwordStrength" class="password-strength"></div>
+          </div>
+          <div class="password-form-group">
+            <label for="confirmPassword">Confirmar nova senha</label>
+            <div class="password-input-wrap">
+              <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Digite a nova senha novamente">
+              <button type="button" class="field-toggle-btn" data-target="confirmPassword"><span class="material-symbols-outlined">visibility</span></button>
+            </div>
+          </div>
+          <div class="password-modal-actions">
+            <button type="button" class="btn-cancel" id="cancelPasswordBtn">Cancelar</button>
+            <button type="submit" class="btn-save">Salvar alteração</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+
 
     <div class="toast" id="toast" aria-live="polite"></div>
 
@@ -496,13 +864,17 @@
       </button>
       <button type="button" class="bottom-nav-item" data-target="meus-chamados">
         <span class="material-symbols-outlined" aria-hidden="true">description</span>
-        <span class="nav-label">Chamados</span>
+        <span class="nav-label">Meus</span>
+      </button>
+      <button type="button" class="bottom-nav-item" data-target="todos-chamados">
+        <span class="material-symbols-outlined" aria-hidden="true">list_alt</span>
+        <span class="nav-label">Todos</span>
       </button>
       <button type="button" class="bottom-nav-item" data-target="relatorios">
         <span class="material-symbols-outlined" aria-hidden="true">bar_chart</span>
         <span class="nav-label">Relatórios</span>
       </button>
-      <button type="button" class="bottom-nav-item" data-target="tecnico-perfil.html">
+      <button type="button" class="bottom-nav-item" data-target="perfil">
         <span class="material-symbols-outlined" aria-hidden="true">person</span>
         <span class="nav-label">Perfil</span>
       </button>
@@ -512,15 +884,22 @@
     <script src="../js/core/auth.js"></script>
     <script src="../js/core/toast.js"></script>
     <script src="../js/core/skeleton.js"></script>
+    <script src="../js/core/ticket-config.js"></script>
+    <script src="../js/core/ticket-metrics.js"></script>
+    <script src="../js/core/notifications.js"></script>
+    <script src="../js/core/tickets.js"></script>
     <script src="../js/components/sidebar.js"></script>
     <script src="../js/components/user-menu.js"></script>
     <script src="../js/components/navigation.js"></script>
+    <script src="../js/components/responsive-tables.js"></script>
+    <script src="../js/components/profile.js"></script>
     <script src="../js/pages/tecnico.js"></script>
     <script>
       DarkMode.init();
           TecnicoPage.init();
     </script>
 
+    </div>
   </body>
 
 </html>

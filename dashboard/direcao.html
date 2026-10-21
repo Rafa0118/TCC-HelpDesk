@@ -2,7 +2,8 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#6655df" />
     <title>Helpium | Direção</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,10 +14,15 @@
     <link rel="stylesheet" href="../css/shared/dashboard.css" />
     <link rel="stylesheet" href="../css/shared/responsive.css" />
     <link rel="stylesheet" href="../css/pages/direcao.css" />
+    <link rel="stylesheet" href="../css/pages/tecnico.css" />
+    <link rel="stylesheet" href="../css/pages/perfil.css" />
     
 
     <link rel="stylesheet" href="../css/shared/refinements.css" />
+    <link rel="stylesheet" href="../css/shared/mobile.css" />
     <link rel="stylesheet" href="../css/shared/dark-mode.css" />
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   </head>
 <body>
     <div class="page-shell">
@@ -33,12 +39,21 @@
 
       <main class="content">
         <header class="header">
+          <div class="header-brand" aria-label="Helpium">
+            <span class="header-brand-mark" aria-hidden="true"></span>
+            <span class="header-brand-name">helpium</span>
+          </div>
           <div class="header-tools">
-            <button class="header-action" id="notificationsBtn" type="button" aria-label="Notificações"><span class="material-symbols-outlined">notifications</span><span class="notification-dot" aria-hidden="true"></span></button>
+            <button class="header-action bell" id="notificationsBtn" type="button" aria-label="Notificações"><span class="material-symbols-outlined" aria-hidden="true">notifications</span><span class="notification-dot" aria-hidden="true"></span></button>
             <div class="user-pill" id="userMenuToggle" tabindex="0" aria-label="Menu de perfil">
               <span class="avatar" aria-hidden="true"></span><span id="userName">Direção</span>
-              <div class="user-menu" id="userMenu"><button type="button" data-action="profile">Meu perfil</button><button type="button" data-action="logout">Sair</button></div>
+              <div class="user-menu" id="userMenu" aria-label="Opções do usuário"><button type="button" data-action="profile" data-target="perfil">Meu perfil</button><button type="button" data-action="logout">Sair</button></div>
             </div>
+            <button class="mobile-menu-button" type="button" aria-expanded="false" aria-label="Abrir menu">
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
           </div>
         </header>
 
@@ -62,35 +77,716 @@
             <div class="shortcut-grid"><button class="shortcut" type="button" data-target="chamados"><span class="material-symbols-outlined">confirmation_number</span><span><strong>Todos os chamados</strong><small>Consultar atendimentos</small></span></button><button class="shortcut" type="button" data-target="relatorios"><span class="material-symbols-outlined">analytics</span><span><strong>Relatórios</strong><small>Analisar resultados</small></span></button><button class="shortcut" type="button" data-target="usuarios"><span class="material-symbols-outlined">groups</span><span><strong>Usuários</strong><small>Gerenciar acessos</small></span></button><button class="shortcut" type="button" data-target="perfil"><span class="material-symbols-outlined">person</span><span><strong>Meu perfil</strong><small>Ver seus dados</small></span></button></div>
           </section>
 
-          <section id="chamados" class="section"><div class="section-card"><h2 class="section-title">Todos os chamados</h2><div class="table-list"><div class="table-row"><strong>#1047 · Projetor não liga</strong><span>Professor Rafael · Sala 12</span><b class="status pending">Em espera</b></div><div class="table-row"><strong>#1049 · Wi-Fi caiu no lab 03</strong><span>Professora Ana · Laboratório 03</span><b class="status">Em andamento</b></div><div class="table-row"><strong>#1052 · Computador sem áudio</strong><span>Coordenação · Bloco A</span><b class="status">Concluído</b></div><div class="table-row"><strong>#1054 · Monitor quebrado</strong><span>Professor João · Sala 14</span><b class="status pending">Aberto</b></div></div></div></section>
-          <section id="usuarios" class="section">
+          <section id="chamados" class="section">
+            <div class="section-card">
+              <div class="section-header-row">
+                <h2 class="section-title">Todos os chamados</h2>
+              </div>
+              <div class="tickets-toolbar">
+                <div class="filter-row">
+                  <div class="search-box-wrap">
+                    <span class="material-symbols-outlined search-icon" aria-hidden="true">search</span>
+                    <input type="text" id="ticketsSearchInput" placeholder="Buscar por título, solicitante, técnico..." aria-label="Buscar chamados">
+                  </div>
+                  <div class="filter-group">
+                    <select id="filterStatus" aria-label="Filtrar por status">
+                      <option value="">Todos os status</option>
+                      <option value="Aberto">Aberto</option>
+                      <option value="Em espera">Em espera</option>
+                      <option value="Em andamento">Em andamento</option>
+                      <option value="Concluído">Concluído</option>
+                      <option value="Cancelado">Cancelado</option>
+                    </select>
+                    <select id="filterCategory" aria-label="Filtrar por categoria">
+                      <option value="">Todas as categorias</option>
+                      <option value="Hardware">Hardware</option>
+                      <option value="Software">Software</option>
+                      <option value="Rede">Rede</option>
+                      <option value="Projetor/Audiovisual">Projetor/Audiovisual</option>
+                      <option value="Impressora">Impressora</option>
+                      <option value="Sala de Aula">Sala de Aula</option>
+                      <option value="Acesso/Credencial">Acesso/Credencial</option>
+                      <option value="Infraestrutura">Infraestrutura</option>
+                      <option value="Outros">Outros</option>
+                    </select>
+                    <select id="filterPriority" aria-label="Filtrar por prioridade">
+                      <option value="">Todas as prioridades</option>
+                      <option value="Urgente">Urgente</option>
+                      <option value="Alta">Alta</option>
+                      <option value="Média">Média</option>
+                      <option value="Baixa">Baixa</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="filter-row filter-row-quick">
+                  <div class="quick-filters" role="group" aria-label="Filtros rápidos de período">
+                    <button type="button" class="quick-filter active" data-period="30" aria-pressed="true">Últimos 30 dias</button>
+                    <button type="button" class="quick-filter" data-period="7" aria-pressed="false">Últimos 7 dias</button>
+                    <button type="button" class="quick-filter" data-period="0" aria-pressed="false">Todos</button>
+                  </div>
+                  <div class="date-range-wrapper">
+                    <label for="filterDateFrom" class="sr-only">De</label>
+                    <input type="date" id="filterDateFrom" aria-label="Data inicial">
+                    <span class="date-separator" aria-hidden="true">até</span>
+                    <label for="filterDateTo" class="sr-only">Até</label>
+                    <input type="date" id="filterDateTo" aria-label="Data final">
+                  </div>
+                </div>
+              </div>
+              <div class="table-wrapper">
+                <table id="allTicketsTable" class="tickets-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Nº</th>
+                      <th scope="col">Título</th>
+                      <th scope="col">Categoria</th>
+                      <th scope="col">Prioridade</th>
+                      <th scope="col">Solicitante</th>
+                      <th scope="col">Sala</th>
+                      <th scope="col">Aberto em</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Resolvido em</th>
+                      <th scope="col">Resolvido por</th>
+                      <th scope="col">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="allTicketsTableBody"></tbody>
+                </table>
+              </div>
+              <div class="table-footer">
+                <span id="ticketsCount" class="tickets-count">0 chamados</span>
+              </div>
+            </div>
+          </section>
+<section id="usuarios" class="section">
             <div class="management-grid">
-              <article class="section-card">
-                <h2 class="section-title">Adicionar usuário</h2>
-                <form id="userForm" class="form-grid">
-                  <div class="form-grid two-columns"><div class="field"><label for="newUserName">Nome completo</label><input id="newUserName" required type="text" placeholder="Ex.: Rafael Santos" /></div><div class="field"><label for="newUserRole">Perfil</label><select id="newUserRole" required><option value="professor">Professor</option><option value="tecnico">Técnico</option></select></div></div>
-                  <div class="field"><label for="newUserEmail">E-mail de acesso</label><input id="newUserEmail" required type="email" placeholder="nome@escola.com" /></div>
-                  <button class="form-action" type="submit">Adicionar e gerar credencial</button>
+              <article class="section-card management-card">
+                <header class="management-card-header">
+                  <span class="management-icon management-icon--user" aria-hidden="true">
+                    <span class="material-symbols-outlined">person_add</span>
+                  </span>
+                  <div>
+                    <h2 class="section-title">Adicionar Usuário</h2>
+                    <p class="card-subtitle">Crie credenciais de acesso para professores e técnicos</p>
+                  </div>
+                </header>
+                <form id="userForm" class="management-form" novalidate>
+                  <div class="field-row field-row--two">
+                    <div class="field-group">
+                      <label for="newUserName" class="field-label">
+                        <span class="material-symbols-outlined field-icon" aria-hidden="true">badge</span>
+                        Nome Completo
+                      </label>
+                      <input id="newUserName" class="field-input" required type="text" placeholder="Ex.: Rafael Santos" autocomplete="name" />
+                    </div>
+                    <div class="field-group">
+                      <label for="newUserRole" class="field-label">
+                        <span class="material-symbols-outlined field-icon" aria-hidden="true">security</span>
+                        Perfil de Acesso
+                      </label>
+                      <select id="newUserRole" class="field-input" required>
+                        <option value="" disabled selected>Selecione o perfil</option>
+                        <option value="direcao">Direção</option>
+                        <option value="professor">Professor</option>
+                        <option value="tecnico">Técnico</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field-group">
+                      <label for="newUserEmail" class="field-label">
+                        <span class="material-symbols-outlined field-icon" aria-hidden="true">mail</span>
+                        E-mail de Acesso
+                      </label>
+                      <input id="newUserEmail" class="field-input" required type="email" placeholder="nome@escola.com" autocomplete="email" />
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <button class="btn btn--primary btn--icon" type="submit">
+                      <span class="material-symbols-outlined" aria-hidden="true">add_circle</span>
+                      <span>Adicionar e Gerar Credencial</span>
+                    </button>
+                  </div>
                 </form>
                 <p id="userFeedback" class="form-feedback" role="status"></p>
               </article>
-              <article class="section-card">
-                <h2 class="section-title">Adicionar espaço</h2>
-                <form id="resourceForm" class="form-grid">
-                  <div class="field"><label for="resourceName">Nome do espaço</label><input id="resourceName" required type="text" placeholder="Ex.: Laboratório 04" /></div>
-                  <div class="field"><label for="resourceType">Tipo</label><select id="resourceType" required><option value="Sala">Sala</option><option value="Laboratório">Laboratório</option></select></div>
-                  <button class="form-action" type="submit">Adicionar ao sistema geral</button>
+
+              <article class="section-card management-card">
+                <header class="management-card-header">
+                  <span class="management-icon management-icon--room" aria-hidden="true">
+                    <span class="material-symbols-outlined">meeting_room</span>
+                  </span>
+                  <div>
+                    <h2 class="section-title">Adicionar Espaço</h2>
+                    <p class="card-subtitle">Cadastre salas e laboratórios do sistema</p>
+                  </div>
+                </header>
+                <form id="resourceForm" class="management-form" novalidate>
+                  <div class="field-row field-row--two">
+                    <div class="field-group">
+                      <label for="resourceName" class="field-label">
+                        <span class="material-symbols-outlined field-icon" aria-hidden="true">place</span>
+                        Nome do Espaço
+                      </label>
+                      <input id="resourceName" class="field-input" required type="text" placeholder="Ex.: Laboratório 04" autocomplete="off" />
+                    </div>
+                    <div class="field-group">
+                      <label for="resourceType" class="field-label">
+                        <span class="material-symbols-outlined field-icon" aria-hidden="true">category</span>
+                        Tipo
+                      </label>
+                      <select id="resourceType" class="field-input" required>
+                        <option value="" disabled selected>Selecione o tipo</option>
+                        <option value="Sala">Sala de Aula</option>
+                        <option value="Laboratório">Laboratório</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <button class="btn btn--primary btn--icon" type="submit">
+                      <span class="material-symbols-outlined" aria-hidden="true">add_circle</span>
+                      <span>Adicionar ao Sistema</span>
+                    </button>
+                  </div>
                 </form>
                 <p id="resourceFeedback" class="form-feedback" role="status"></p>
-                <div id="resourceList" class="resource-list" aria-live="polite"></div>
+
+                <div id="resourceList" class="resource-list" aria-live="polite">
+                  <h3 class="resource-list-title">Espaços Cadastrados</h3>
+                  <div class="resource-items"></div>
+                </div>
               </article>
             </div>
-            <div class="section-card"><h2 class="section-title">Usuários do sistema</h2><div id="usersList" class="table-list"></div></div>
+
+            <article class="section-card users-table-card">
+              <header class="section-card-header">
+                <span class="material-symbols-outlined" aria-hidden="true">groups</span>
+                <h2 class="section-title">Usuários do Sistema</h2>
+              </header>
+              <div class="table-toolbar">
+                <div class="toolbar-left">
+                  <div class="search-box-wrap">
+                    <span class="material-symbols-outlined search-icon" aria-hidden="true">search</span>
+                    <input type="text" id="usersSearchInput" placeholder="Buscar por nome, email ou perfil..." aria-label="Buscar usuários">
+                  </div>
+                </div>
+                <div class="toolbar-right">
+                  <select id="filterUserRole" aria-label="Filtrar por perfil">
+                    <option value="">Todos os perfis</option>
+                    <option value="direcao">Direção</option>
+                    <option value="professor">Professor</option>
+                    <option value="tecnico">Técnico</option>
+                  </select>
+                </div>
+              </div>
+              <div class="table-wrapper">
+                <table id="usersTable" class="data-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Usuário</th>
+                      <th scope="col">Perfil</th>
+                      <th scope="col">Email</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Cadastrado em</th>
+                      <th scope="col"><span class="sr-only">Ações</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="usersTableBody"></tbody>
+                </table>
+              </div>
+              <div class="table-footer">
+                <span id="usersCount" class="table-count">0 usuários</span>
+              </div>
+            </article>
           </section>
-          <section id="relatorios" class="section"><div class="section-card"><h2 class="section-title">Relatórios</h2><div class="reports-grid"><div class="report-box"><span>Atendimentos no mês</span><strong>128</strong></div><div class="report-box"><span>Tempo médio</span><strong>39m</strong></div><div class="report-box"><span>Taxa de resolução</span><strong>96%</strong></div></div><div class="bar-chart"><div class="bar-item"><div class="bar" style="--bar-height: 45%"></div><span>Mai</span></div><div class="bar-item"><div class="bar" style="--bar-height: 62%"></div><span>Jun</span></div><div class="bar-item"><div class="bar" style="--bar-height: 78%"></div><span>Jul</span></div><div class="bar-item"><div class="bar" style="--bar-height: 94%"></div><span>Ago</span></div></div></div></section>
-          <section id="perfil" class="section"><div class="section-card"><h2 class="section-title">Meu perfil</h2><div class="table-list"><div class="table-row"><strong id="profileName">Direção</strong><span id="profileEmail">direcao@helpium.com</span><b class="status">Ativa</b></div><div class="table-row"><strong>Função</strong><span>Gestão e acompanhamento do sistema</span><b class="status">Direção</b></div></div></div></section>
+           <section id="relatorios" class="section">
+             <div class="section-card">
+               <div class="section-header-row" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+                 <div>
+                   <h2 class="section-title">Relatórios Gerenciais</h2>
+                   <span class="section-subtitle">Análise de desempenho por período</span>
+                 </div>
+                 <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                   <div class="quick-filters" role="group" aria-label="Filtro de período do relatório" style="display: flex; gap: 8px;">
+                     <button type="button" class="report-period-btn quick-filter" data-period="week">Esta Semana</button>
+                     <button type="button" class="report-period-btn quick-filter active" data-period="month">Este Mês</button>
+                     <button type="button" class="report-period-btn quick-filter" data-period="year">Este Ano</button>
+                     <button type="button" class="report-period-btn quick-filter" data-period="all">Todos</button>
+                   </div>
+                   <button type="button" class="btn-modal-pdf" id="exportReportPdfBtn" aria-label="Exportar relatório em PDF" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: var(--surface-alt, #f8fafc); border: 1px solid var(--line, #cbd5e1); border-radius: 8px; font-weight: 600; cursor: pointer; color: var(--text-main, #1e293b);">
+                     <span class="material-symbols-outlined" style="font-size: 18px;" aria-hidden="true">picture_as_pdf</span>
+                     <span>Exportar PDF</span>
+                   </button>
+                 </div>
+               </div>
+               
+               <div class="reports-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                 <div class="report-box">
+                   <span>Total de Chamados</span>
+                   <strong id="reportTotalTickets">0</strong>
+                 </div>
+                 <div class="report-box">
+                   <span>Taxa de Resolução</span>
+                   <strong id="reportResolutionRate">0%</strong>
+                 </div>
+                 <div class="report-box">
+                   <span>Tempo Médio</span>
+                   <strong id="reportAvgTime">—</strong>
+                 </div>
+                 <div class="report-box" style="border-left: 4px solid var(--primary, #7a4ae8);">
+                   <span>Técnico Destaque (Mais Resolveu)</span>
+                   <strong id="reportTopTechnician" style="font-size: 1.1rem; color: var(--primary, #7a4ae8);">—</strong>
+                 </div>
+               </div>
+
+               <div style="background: var(--bg-surface-alt, #f8fafc); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                 <h3 style="margin-top: 0; margin-bottom: 14px; font-size: 1.1rem;">Desempenho da Equipe Técnica no Período</h3>
+                 <div id="reportTechniciansList" style="display: flex; flex-direction: column; gap: 10px;">
+                   <p style="color: var(--text-secondary, #666); margin: 0;">Carregando relatórios...</p>
+                 </div>
+               </div>
+
+               <!-- Mapa de Calor de Infraestrutura -->
+               <div style="background: var(--bg-surface-alt, #f8fafc); border-radius: 12px; padding: 20px; margin-bottom: 20px;" id="infrastructureHeatmapContainer">
+                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+                   <h3 style="margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                     <span class="material-symbols-outlined" style="color: var(--primary);">grid_view</span>
+                     <span>Mapa Térmico de Infraestrutura (Incidências por Espaço)</span>
+                   </h3>
+                   <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                     <span style="font-size: 0.8rem; color: var(--muted); font-weight: 600;">🟢 Estável (0-1) | 🟡 Atenção (2-3) | 🔴 Crítico (4+)</span>
+                     <button type="button" id="heatmapToggleBtn" style="padding: 4px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; color: var(--primary);">Ver todos</button>
+                   </div>
+                 </div>
+                 <div id="heatmapRoomsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;">
+                   <p style="color: var(--text-secondary, #666); margin: 0;">Carregando mapa térmico...</p>
+                 </div>
+               </div>
+
+               <!-- Dashboard de Incidentes e Prioridades com Seletor de Gráfico -->
+               <div style="background: var(--bg-surface-alt, #f8fafc); border-radius: 12px; padding: 20px; margin-bottom: 20px;" id="incidentsPriorityDashboardContainer">
+                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+                   <h3 style="margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                     <span class="material-symbols-outlined" style="color: var(--primary);">analytics</span>
+                     <span>Incidentes e Prioridades — Análise Gráfica</span>
+                   </h3>
+                   <div class="chart-view-selector" role="group" aria-label="Seletor de tipo de gráfico" style="display: flex; gap: 4px; background: var(--surface); padding: 4px; border-radius: 10px; border: 1px solid var(--line); flex-wrap: wrap;">
+                     <button type="button" class="chart-view-btn active" data-view="donut" style="padding: 6px 10px; border: 0; background: var(--primary); color: white; border-radius: 6px; font-weight: 600; font-size: 0.75rem; cursor: pointer;">Donut</button>
+                     <button type="button" class="chart-view-btn" data-view="bar" style="padding: 6px 10px; border: 0; background: transparent; color: var(--text); border-radius: 6px; font-weight: 600; font-size: 0.75rem; cursor: pointer;">Barras</button>
+                     <button type="button" class="chart-view-btn" data-view="pie" style="padding: 6px 10px; border: 0; background: transparent; color: var(--text); border-radius: 6px; font-weight: 600; font-size: 0.75rem; cursor: pointer;">Pizza</button>
+                     <button type="button" class="chart-view-btn" data-view="horizontal" style="padding: 6px 10px; border: 0; background: transparent; color: var(--text); border-radius: 6px; font-weight: 600; font-size: 0.75rem; cursor: pointer;">H. Barras</button>
+                     <button type="button" class="chart-view-btn" data-view="line" style="padding: 6px 10px; border: 0; background: transparent; color: var(--text); border-radius: 6px; font-weight: 600; font-size: 0.75rem; cursor: pointer;">Linha</button>
+                     <button type="button" class="chart-view-btn" data-view="funnel" style="padding: 6px 10px; border: 0; background: transparent; color: var(--text); border-radius: 6px; font-weight: 600; font-size: 0.75rem; cursor: pointer;">Funil</button>
+                   </div>
+                 </div>
+                 <div id="dynamicChartContainer" style="min-height: 240px; display: flex; align-items: center; justify-content: center; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px;">
+                   <!-- Gráfico Renderizado Dinamicamente -->
+                 </div>
+               </div>
+
+               <div class="bar-chart" id="reportBarChart" aria-label="Gráfico de chamados" style="display: none;">
+                 <div class="bar-item"><div class="bar" style="--bar-height: 45%"></div><span>Período</span></div>
+               </div>
+             </div>
+           </section>
+
+          <section id="perfil" class="section">
+            <div class="profile-container">
+              <div class="profile-header-breadcrumb">
+                <span>Configurações</span>
+                <span class="material-symbols-outlined" style="font-size: 14px;">chevron_right</span>
+                <span style="color: var(--text-main); font-weight: 600;">Meu perfil</span>
+              </div>
+              <div class="profile-header-main">
+                <h1>Meu perfil e preferências</h1>
+                <p class="profile-subtitle">Gerencie suas informações pessoais e a configuração da sua conta.</p>
+              </div>
+
+              <div class="profile-main-layout">
+                <!-- Left Column -->
+                <div class="profile-col-left">
+                  <div class="profile-card">
+                    <h3 class="profile-card-title">Perfil da conta</h3>
+                    <div class="profile-avatar-box">
+                      <div class="profile-avatar-wrapper">
+                        <img id="profileAvatarImage" class="profile-avatar" src="" alt="Foto de perfil" />
+                        <div class="avatar-placeholder" id="profileAvatarPlaceholder" aria-hidden="true">
+                          <span class="material-symbols-outlined">person</span>
+                        </div>
+                        <label class="avatar-upload-label" for="profilePhotoInput" aria-label="Alterar foto de perfil"></label>
+                        <input id="profilePhotoInput" type="file" accept="image/*" hidden />
+                      </div>
+                      <div class="profile-avatar-info">
+                        <h4 id="profileName" class="profile-user-name">Carla Mendes</h4>
+                        <div class="profile-status-badge">
+                          <span class="status-dot"></span>
+                          <span>Conta ativa</span>
+                        </div>
+                        <button id="uploadPhotoBtn" class="secondary-btn btn-sm" type="button">
+                          <span class="material-symbols-outlined" style="font-size: 16px;">photo_camera</span>
+                          Alterar foto
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="profile-details-list">
+                      <div class="profile-detail-item">
+                        <span class="material-symbols-outlined detail-icon">work</span>
+                        <div>
+                          <label>Função</label>
+                          <p id="profileRole" class="detail-val">Direção escolar</p>
+                        </div>
+                      </div>
+                      <div class="profile-detail-item">
+                        <span class="material-symbols-outlined detail-icon">mail</span>
+                        <div>
+                          <label>E-mail</label>
+                          <p id="profileEmail" class="detail-val">direcao@helpium.com</p>
+                        </div>
+                      </div>
+                      <div class="profile-detail-item">
+                        <span class="material-symbols-outlined detail-icon">shield</span>
+                        <div>
+                          <label>Acesso</label>
+                          <p class="detail-val">Administrativo</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button id="editProfileBtn" class="primary-btn w-100" type="button" style="margin-top: 24px;">
+                      <span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
+                      Editar informações
+                    </button>
+                  </div>
+
+                  <div class="profile-card">
+                    <h3 class="profile-card-title">Resumo da conta</h3>
+                    <div class="profile-summary-list">
+                      <div class="profile-summary-item">
+                        <div class="summary-icon-wrap"><span class="material-symbols-outlined">calendar_today</span></div>
+                        <div>
+                          <label>Perfil criado</label>
+                          <p>12 fev. 2026</p>
+                        </div>
+                      </div>
+                      <div class="profile-summary-item">
+                        <div class="summary-icon-wrap"><span class="material-symbols-outlined">schedule</span></div>
+                        <div>
+                          <label>Último acesso</label>
+                          <p>Hoje, 08:42</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="profile-col-right">
+                  <div class="profile-settings-card">
+                    <div class="settings-card-header">
+                      <span class="settings-icon"><span class="material-symbols-outlined">lock</span></span>
+                      <div><h3>Segurança e acesso</h3></div>
+                    </div>
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <span class="material-symbols-outlined row-icon">key</span>
+                        <div><h4>Alterar senha</h4><p>Atualize sua senha periodicamente.</p></div>
+                      </div>
+                      <button id="openPasswordModalBtn" class="secondary-btn" type="button">Alterar senha</button>
+                    </div>
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <span class="material-symbols-outlined row-icon">verified_user</span>
+                        <div>
+                          <div style="display: flex; align-items: center; gap: 8px;">
+                            <h4>Autenticação em duas etapas</h4>
+                            <span class="badge-recommended">Recomendado</span>
+                          </div>
+                          <p>Adicione uma camada extra de segurança à sua conta.</p>
+                        </div>
+                      </div>
+                      <label class="switch"><input type="checkbox" id="twoFaToggle"><span class="slider round"></span></label>
+                    </div>
+                  </div>
+
+                  <div class="profile-settings-card">
+                    <div class="settings-card-header">
+                      <span class="settings-icon"><span class="material-symbols-outlined">tune</span></span>
+                      <div><h3>Preferências do usuário</h3></div>
+                    </div>
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <span class="material-symbols-outlined row-icon">light_mode</span>
+                        <div><h4>Aparência</h4><p>Escolha o tema da interface.</p></div>
+                      </div>
+                      <div style="display: flex; align-items: center; gap: 10px;">
+                        <select id="themeSelect" class="settings-select">
+                          <option value="light">Claro</option>
+                          <option value="dark">Escuro</option>
+                          <option value="system">Sistema</option>
+                        </select>
+                        <button id="themeToggleQuickBtn" class="theme-quick-pill" type="button" aria-label="Alternar tema">
+                          <span class="material-symbols-outlined">light_mode</span>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <span class="material-symbols-outlined row-icon">language</span>
+                        <div><h4>Idioma</h4><p>Selecione o idioma da interface.</p></div>
+                      </div>
+                      <select class="settings-select"><option value="pt-BR">Português (Brasil)</option><option value="en">English</option></select>
+                    </div>
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <span class="material-symbols-outlined row-icon">text_fields</span>
+                        <div><h4>Tamanho do texto</h4><p>Defina o tamanho do texto na plataforma.</p></div>
+                      </div>
+                      <select class="settings-select"><option value="normal">Padrão</option><option value="large">Grande</option></select>
+                    </div>
+                  </div>
+
+                  <div class="profile-settings-card">
+                    <div class="settings-card-header">
+                      <span class="settings-icon"><span class="material-symbols-outlined">notifications</span></span>
+                      <div><h3>Notificações</h3></div>
+                    </div>
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <span class="material-symbols-outlined row-icon">notifications_active</span>
+                        <div><h4>Atualizações dos chamados</h4><p>Receba notificações sobre novos status e atualizações.</p></div>
+                      </div>
+                      <label class="switch"><input type="checkbox" id="notifTicketsToggle" checked><span class="slider round"></span></label>
+                    </div>
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <span class="material-symbols-outlined row-icon">mail</span>
+                        <div><h4>Avisos administrativos por e-mail</h4><p>Receba comunicados importantes da escola.</p></div>
+                      </div>
+                      <label class="switch"><input type="checkbox" id="notifEmailToggle" checked><span class="slider round"></span></label>
+                    </div>
+                  </div>
+
+                  <div class="profile-settings-card">
+                    <div class="settings-card-header">
+                      <span class="settings-icon"><span class="material-symbols-outlined">security</span></span>
+                      <div><h3>Privacidade e sessões</h3></div>
+                    </div>
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <span class="material-symbols-outlined row-icon">devices</span>
+                        <div><h4>Sessões ativas</h4><p>1 sessão neste dispositivo</p></div>
+                      </div>
+                      <button class="secondary-btn" type="button" id="manageSessionsBtn">Gerenciar</button>
+                    </div>
+                    <div class="settings-row">
+                      <div class="settings-row-info">
+                        <span class="material-symbols-outlined row-icon">logout</span>
+                        <div><h4>Sair de todos os dispositivos</h4><p>Encerrar sua sessão em todos os dispositivos.</p></div>
+                      </div>
+                      <button class="secondary-btn" type="button" id="logoutAllBtn">Sair de todos</button>
+                    </div>
+                  </div>
+
+                  <div class="profile-danger-box" id="deactivateAccountBtn" role="button" tabindex="0">
+                    <div class="danger-box-content">
+                      <div class="danger-icon">
+                        <span class="material-symbols-outlined">warning</span>
+                      </div>
+                      <div>
+                        <h4>Desativar minha conta</h4>
+                        <p>Entre em contato com o suporte para solicitar alterações de acesso.</p>
+                      </div>
+                    </div>
+                    <span class="material-symbols-outlined chevron-danger">chevron_right</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
         </section>
       </main>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal-overlay" id="editUserModalOverlay" aria-hidden="true">
+      <div class="modal-card" style="background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 24px; width: min(500px, 92%); box-shadow: var(--shadow-lg);">
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h3 style="margin: 0; font-size: 1.25rem;">Editar Usuário</h3>
+          <button class="modal-close-btn" id="closeEditUserModalBtn" type="button" aria-label="Fechar modal" style="background: transparent; border: 1px solid var(--line); border-radius: 8px; width: 34px; height: 34px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">×</button>
+        </div>
+        <form id="editUserForm">
+          <input type="hidden" id="editUserOriginalEmail">
+          <div style="margin-bottom: 16px;">
+            <label for="editUserName" style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.9rem;">Nome completo</label>
+            <input type="text" id="editUserName" required style="width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text);">
+          </div>
+          <div style="margin-bottom: 16px;">
+            <label for="editUserEmail" style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.9rem;">E-mail</label>
+            <input type="email" id="editUserEmail" required style="width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text);">
+          </div>
+          <div style="margin-bottom: 16px;">
+            <label for="editUserPassword" style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.9rem;">Senha</label>
+            <input type="text" id="editUserPassword" required style="width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text);">
+          </div>
+          <div style="margin-bottom: 20px;">
+            <label for="editUserRole" style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.9rem;">Perfil</label>
+            <select id="editUserRole" style="width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text);">
+              <option value="professor">Professor</option>
+              <option value="tecnico">Técnico</option>
+              <option value="direcao">Direção</option>
+            </select>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 12px;">
+            <button type="button" id="cancelEditUserBtn" class="btn" style="padding: 10px 16px; border: 1px solid var(--line); background: var(--surface-alt); border-radius: 8px; font-weight: 600; cursor: pointer;">Cancelar</button>
+            <button type="submit" class="btn btn--primary" style="padding: 10px 16px; background: var(--primary); color: #fff; border: 0; border-radius: 8px; font-weight: 600; cursor: pointer;">Salvar Alterações</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Delete User Confirmation Modal -->
+    <div class="modal-overlay" id="deleteUserModalOverlay" aria-hidden="true">
+      <div class="modal-card" style="background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 24px; width: min(420px, 92%); box-shadow: var(--shadow-lg);">
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h3 style="margin: 0; font-size: 1.25rem;">Excluir Usuário</h3>
+          <button class="modal-close-btn" id="closeDeleteUserModalBtn" type="button" aria-label="Fechar modal" style="background: transparent; border: 1px solid var(--line); border-radius: 8px; width: 34px; height: 34px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">×</button>
+        </div>
+        <p style="color: var(--text); margin-bottom: 20px; font-size: 0.95rem; line-height: 1.4;">
+          Tem certeza que deseja excluir o usuário <strong id="deleteUserNameTarget"></strong>? Esta ação não pode ser desfeita.
+        </p>
+        <input type="hidden" id="deleteUserEmailTarget">
+        <div style="display: flex; justify-content: flex-end; gap: 12px;">
+          <button type="button" id="cancelDeleteUserBtn" class="btn" style="padding: 10px 16px; border: 1px solid var(--line); background: var(--surface-alt); border-radius: 8px; font-weight: 600; cursor: pointer;">Cancelar</button>
+          <button type="button" id="confirmDeleteUserBtn" class="btn" style="padding: 10px 16px; background: #e53935; color: #fff; border: 0; border-radius: 8px; font-weight: 600; cursor: pointer;">Excluir</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal-overlay" id="passwordModalOverlay" aria-hidden="true">
+      <div class="password-modal-card">
+        <div class="password-modal-header">
+          <h3>Alterar senha</h3>
+          <button class="password-modal-close" id="closePasswordModalBtn" type="button" aria-label="Fechar modal">×</button>
+        </div>
+        <form id="changePasswordForm">
+          <div id="passwordFeedback" class="form-feedback" style="margin-bottom: 16px;"></div>
+          <div class="password-form-group">
+            <label for="currentPassword">Senha atual</label>
+            <div class="password-input-wrap">
+              <input type="password" id="currentPassword" name="currentPassword" required placeholder="Digite sua senha atual">
+              <button type="button" class="field-toggle-btn" data-target="currentPassword"><span class="material-symbols-outlined">visibility</span></button>
+            </div>
+          </div>
+          <div class="password-form-group">
+            <label for="newPassword">Nova senha</label>
+            <div class="password-input-wrap">
+              <input type="password" id="newPassword" name="newPassword" required placeholder="Mínimo de 6 caracteres">
+              <button type="button" class="field-toggle-btn" data-target="newPassword"><span class="material-symbols-outlined">visibility</span></button>
+            </div>
+            <div id="passwordStrength" class="password-strength"></div>
+          </div>
+          <div class="password-form-group">
+            <label for="confirmPassword">Confirmar nova senha</label>
+            <div class="password-input-wrap">
+              <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Digite a nova senha novamente">
+              <button type="button" class="field-toggle-btn" data-target="confirmPassword"><span class="material-symbols-outlined">visibility</span></button>
+            </div>
+          </div>
+          <div class="password-modal-actions">
+            <button type="button" class="btn-cancel" id="cancelPasswordBtn">Cancelar</button>
+            <button type="submit" class="btn-save">Salvar alteração</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal-overlay" id="editProfileModalOverlay" aria-hidden="true">
+      <div class="password-modal-card">
+        <div class="password-modal-header">
+          <h3>Editar informações pessoais</h3>
+          <button class="password-modal-close" id="closeEditProfileModalBtn" type="button" aria-label="Fechar modal">×</button>
+        </div>
+        <form id="editProfileForm">
+          <div class="password-form-group">
+            <label for="editProfileName">Nome completo</label>
+            <input type="text" id="editProfileName" class="settings-select" style="width: 100%; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text-main);" required>
+          </div>
+          <div class="password-form-group">
+            <label for="editProfileEmail">E-mail</label>
+            <input type="email" id="editProfileEmail" class="settings-select" style="width: 100%; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text-main);" required>
+          </div>
+          <div class="password-modal-actions">
+            <button type="button" class="btn-cancel" id="cancelEditProfileBtn">Cancelar</button>
+            <button type="submit" class="btn-save">Salvar alterações</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal de Informações do Chamado (Ver Ficha) -->
+    <div class="modal-overlay" id="ticketInfoModalOverlay" role="dialog" aria-modal="true" aria-labelledby="ticketInfoModalTitle" aria-hidden="true">
+      <div class="modal-card modal-lg">
+        <header class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="material-symbols-outlined modal-header-icon" aria-hidden="true">info</span>
+            <div>
+              <div class="modal-title-row">
+                <h2 id="ticketInfoModalTitle" class="modal-title">Informações do Chamado</h2>
+                <span class="ticket-id-pill" id="ticketInfoModalTicketId">#1049</span>
+              </div>
+              <span class="modal-subtitle">Consulta detalhada das informações solicitadas</span>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn" id="closeTicketInfoModalBtn" aria-label="Fechar janela">
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+          </button>
+        </header>
+
+        <div class="modal-body-scrollable" style="padding: 20px;">
+          <div class="ticket-context-strip" style="background: var(--surface-alt); padding: 16px; border-radius: 12px; margin-bottom: 20px;">
+            <div class="context-meta-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <div class="context-requester">
+                <span class="material-symbols-outlined context-icon" aria-hidden="true">person</span>
+                <strong id="ticketInfoModalRequester">Professor</strong>
+                <span class="context-divider">•</span>
+                <span class="context-room" id="ticketInfoModalRoom">Sala</span>
+              </div>
+              <div class="context-badges" style="display: flex; gap: 8px; align-items: center;">
+                <span class="priority-pill" id="ticketInfoModalPriority">Média prioridade</span>
+                <span class="context-datetime" id="ticketInfoModalDate">Data</span>
+              </div>
+            </div>
+
+            <div class="context-type-row" style="margin-bottom: 12px; font-size: 0.9rem; color: var(--text);">
+              <strong>Tipo de problema:</strong> <span id="ticketInfoModalType">Categoria</span>
+            </div>
+
+            <div class="context-problem-box">
+              <div class="problem-text-wrap">
+                <h3 class="problem-title" id="ticketInfoModalTitleText" style="font-size: 1.1rem; margin-bottom: 8px;">Título</h3>
+                <p id="ticketInfoModalDescription" class="problem-desc" style="color: var(--muted); line-height: 1.5;">Descrição</p>
+              </div>
+              <div class="problem-photo-wrap" id="ticketInfoModalPhotoWrap" style="display: none; margin-top: 12px;">
+                <h4 style="font-size: 0.85rem; margin-bottom: 6px; color: var(--text);">Anexo:</h4>
+                <img id="ticketInfoModalPhoto" src="" alt="Anexo" class="problem-thumbnail" style="max-height: 200px; border-radius: 8px;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-top: 1px solid var(--line);">
+          <div>
+            <button type="button" class="btn btn-primary btn-sm" id="ticketInfoDownloadPdfBtn" style="display: none; align-items: center; gap: 6px;">
+              <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 18px;">picture_as_pdf</span>
+              <span>Baixar Relatório PDF</span>
+            </button>
+          </div>
+          <button type="button" class="btn btn-secondary" id="closeTicketInfoBtn">Fechar</button>
+        </footer>
+      </div>
     </div>
 
     <div class="toast" id="toast" aria-live="polite"></div>
@@ -123,9 +819,15 @@
     <script src="../js/core/auth.js"></script>
     <script src="../js/core/toast.js"></script>
     <script src="../js/core/skeleton.js"></script>
+    <script src="../js/core/ticket-config.js"></script>
+    <script src="../js/core/ticket-metrics.js"></script>
+    <script src="../js/core/notifications.js"></script>
+    <script src="../js/core/tickets.js"></script>
     <script src="../js/components/sidebar.js"></script>
     <script src="../js/components/user-menu.js"></script>
     <script src="../js/components/navigation.js"></script>
+    <script src="../js/components/responsive-tables.js"></script>
+    <script src="../js/components/profile.js"></script>
     <script src="../js/pages/direcao.js"></script>
     <script>
       DarkMode.init();

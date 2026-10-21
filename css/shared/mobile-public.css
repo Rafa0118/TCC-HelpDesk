@@ -1,0 +1,262 @@
+/* ============================================================
+   HELPIUM - Mobile para páginas públicas
+   (index, login, cadastro, home)
+   Carregado depois de css/legacy/styles.css
+   ============================================================ */
+
+@media (max-width: 860px) {
+
+  html { -webkit-text-size-adjust: 100%; }
+  body { overflow-x: hidden; }
+
+  /* ---------- Landing (index) ---------- */
+  .topbar { font-size: 0.74rem; }
+  .topbar-tag { display: none; }
+  .topbar-inner { justify-content: center; text-align: center; padding-block: 8px; }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.88);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: 1px solid rgba(17, 17, 17, 0.06);
+  }
+
+  .header-inner { min-height: 64px; padding: 0.55rem 0; }
+
+  .mobile-menu-toggle {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    touch-action: manipulation;
+  }
+
+  .main-nav {
+    top: calc(100% + 8px);
+    right: 0;
+    left: 0;
+    width: auto;
+    margin-inline: 0;
+    border-radius: 20px;
+  }
+
+  .nav-link { min-height: 48px; display: flex; align-items: center; font-weight: 600; }
+
+  .hero-section { padding: 16px 0 28px; min-height: calc(100dvh - 112px); }
+
+  .hero-shell {
+    display: flex !important;
+    flex-direction: column;
+    gap: 16px;
+    padding-inline: 0;
+  }
+
+  .hero-copy {
+    padding: 28px 22px 26px !important;
+    border-radius: 26px;
+  }
+
+  .eyebrow {
+    margin-bottom: 14px;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    line-height: 1.4;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(2rem, 9vw, 2.6rem) !important;
+    line-height: 1.04 !important;
+    letter-spacing: -0.045em;
+    margin-bottom: 14px;
+  }
+
+  .hero-description {
+    font-size: 0.98rem !important;
+    line-height: 1.55;
+    margin-bottom: 22px;
+  }
+
+  .hero-actions {
+    width: 100% !important;
+    max-width: none !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .hero-actions .btn,
+  .btn {
+    height: auto !important;
+    min-height: 52px;
+    width: 100% !important;
+    min-width: 0 !important;
+    justify-content: center;
+    border-radius: 16px;
+    font-size: 1rem;
+    touch-action: manipulation;
+  }
+
+  .hero-visual { min-height: 0 !important; }
+
+  .visual-card {
+    min-height: 170px !important;
+    height: 170px;
+    border-radius: 24px;
+  }
+
+  /* ---------- Login e Cadastro ---------- */
+  .login-page {
+    display: block !important;
+    min-height: 100dvh;
+    padding: 0 !important;
+    background: var(--login-bg, #f4f3ff);
+  }
+
+  .login-shell {
+    display: flex !important;
+    flex-direction: column;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 100dvh;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent;
+    overflow: visible !important;
+  }
+
+  .login-visual {
+    flex: 0 0 auto;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: calc(28px + env(safe-area-inset-top)) 24px 56px !important;
+    border-radius: 0 !important;
+  }
+
+  .login-visual-inner { min-height: 0 !important; padding: 0 !important; }
+  .login-visual::before,
+  .login-visual::after { opacity: 0.55; }
+
+  .login-kicker { margin: 0 0 8px; font-size: 0.78rem; }
+
+  .login-copy h1 {
+    margin: 0;
+    font-size: clamp(1.5rem, 7vw, 1.9rem) !important;
+    line-height: 1.12 !important;
+    letter-spacing: -0.035em;
+  }
+
+  .login-panel {
+    flex: 1 1 auto;
+    display: block !important;
+    margin-top: -28px;
+    padding: 0 !important;
+    background: #fff;
+    border-radius: 28px 28px 0 0 !important;
+    box-shadow: 0 -10px 30px rgba(50, 40, 120, 0.12);
+    position: relative;
+    z-index: 2;
+  }
+
+  .login-form-wrap {
+    width: 100% !important;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 28px 22px calc(28px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .login-form-wrap h2 {
+    margin: 0 0 6px;
+    font-size: 1.7rem !important;
+    letter-spacing: -0.03em;
+  }
+
+  .login-subtitle { margin: 0 0 22px; font-size: 0.95rem; }
+
+  .login-form { display: grid; gap: 16px; }
+  .login-field label { display: block; margin-bottom: 7px; font-size: 0.86rem; font-weight: 700; }
+
+  .login-field input:not([type="checkbox"]) {
+    width: 100%;
+    min-height: 52px;
+    padding-inline: 16px;
+    border-radius: 14px;
+    font-size: 16px !important; /* impede o zoom automático do iOS */
+  }
+
+  .input-wrap input { padding-right: 52px !important; }
+
+  .password-toggle {
+    width: 44px;
+    height: 44px;
+    right: 4px;
+    display: grid;
+    place-items: center;
+    touch-action: manipulation;
+  }
+
+  .check-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-height: 44px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .check-row input { width: 22px; height: 22px; margin-top: 1px; flex: 0 0 22px; }
+
+  .login-submit,
+  .support-btn,
+  .social-btn,
+  .social-button,
+  .logout-btn {
+    width: 100%;
+    min-height: 54px;
+    border-radius: 16px;
+    font-size: 1rem;
+    touch-action: manipulation;
+  }
+
+  .support-btn { margin-top: 12px; }
+
+  .divider { margin: 20px 0 16px; text-align: center; color: #737891; font-size: 0.85rem; }
+
+  .social-row { display: grid; gap: 10px; }
+
+  .social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #fff;
+    border: 1.5px solid rgba(50, 57, 112, 0.18);
+    font-weight: 600;
+    color: #252844;
+  }
+
+  .social-icon { font-weight: 800; }
+
+  .signup-text { margin-top: 20px; text-align: center; font-size: 0.94rem; }
+  .signup-text a { display: inline-block; padding: 6px 4px; font-weight: 700; }
+
+  /* ---------- Home (redirecionamento pós-login) ---------- */
+  .home-card {
+    width: calc(100% - 32px);
+    max-width: 420px;
+    padding: 28px 22px;
+    border-radius: 24px;
+  }
+}
+
+@media (max-width: 380px) {
+  .hero-copy { padding: 24px 18px 22px !important; }
+  .login-form-wrap { padding-inline: 18px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header { -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
