@@ -11,9 +11,7 @@ const PAGES = [
   'home.html',
   'dashboard/direcao.html',
   'dashboard/professor.html',
-  'dashboard/professor-perfil.html',
-  'dashboard/tecnico.html',
-  'dashboard/tecnico-perfil.html'
+  'dashboard/tecnico.html'
 ];
 const DASHBOARD_PAGES = PAGES.filter(p => p.startsWith('dashboard'));
 let pass = 0, fail = 0;

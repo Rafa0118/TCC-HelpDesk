@@ -1,0 +1,925 @@
+/* ============================================================
+   HELPIUM - Mobile Experience Layer
+   Carregado depois de todos os CSS de página e ANTES do dark-mode.css.
+   Aqui vive o design "app-like" para celular/tablet (<= 1024px):
+   cabeçalho compacto com marca, barra de navegação inferior,
+   cartões no lugar de tabelas, formulários grandes e modais em
+   formato "bottom sheet".
+   Tudo usa os tokens de variables.css, então o modo escuro funciona.
+   ============================================================ */
+
+:root {
+  --m-gutter: 16px;
+  --m-radius: 18px;
+  --m-radius-sm: 12px;
+  --m-header-h: 58px;
+  --m-nav-h: 64px;
+  --m-tap: 44px;
+  --m-safe-b: env(safe-area-inset-bottom, 0px);
+  --m-safe-t: env(safe-area-inset-top, 0px);
+  --m-card-shadow: 0 1px 2px rgba(50, 58, 120, 0.06), 0 8px 24px rgba(50, 58, 120, 0.07);
+}
+
+[data-theme="dark"] {
+  --m-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+/* Elementos que só existem no mobile ficam escondidos no desktop */
+.header-brand { display: none; }
+
+/* ============================================================
+   1. TABLET + MOBILE  (<= 1024px)
+   ============================================================ */
+@media (max-width: 1024px) {
+  html { -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--m-header-h) + 12px); }
+
+  body {
+    min-height: 100dvh;
+    overflow-x: hidden;
+    padding-bottom: calc(var(--m-nav-h) + var(--m-safe-b) + 20px) !important;
+  }
+
+  body.professor-dashboard { padding-bottom: calc(var(--m-nav-h) + var(--m-safe-b) + 20px) !important; }
+
+  .page-shell { min-height: 100dvh; }
+
+  /* ---------- Cabeçalho ---------- */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    min-height: calc(var(--m-header-h) + var(--m-safe-t));
+    padding: var(--m-safe-t) var(--m-gutter) 0;
+    justify-content: space-between;
+    gap: 12px;
+    background: color-mix(in srgb, var(--panel-strong) 86%, transparent);
+    -webkit-backdrop-filter: saturate(180%) blur(16px);
+    backdrop-filter: saturate(180%) blur(16px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .header-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    color: var(--text);
+    font-weight: 800;
+    font-size: 1.15rem;
+    letter-spacing: -0.04em;
+  }
+
+  .header-brand-mark {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    box-shadow: 0 4px 12px rgba(102, 85, 223, 0.35);
+  }
+
+  .header-brand-mark::before {
+    content: "";
+    position: absolute;
+    left: 10px;
+    top: 9px;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    background: #fff;
+    transform: rotate(45deg) scale(0.9);
+  }
+
+  .header-tools { margin-left: auto; gap: 8px; }
+
+  .header-action {
+    width: var(--m-tap);
+    height: var(--m-tap);
+    border-radius: 14px;
+    background: var(--surface);
+    border-color: transparent;
+  }
+
+  .header-action:hover { transform: none; box-shadow: none; }
+  .header-action:active { transform: scale(0.94); }
+
+  .user-pill {
+    padding: 4px;
+    min-height: var(--m-tap);
+    min-width: var(--m-tap);
+    justify-content: center;
+    border-radius: 999px;
+    background: var(--surface);
+    border-color: transparent;
+  }
+
+  .user-pill #userName,
+  .user-pill-info,
+  .user-pill-chevron { display: none; }
+
+  .user-menu {
+    right: 0;
+    left: auto;
+    min-width: 190px;
+    top: calc(100% + 10px);
+    border-radius: 16px;
+  }
+
+  .user-menu button { min-height: var(--m-tap); }
+
+  /* ---------- Conteúdo ---------- */
+  .main-panel,
+  .main-panel-inner,
+  .main-content {
+    padding-inline: var(--m-gutter) !important;
+  }
+
+  .main-panel { padding-top: 16px; padding-bottom: 8px; }
+  .main-panel-inner { padding-block: 0 !important; }
+
+  /* Seções "ativas" entram com um fade curto */
+  .section.active { animation: sectionEnter 0.28s var(--ease-smooth) both; }
+
+  /* ---------- Navegação inferior ---------- */
+  .mobile-bottom-nav {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    max-width: none;
+    transform: none;
+    border-radius: 0;
+    border-width: 1px 0 0;
+    z-index: 900;
+    gap: 2px;
+    padding: 6px 8px calc(6px + var(--m-safe-b));
+    min-height: calc(var(--m-nav-h) + var(--m-safe-b));
+    background: color-mix(in srgb, var(--panel-strong) 92%, transparent);
+    -webkit-backdrop-filter: saturate(180%) blur(18px);
+    backdrop-filter: saturate(180%) blur(18px);
+    border-top: 1px solid var(--line);
+    box-shadow: 0 -8px 28px rgba(50, 58, 120, 0.08);
+  }
+
+  .bottom-nav-item {
+    min-width: 0;
+    min-height: 52px;
+    gap: 3px;
+    padding: 6px 2px;
+    border-radius: 14px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
+
+  .bottom-nav-item .material-symbols-outlined {
+    width: 56px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    font-size: 24px;
+    transition: background 0.25s var(--ease-smooth), color 0.25s var(--ease-smooth);
+  }
+
+  .bottom-nav-item:hover { background: transparent; }
+  .bottom-nav-item:active .material-symbols-outlined { transform: scale(0.92); }
+
+  .mobile-bottom-nav .bottom-nav-item.active,
+  [data-theme="dark"] .mobile-bottom-nav .bottom-nav-item.active {
+    color: var(--primary-dark);
+    background: transparent;
+    font-weight: 700;
+  }
+  .bottom-nav-item.active::before { display: none; }
+
+  .mobile-bottom-nav .bottom-nav-item.active .material-symbols-outlined {
+    background: var(--primary-soft-strong);
+    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+  }
+
+  .nav-label { font-size: 0.68rem; line-height: 1; }
+
+  /* ---------- Toast acima da barra ---------- */
+  .toast {
+    left: var(--m-gutter);
+    right: var(--m-gutter);
+    bottom: calc(var(--m-nav-h) + var(--m-safe-b) + 14px);
+    max-width: none;
+    border-radius: 16px;
+  }
+
+  /* ---------- FAB (Professor) ---------- */
+  .fab--ticket {
+    right: var(--m-gutter) !important;
+    bottom: calc(var(--m-nav-h) + var(--m-safe-b) + 16px) !important;
+    z-index: 850 !important; /* abaixo dos modais (1000) */
+    width: 56px;
+    height: 56px;
+    box-shadow: 0 10px 26px rgba(79, 64, 196, 0.42);
+  }
+
+  /* ---------- Cards genéricos ---------- */
+  .content-card,
+  .panel-card,
+  .section-card,
+  .report-box,
+  .tickets-card {
+    border-radius: var(--m-radius);
+    box-shadow: var(--m-card-shadow);
+  }
+
+  .panel-card:hover,
+  .stat-card:hover,
+  .technician-ticket-card:hover { transform: none; }
+
+  /* ---------- Rodapé de suporte ---------- */
+  .support-bar { border-radius: var(--m-radius); }
+}
+
+/* ============================================================
+   2. SMARTPHONE  (<= 640px)
+   ============================================================ */
+@media (max-width: 640px) {
+
+  body { font-size: 15px; }
+
+  /* Evita o zoom automático do iOS ao focar campos */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+    min-height: 48px;
+    border-radius: var(--m-radius-sm);
+  }
+
+  textarea { min-height: 110px; line-height: 1.45; }
+
+  button,
+  .primary-btn,
+  .secondary-btn,
+  .danger-btn,
+  .btn { touch-action: manipulation; }
+
+  .primary-btn,
+  .secondary-btn,
+  .danger-btn,
+  .btn {
+    min-height: 48px;
+    border-radius: var(--m-radius-sm);
+    font-size: 0.95rem;
+  }
+
+  .link-button { min-height: 36px; padding: 0 4px; font-weight: 700; }
+
+  /* ---------- Hero ---------- */
+  .hero-box,
+  #inicio .hero-box {
+    padding: 20px 18px !important;
+    margin-bottom: 14px;
+    border-radius: 22px !important;
+    min-height: 0;
+  }
+
+  .hero-title {
+    margin: 0 0 6px;
+    font-size: 1.55rem !important;
+    line-height: 1.12;
+    letter-spacing: -0.035em;
+  }
+
+  .hero-subtitle {
+    margin: 0;
+    font-size: 0.88rem !important;
+    line-height: 1.45;
+    opacity: 0.92;
+    max-width: 34ch;
+  }
+
+  .hero-box::after { width: 150px !important; height: 150px !important; right: -50px !important; top: -50px !important; }
+
+  /* ---------- Estatísticas: grade 2×N, sem carrossel ---------- */
+  .stats-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    overflow: visible !important;
+    gap: 10px !important;
+    padding: 0 !important;
+    margin: 0 0 14px !important;
+    scroll-snap-type: none !important;
+  }
+
+  .stats-grid .stat-card,
+  .stat-card {
+    flex: none !important;
+    min-width: 0;
+    padding: 14px !important;
+    border-radius: 16px !important;
+    box-shadow: var(--m-card-shadow);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  /* o CSS antigo do técnico escondia do 3º card em diante: aqui voltam todos */
+  #inicio .stats-grid .stat-card:nth-child(n + 3) { display: flex !important; }
+
+  /* Um card sobrando na última linha ocupa a largura toda */
+  .stats-grid .stat-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+  .stat-top,
+  .stat-card-top {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.72rem !important;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: none !important;
+    color: var(--muted);
+    line-height: 1.25;
+  }
+
+  .stat-top > span:first-child { flex: 1; min-width: 0; }
+
+  .stat-icon,
+  .stat-card-icon {
+    width: 32px !important;
+    height: 32px !important;
+    flex: 0 0 32px;
+    margin: 0 !important;
+    display: grid !important;
+    place-items: center;
+    border-radius: 10px !important;
+    font-size: 18px !important;
+    background: var(--primary-soft);
+    color: var(--primary-dark);
+  }
+
+  .stat-chevron { display: none !important; }
+
+  .stat-value,
+  .stat-card-value {
+    font-size: 1.9rem !important;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-change,
+  .stat-card-label,
+  .stat-card-change {
+    margin: 0 !important;
+    font-size: 0.7rem !important;
+    line-height: 1.3;
+  }
+
+  /* ---------- Painéis e cards ---------- */
+  .cards-row,
+  #inicio .cards-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  .panel-card,
+  #inicio .panel-card,
+  .content-card,
+  .section-card,
+  .tickets-card {
+    padding: 16px !important;
+    margin-bottom: 14px;
+  }
+
+  .panel-header,
+  .tickets-header,
+  .content-card-header,
+  .section-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px !important;
+  }
+
+  .panel-header h2,
+  .panel-header h3,
+  .tickets-header h2,
+  .tickets-header h3,
+  .section-title {
+    margin: 0;
+    font-size: 1.05rem !important;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+
+  .section-subtitle { font-size: 0.82rem; }
+
+  /* ---------- Listas ---------- */
+  .ticket-list,
+  .recent-ticket-list,
+  .table-list,
+  .mini-list { gap: 10px; }
+
+  .ticket-item,
+  .priority-card,
+  .recent-ticket-item,
+  .table-row,
+  .mini-item,
+  .resource-row {
+    border-radius: 14px !important;
+  }
+
+  .ticket-item.priority-card,
+  .recent-ticket-item {
+    padding: 14px !important;
+    margin: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+
+  .recent-ticket-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .recent-ticket-main { width: 100%; }
+  .recent-ticket-main h3 { white-space: normal !important; overflow: visible !important; line-height: 1.3; }
+  .recent-ticket-badges { justify-content: flex-start !important; }
+
+  .ticket-title { font-size: 0.95rem; line-height: 1.3; }
+
+  .ticket-actions-row .primary-btn,
+  .ticket-actions-row button,
+  .ticket-item .link-button,
+  .priority-card button {
+    min-height: 40px;
+    padding-inline: 14px;
+    border-radius: 12px;
+  }
+
+  /* ---------- Filtros: chips com rolagem horizontal ---------- */
+  .filter-bar,
+  .tickets-filter-bar,
+  .quick-filters,
+  .tickets-tabs,
+  .period-filters,
+  .filter-chips {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 8px;
+    overflow-x: auto;
+    margin-inline: calc(var(--m-gutter) * -1 + 0px);
+    padding: 2px var(--m-gutter) 8px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+  }
+
+  /* dentro de cards o recuo negativo é de 16px (padding do card) */
+  .panel-card .filter-bar,
+  .panel-card .tickets-filter-bar,
+  .content-card .filter-bar,
+  .tickets-card .tickets-filter-bar,
+  .section-card .quick-filters {
+    margin-inline: -16px;
+    padding-inline: 16px;
+  }
+
+  .filter-bar::-webkit-scrollbar,
+  .tickets-filter-bar::-webkit-scrollbar,
+  .quick-filters::-webkit-scrollbar,
+  .tickets-tabs::-webkit-scrollbar { display: none; }
+
+  .filter-tab,
+  .quick-filter,
+  .period-btn,
+  .tab-btn {
+    flex: 0 0 auto;
+    min-height: 40px;
+    padding: 0 16px !important;
+    border-radius: 999px !important;
+    font-size: 0.82rem !important;
+    font-weight: 600;
+    white-space: nowrap;
+    scroll-snap-align: start;
+    touch-action: manipulation;
+  }
+
+  .filter-row,
+  .filter-group,
+  .filter-controls-group,
+  .tickets-toolbar,
+  .table-toolbar,
+  .toolbar-left,
+  .toolbar-right {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+    width: 100%;
+    align-items: stretch;
+  }
+
+
+  .filter-row-quick { margin-top: 2px; }
+
+  /* Cabeçalhos de seção com filtros (ex.: Relatórios da direção) em coluna */
+  .section-header-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .section-header-row > div { min-width: 0; max-width: 100%; }
+
+  .section-header-row > div:last-child {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .section-header-row .quick-filters {
+    margin-inline: 0 !important;
+    padding-inline: 0 !important;
+    max-width: 100%;
+  }
+
+  .btn-modal-pdf {
+    width: 100%;
+    justify-content: center;
+    min-height: 46px;
+    border-radius: var(--m-radius-sm) !important;
+  }
+
+  .search-box-wrap,
+  .search-bar,
+  .search-wrap { position: relative; width: 100%; min-width: 0; max-width: none; }
+
+  .search-box-wrap input,
+  .search-bar input { padding-left: 44px !important; width: 100%; }
+
+  .search-box-wrap .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: var(--muted);
+    pointer-events: none;
+  }
+
+  .date-range-wrapper {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+  }
+
+  .date-range-wrapper input { min-width: 0; padding-inline: 10px; }
+  .date-separator { font-size: 0.78rem; color: var(--muted); }
+
+  select {
+    background-position: right 14px center;
+    padding-right: 38px;
+    text-overflow: ellipsis;
+  }
+
+  /* ---------- Tabelas viram cartões ---------- */
+  .table-wrapper {
+    overflow: visible !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  table.data-table,
+  table.tickets-table,
+  .table-wrapper table,
+  .tickets-card table,
+  table.responsive {
+    display: block;
+    width: 100% !important;
+    min-width: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .table-wrapper table thead,
+  .tickets-card table thead,
+  table.data-table thead,
+  table.tickets-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+  }
+
+  .table-wrapper table tbody,
+  .tickets-card table tbody,
+  table.data-table tbody,
+  table.tickets-table tbody {
+    display: grid;
+    gap: 12px;
+  }
+
+  .table-wrapper table tbody tr,
+  .tickets-card table tbody tr,
+  table.data-table tbody tr,
+  table.tickets-table tbody tr {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding: 6px 14px !important;
+    margin: 0 !important;
+    background: var(--panel-strong) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 16px !important;
+    box-shadow: var(--m-card-shadow);
+    transform: none !important;
+  }
+
+  .table-wrapper table tbody tr td,
+  .tickets-card table tbody tr td,
+  table.data-table tbody tr td,
+  table.tickets-table tbody tr td {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: auto !important;
+    padding: 10px 0 !important;
+    border: 0 !important;
+    border-bottom: 1px dashed var(--line) !important;
+    background: transparent !important;
+    text-align: right !important;
+    font-size: 0.88rem !important;
+    line-height: 1.35;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .table-wrapper table tbody tr td:last-child,
+  .tickets-card table tbody tr td:last-child,
+  table.data-table tbody tr td:last-child,
+  table.tickets-table tbody tr td:last-child { border-bottom: 0 !important; }
+
+  .table-wrapper table tbody tr td::before,
+  .tickets-card table tbody tr td::before,
+  table.data-table tbody tr td::before,
+  table.tickets-table tbody tr td::before {
+    content: attr(data-label);
+    flex: 0 0 auto;
+    max-width: 42%;
+    text-align: left;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* células sem rótulo (ações) ocupam a linha toda */
+  .table-wrapper table tbody tr td[data-label=""]::before,
+  .tickets-card table tbody tr td[data-label=""]::before { display: none; }
+
+  .table-wrapper table tbody tr td[data-label=""],
+  .tickets-card table tbody tr td[data-label=""] { justify-content: flex-end; }
+
+  /* a primeira célula (identificação) vira o título do cartão */
+  .table-wrapper table tbody tr td:first-child,
+  table.tickets-table tbody tr td:first-child {
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  td .status,
+  td .priority-pill { flex-shrink: 0; }
+
+  td[colspan] { display: block !important; text-align: center !important; }
+  td[colspan]::before { display: none !important; }
+
+  .table-footer { padding: 10px 2px 0; font-size: 0.8rem; color: var(--muted); }
+
+  /* ---------- Formulários ---------- */
+  .form-grid,
+  .form-grid.two,
+  .ticket-form .form-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  .field,
+  .form-group { min-width: 0; }
+
+  .field label,
+  .form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .form-actions {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .form-actions .primary-btn { order: -1; }
+
+  .new-ticket-button {
+    width: 100%;
+    min-height: 56px;
+    margin-bottom: 14px;
+    border-radius: 18px;
+    font-size: 1rem;
+  }
+
+  /* ---------- Modais viram bottom sheets ---------- */
+  .modal-overlay {
+    align-items: flex-end !important;
+    justify-content: center;
+    padding: 0 !important;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay > section,
+  .modal-overlay > div,
+  .modal-overlay .profile-modal,
+  .modal-overlay .ticket-form,
+  .modal-overlay .modal-content,
+  .modal-overlay .modal-card {
+    width: 100% !important;
+    max-width: none !important;
+    max-height: 92dvh !important;
+    margin: 0 !important;
+    padding-bottom: calc(18px + var(--m-safe-b));
+    border-radius: 24px 24px 0 0 !important;
+    background: var(--panel-strong) !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    animation: sheetUp 0.3s var(--ease-smooth) both;
+  }
+
+  /* "alça" do sheet */
+  .modal-overlay > section::before,
+  .modal-overlay .profile-modal::before,
+  .modal-overlay .modal-content::before,
+  .modal-overlay .modal-card::before {
+    content: "";
+    display: block;
+    width: 40px;
+    height: 4px;
+    margin: 0 auto 12px;
+    border-radius: 4px;
+    background: var(--line-strong);
+  }
+
+  .modal-header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--panel-strong);
+    padding: 6px 0 12px !important;
+    margin: 0 0 8px !important;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .modal-header h3 { margin: 0; font-size: 1.1rem; }
+
+  .modal-close {
+    width: var(--m-tap) !important;
+    height: var(--m-tap) !important;
+    border-radius: 14px;
+    font-size: 1.4rem;
+  }
+
+  /* ---------- Perfil ---------- */
+  .profile-header {
+    padding: 22px 20px !important;
+    margin-bottom: 14px !important;
+    border-radius: 22px !important;
+    gap: 4px;
+  }
+
+  .profile-header h1 { font-size: 1.6rem !important; }
+  .profile-subtitle { font-size: 0.9rem !important; }
+
+  .profile-card { border-radius: var(--m-radius) !important; }
+  .profile-content { padding: 20px 16px !important; }
+
+  .back-button {
+    min-height: var(--m-tap);
+    margin-bottom: 12px;
+    border-radius: 14px;
+  }
+
+  .profile-avatar-section,
+  .profile-hero {
+    flex-direction: column;
+    align-items: center !important;
+    text-align: center;
+    gap: 14px;
+  }
+
+  .info-group { min-width: 0; }
+
+  /* ---------- Suporte ---------- */
+  .support-bar {
+    padding: 16px;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  /* ---------- Métricas (relatórios do técnico) ---------- */
+  .metric-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .metric-box {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "label value" "trend value";
+    align-items: center;
+    column-gap: 14px;
+    row-gap: 2px;
+    padding: 14px 16px !important;
+  }
+
+  .metric-box .metric-label { grid-area: label; margin: 0; }
+  .metric-box .metric-value { grid-area: value; font-size: 1.9rem; text-align: right; }
+  .metric-box .metric-trend { grid-area: trend; }
+
+  /* ---------- Gráficos ---------- */
+  .bar-chart,
+  .donut-layout { max-width: 100%; }
+
+  .donut-layout {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .reports-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; }
+  .reports-grid .report-box:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+  /* Garante que nada force rolagem horizontal */
+  img, video, canvas, svg { max-width: 100%; }
+  .main-panel, .content, .section { min-width: 0; }
+}
+
+/* ============================================================
+   3. TELAS PEQUENAS  (<= 380px)
+   ============================================================ */
+@media (max-width: 380px) {
+  :root { --m-gutter: 14px; }
+  .hero-title { font-size: 1.4rem !important; }
+  .stat-value, .stat-card-value { font-size: 1.65rem !important; }
+  .nav-label { font-size: 0.64rem; }
+  .bottom-nav-item .material-symbols-outlined { width: 48px; }
+}
+
+/* ============================================================
+   4. DISPOSITIVOS TOUCH: sem efeitos "hover" que ficam presos
+   ============================================================ */
+@media (hover: none) {
+  .stat-card:hover,
+  .panel-card:hover,
+  .technician-ticket-card:hover,
+  .ticket-item:hover,
+  .recent-ticket-item:hover,
+  .shortcut:hover,
+  .header-action:hover,
+  .primary-btn:hover,
+  .secondary-btn:hover {
+    transform: none;
+  }
+}
+
+@keyframes sheetUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay > section,
+  .modal-overlay > div,
+  .section.active { animation: none !important; }
+}

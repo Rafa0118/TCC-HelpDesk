@@ -20,6 +20,7 @@
   /* Surfaces */
   --surface: #f5f6ff;
   --surface-2: #eceeff;
+  --surface-alt: #eceeff; /* alias, consistent thead bg across pages */
 
   /* Primary */
   --primary: #6655df;
@@ -36,6 +37,7 @@
   /* Text */
   --text: #252844;
   --muted: #626781;
+  --text-muted: var(--muted); /* alias used widely across page CSS */
 
   /* Borders */
   --line: rgba(50, 57, 112, 0.12);
@@ -89,8 +91,9 @@
   --panel: rgba(27, 32, 52, 0.94);
   --panel-strong: #1b2034;
 
-  --surface: #20263d;
+   --surface: #20263d;
   --surface-2: #272d47;
+  --surface-alt: #272d47; /* alias for thead backgrounds */
 
   --primary: #a79bff;
   --primary-dark: #c1baff;
@@ -104,6 +107,7 @@
 
   --text: #eef0ff;
   --muted: #a6abc6;
+  --text-muted: var(--muted); /* alias */
 
   --line: rgba(195, 202, 255, 0.13);
   --line-strong: rgba(195, 202, 255, 0.22);
