@@ -1,5 +1,5 @@
 /* ============================================
-   HELPIUM - Dark Mode Toggle
+   iHelpy - Dark Mode Toggle
    ============================================ */
 
 const DarkMode = (() => {

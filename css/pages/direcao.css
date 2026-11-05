@@ -1,5 +1,5 @@
 /* ============================================
-   HELPIUM - DIRECAO Page Styles
+   iHelpy - DIRECAO Page Styles
    Extracted from direcao.html + deduplicated against shared CSS
    ============================================ */
 
@@ -79,6 +79,12 @@ h1, h2, h3, p { margin-top: 0; }
 
 .status.pending { background: var(--warning); color: var(--warning-text); }
 
+.status.progress { background: var(--progress); color: var(--progress-text); }
+
+.status.cancelled { background: var(--cancelled); color: var(--cancelled-text); }
+
+.ticket-empty { margin: 0; padding: 18px 12px; color: var(--muted); font-size: 0.78rem; text-align: center; }
+
 .shortcut-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 
 .shortcut { display: flex; align-items: center; gap: 10px; min-height: 58px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,0.7); color: var(--text); text-align: left; }
@@ -96,6 +102,32 @@ h1, h2, h3, p { margin-top: 0; }
 .section-title { margin-bottom: 16px; color: var(--primary-dark); font-size: 1.4rem; letter-spacing: -0.06em; }
 
 .section-card .table-row { grid-template-columns: 1.4fr 1fr 0.7fr; min-height: 50px; }
+
+.ticket-row { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto auto; }
+
+.ticket-report-button { justify-self: center; padding: 7px 10px; border: 1px solid var(--primary-soft-strong); border-radius: 8px; background: var(--primary-soft); color: var(--primary-dark); font: inherit; font-size: 0.66rem; font-weight: 800; cursor: pointer; white-space: nowrap; }
+
+.ticket-row .ticket-report-button { grid-column: 1 / -1; }
+
+.ticket-report-button:hover, .ticket-report-button:focus-visible { background: var(--primary); color: #fff; outline: none; }
+
+.ticket-report-modal { width: min(620px, calc(100% - 32px)); max-height: min(85vh, 720px); overflow: auto; border: 1px solid var(--line); border-radius: 18px; background: var(--panel-strong); box-shadow: var(--shadow); }
+
+.ticket-report-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 20px 22px; border-bottom: 1px solid var(--line); }
+
+.ticket-report-header h2 { margin: 0 0 5px; font-size: 1.15rem; }
+
+.ticket-report-header p { margin: 0; color: var(--muted); font-size: 0.74rem; }
+
+.ticket-report-close { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); color: var(--text); font-size: 1.35rem; line-height: 1; cursor: pointer; }
+
+.ticket-report-content { display: grid; gap: 10px; padding: 18px 22px 22px; }
+
+.ticket-report-field { padding: 11px 12px; border-radius: 10px; background: rgba(122,74,232,0.05); }
+
+.ticket-report-field strong { display: block; margin-bottom: 5px; color: var(--muted); font-size: 0.68rem; }
+
+.ticket-report-field p { margin: 0; color: var(--text); font-size: 0.78rem; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
 
 .reports-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px; }
 
@@ -148,7 +180,7 @@ h1, h2, h3, p { margin-top: 0; }
         .shortcut-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       }
 
-@media (max-width: 560px) { .stats-grid, .reports-grid { grid-template-columns: 1fr; } .donut-layout { flex-direction: column; justify-content: center; } .table-row { grid-template-columns: 1fr 1fr; } .table-row .status { grid-column: 2; } .shortcut-grid { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .stats-grid, .reports-grid { grid-template-columns: 1fr; } .donut-layout { flex-direction: column; justify-content: center; } .table-row { grid-template-columns: 1fr 1fr; } .table-row .status { grid-column: 2; } .ticket-row { grid-template-columns: minmax(0, 1fr) auto; } .ticket-row > span { grid-column: 1 / -1; } .ticket-row .status { grid-column: 1; justify-self: start; } .ticket-report-button { grid-column: 2; grid-row: 3; } .shortcut-grid { grid-template-columns: 1fr; } }
 
 
 /* Hero-box decorative pseudo-elements */

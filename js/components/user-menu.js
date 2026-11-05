@@ -1,5 +1,5 @@
 /* ============================================
-   HELPIUM - User Menu Module
+   iHelpy - User Menu Module
    initUserMenu() - dropdown toggle + close
    ============================================ */
 
@@ -12,6 +12,7 @@ const UserMenu = {
 
     userMenuToggle.addEventListener('click', (event) => {
       event.stopPropagation();
+      if (userMenu.contains(event.target)) return;
       userMenu.classList.toggle('open');
     });
 
@@ -29,10 +30,32 @@ const UserMenu = {
       }
     });
 
+    document.querySelectorAll('[data-action="profile"]').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        userMenu.classList.remove('open');
+
+        const target = button.dataset.target;
+        if (target) {
+          window.location.href = target;
+          return;
+        }
+
+        if (document.getElementById('profileModalOverlay')) return;
+
+        if (document.getElementById('perfil') && typeof Navigation !== 'undefined') {
+          Navigation.showSection('perfil');
+        }
+      });
+    });
+
     // Logout buttons
     document.querySelectorAll('[data-action="logout"]').forEach((button) => {
-      button.addEventListener('click', () => {
-        Auth.logout();
+      button.addEventListener('click', async (event) => {
+        event.stopPropagation();
+        button.disabled = true;
+        const loggedOut = await Auth.logout();
+        if (!loggedOut) button.disabled = false;
       });
     });
   }

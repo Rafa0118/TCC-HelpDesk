@@ -1,5 +1,5 @@
 /* ============================================
-   HELPIUM - PROFESSOR Page Styles
+   iHelpy - PROFESSOR Page Styles
    Extracted from professor.html + deduplicated against shared CSS
    ============================================ */
 
@@ -264,6 +264,12 @@
         justify-content: space-between;
         gap: 12px;
         margin-bottom: 8px;
+      }
+
+.ticket-draft-note {
+        margin: 0 0 14px;
+        color: var(--muted);
+        font-size: 0.78rem;
       }
 
 .modal-close {

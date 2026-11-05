@@ -1,5 +1,5 @@
 /* ============================================
-   HELPIUM - Navigation Module
+   iHelpy - Navigation Module
    initNavigation() - section switching
    ============================================ */
 

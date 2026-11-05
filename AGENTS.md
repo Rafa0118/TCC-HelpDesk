@@ -1,6 +1,6 @@
-# AGENTS.md - Helpium School Help Desk
+# AGENTS.md - iHelpy School Help Desk
 
-Frontend-only project for a school help desk system with three user roles (professor, técnico, direção). Uses localStorage for persistence.
+Frontend project for a school help desk system with three user roles (professor, técnico, direção). Firebase Authentication, Cloud Firestore, and Firebase Storage are the persistent data services.
 
 ## Project Structure
 
@@ -78,14 +78,12 @@ DarkMode.init();
 PageName.init();
 ```
 
-### Data Storage (localStorage)
-- `helpium_logged_user` — current user session `{ name, email, role }`
-- `helpium_tickets` — all tickets (shared between professor/técnico)
-- `helpium_professor_tickets` — legacy alias, kept in sync
-- `helpium_users` — user management list (direção)
-- `helpium_resources` — resource/space management (direção)
-- `helpium_{role}_photo` — profile photo per role
-- `helpium-theme` — `light` or `dark`
+### Data Storage
+- Firebase Authentication owns user credentials.
+- Cloud Firestore is the source of truth: `usuarios`, `chamados`, `atendimentos`, and `locais`.
+- Firebase Storage holds ticket evidence images under `chamados/{userId}/{ticketId}/`.
+- `localStorage` is limited to the cached session (`helpium_logged_user`), UI preferences (`helpium-theme`), profile photos, and temporary compatibility caches. Ticket, user, and resource writes must go through `FirebaseDB`.
+- `firestore.rules` and `storage.rules` must be deployed to the configured Firebase project for access to work.
 
 ### Running Validation
 ```bash

@@ -1,0 +1,24 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function role() {
+      return firestore.get(/databases/(default)/documents/usuarios/$(request.auth.uid)).data.tipo;
+    }
+
+    match /chamados/{userId}/{ticketId}/{fileName} {
+      allow create, update: if signedIn() && request.auth.uid == userId &&
+        request.resource.size < 5 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*');
+      allow read: if signedIn() && (
+        request.auth.uid == userId ||
+        role() == 'TECNICO' ||
+        role() == 'DIRECAO'
+      );
+      allow delete: if signedIn() && (request.auth.uid == userId || role() == 'DIRECAO');
+    }
+  }
+}

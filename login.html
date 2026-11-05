@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Helpium | Login</title>
+    <title>iHelpy | Login</title>
     <meta
       name="description"
       content="Tela de login moderna e inspirada em landing page de SaaS."
@@ -59,6 +59,11 @@
       </main>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+    <script src="js/core/firebase.js"></script>
     <script>
       const passwordInput = document.getElementById('password');
       const toggleButton = document.querySelector('.password-toggle');
@@ -69,93 +74,24 @@
         toggleButton.textContent = isHidden ? '◉' : '◌';
       });
 
-      const defaultUsers = [
-        { role: 'professor', email: 'professor@helpium.com', password: 'professor123', name: 'Prof. Ana Souza' },
-        { role: 'tecnico', email: 'tecnico@helpium.com', password: 'tecnico123', name: 'Técnico João Silva' },
-        { role: 'direcao', email: 'direcao@helpium.com', password: 'direcao123', name: 'Diretora Carla Mendes' }
-      ];
-
-      const getUsers = () => {
-        try {
-          const saved = JSON.parse(localStorage.getItem('helpium_users') || '[]');
-          const normalized = Array.isArray(saved) ? saved : [];
-
-          const hasRoleData = normalized.some((user) => user && user.role);
-          const users = hasRoleData ? normalized : defaultUsers;
-
-          const merged = [...defaultUsers];
-          users.forEach((user) => {
-            if (!user || !user.email || !user.password) return;
-            const match = merged.find((item) => item.email.toLowerCase() === user.email.toLowerCase());
-            if (!match) {
-              merged.push({
-                role: user.role || 'professor',
-                email: user.email,
-                password: user.password,
-                name: user.name || user.email
-              });
-            }
-          });
-
-          localStorage.setItem('helpium_users', JSON.stringify(merged));
-          return merged;
-        } catch (error) {
-          localStorage.setItem('helpium_users', JSON.stringify(defaultUsers));
-          return defaultUsers;
-        }
-      };
-
-      const detectRoleFromEmail = (email) => {
-        const normalized = String(email || '').trim().toLowerCase();
-
-        if (!normalized) return null;
-        if (normalized.includes('professor')) return 'professor';
-        if (normalized.includes('tecnico')) return 'tecnico';
-        if (normalized.includes('direcao') || normalized.includes('direção')) return 'direcao';
-
-        return null;
-      };
-
       const form = document.querySelector('.login-form');
-      form.addEventListener('submit', function (event) {
+      form.addEventListener('submit', async function (event) {
         event.preventDefault();
 
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
-        const users = getUsers();
-        const role = detectRoleFromEmail(email) || users.find((item) => item.email.toLowerCase() === email.toLowerCase())?.role;
-
-        if (!role) {
-          alert('Use um e-mail válido para acessar o sistema.');
-          return;
-        }
-
-        const user = users.find(
-          (item) =>
-            item.role === role &&
-            item.email.toLowerCase() === email.toLowerCase() &&
-            item.password === password
-        );
-
-        if (!user) {
-          alert('E-mail ou senha inválidos para esse acesso.');
-          return;
-        }
-
-        localStorage.setItem(
-          'helpium_logged_user',
-          JSON.stringify({ name: user.name, email: user.email, role: user.role })
-        );
-
-        if (role === 'professor') {
-          window.location.href = 'dashboard/professor.html';
-        } else if (role === 'tecnico') {
-          window.location.href = 'dashboard/tecnico.html';
-        } else {
-          window.location.href = 'dashboard/direcao.html';
+        try {
+          const user = await FirebaseDB.login(email, password);
+          if (user.role === 'professor') window.location.href = 'dashboard/professor.html';
+          else if (user.role === 'tecnico') window.location.href = 'dashboard/tecnico.html';
+          else if (user.role === 'direcao') window.location.href = 'dashboard/direcao.html';
+          else throw new Error('O perfil desta conta não é reconhecido.');
+        } catch (error) {
+          alert(error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found'
+            ? 'E-mail ou senha inválidos.'
+            : error.message || 'Não foi possível entrar. Verifique sua conexão e tente novamente.');
         }
       });
     </script>
   </body>
 </html>
-

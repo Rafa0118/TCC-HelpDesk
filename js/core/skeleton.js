@@ -1,5 +1,5 @@
 /* ============================================
-   HELPIUM - Skeleton Loading
+   iHelpy - Skeleton Loading
    ============================================ */
 
 const SkeletonLoader = (() => {

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Helpium | Início</title>
+    <title>iHelpy | Início</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="css/shared/variables.css" />
@@ -108,12 +108,17 @@
       </div>
 
       <div id="noUserState" style="display:none;">
-        <h1>Bem-vindo ao Helpium</h1>
+        <h1>Bem-vindo ao iHelpy</h1>
         <p>Faça login para acessar o sistema.</p>
         <button class="logout-btn" type="button" onclick="window.location.href='login.html'">Ir para o Login</button>
       </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+    <script src="js/core/firebase.js"></script>
     <script src="js/core/auth.js"></script>
     <script>
       const user = Auth.getCurrentUser();
@@ -152,5 +157,4 @@
     </script>
   </body>
 </html>
-
 

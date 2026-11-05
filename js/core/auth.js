@@ -1,5 +1,5 @@
 /* ============================================
-   HELPIUM - Auth Module
+   iHelpy - Auth Module
    getCurrentUser, logout, requireAuth
    ============================================ */
 
@@ -9,21 +9,44 @@ const Auth = {
   getCurrentUser() {
     try {
       const raw = localStorage.getItem(this.STORAGE_KEY);
-      return raw ? JSON.parse(raw) : null;
+      const user = raw ? JSON.parse(raw) : null;
+      if (user && !user.uid) {
+        localStorage.removeItem(this.STORAGE_KEY);
+        return null;
+      }
+      return user;
     } catch {
       return null;
     }
   },
 
-  logout() {
+  redirectToLogin() {
+    const loginPath = window.location.pathname.includes('/dashboard/') ? '../login.html' : 'login.html';
+    window.location.href = loginPath;
+  },
+
+  async logout() {
+    try {
+      if (window.FirebaseDB) {
+        await window.FirebaseDB.auth.signOut();
+      }
+    } catch (error) {
+      console.error('Não foi possível encerrar a sessão do Firebase:', error);
+      if (typeof Toast !== 'undefined') {
+        Toast.error('Não foi possível sair da conta. Tente novamente.');
+      }
+      return false;
+    }
+
     localStorage.removeItem(this.STORAGE_KEY);
-    window.location.href = 'login.html';
+    this.redirectToLogin();
+    return true;
   },
 
   requireAuth() {
     const user = this.getCurrentUser();
     if (!user) {
-      window.location.href = 'login.html';
+      this.redirectToLogin();
       return null;
     }
     return user;

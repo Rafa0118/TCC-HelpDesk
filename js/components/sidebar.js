@@ -1,5 +1,5 @@
 /* ============================================
-   HELPIUM - Sidebar Module
+   iHelpy - Sidebar Module
    initSidebar() - expand/collapse + mobile
    ============================================ */
 

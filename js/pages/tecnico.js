@@ -1,5 +1,5 @@
 /* ============================================
-   HELPIUM - Tecnico Page Logic
+   iHelpy - Tecnico Page Logic
    Technician Dashboard, Ticket Attendance & Funnel Resolution
    ============================================ */
 
@@ -364,44 +364,11 @@ const TecnicoPage = {
   getTickets() {
     try {
       const saved = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || 'null');
-      if (Array.isArray(saved) && saved.length > 0) return saved;
-
-      const legacy = JSON.parse(localStorage.getItem(this.LEGACY_KEY) || 'null');
-      if (Array.isArray(legacy) && legacy.length > 0) {
-        const merged = [...this.defaultTickets];
-        legacy.forEach((lt) => {
-          if (!merged.some((t) => t.id === lt.id)) {
-            merged.push({
-              id: lt.id,
-              title: lt.title || 'Chamado Solicitado',
-              room: lt.room || 'Sala',
-              requester: lt.requester || 'Professor',
-              date: lt.date || new Date().toLocaleDateString('pt-BR'),
-              time: '10:00',
-              type: lt.type || 'Hardware',
-              priority: lt.priority || 'Média',
-              status: lt.status || 'Em espera',
-              description: lt.description || 'Sem descrição.',
-              photo: lt.photo || '',
-              resolutionCategory: lt.resolutionCategory || '',
-              resolutionSubcategory: lt.resolutionSubcategory || '',
-              resolutionDetails: lt.resolutionDetails || '',
-              resolutionTimeSpent: lt.resolutionTimeSpent || '',
-              resolutionParts: lt.resolutionParts || '',
-              resolutionUserNote: lt.resolutionUserNote || '',
-              technicianName: lt.technicianName || '',
-              resolvedAt: lt.resolvedAt || ''
-            });
-          }
-        });
-        this.saveTickets(merged);
-        return merged;
-      }
+      if (Array.isArray(saved)) return saved;
     } catch (e) {
       console.warn('Erro ao carregar chamados:', e);
     }
-    this.saveTickets(this.defaultTickets);
-    return [...this.defaultTickets];
+    return [];
   },
 
   saveTickets(tickets) {
@@ -418,19 +385,25 @@ const TecnicoPage = {
     return tickets.find((t) => String(t.id).trim() === String(id).trim()) || null;
   },
 
-  updateTicket(id, updateData) {
+  async updateTicket(id, updateData) {
     const tickets = this.getTickets();
     const index = tickets.findIndex((t) => String(t.id).trim() === String(id).trim());
     if (index === -1) return false;
+    try {
+      await FirebaseDB.updateTicket(tickets[index], updateData, Auth.getCurrentUser());
+    } catch (error) {
+      console.error('Erro ao salvar o chamado no Firebase:', error);
+      return false;
+    }
     tickets[index] = { ...tickets[index], ...updateData };
     this.saveTickets(tickets);
     return true;
   },
 
-  init() {
+  async init() {
     const user = Auth.requireAuth();
     if (!user || user.role !== 'tecnico') {
-      window.location.href = 'login.html';
+      Auth.redirectToLogin();
       return;
     }
 
@@ -480,6 +453,12 @@ const TecnicoPage = {
 
     this.bindResolutionModal();
     this.bindFiltersAndSearch();
+    try {
+      this.saveTickets(await FirebaseDB.listTickets(user));
+    } catch (error) {
+      Toast.error('Não foi possível carregar a fila do banco de dados.');
+      this.saveTickets([]);
+    }
     this.renderStats(this.getTickets());
     this.renderAllSections(true);
     const initialTarget = window.location.hash.slice(1);
@@ -935,6 +914,7 @@ const TecnicoPage = {
         btn.classList.add('active');
         const status = btn.dataset.status;
         if (statusInput) statusInput.value = status;
+        this.updateResolutionRequiredFields(status);
         this.updateModalStatusBadge(status);
       });
     });
@@ -970,9 +950,9 @@ const TecnicoPage = {
       });
     });
 
-    form?.addEventListener('submit', (e) => {
+    form?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      this.handleSaveResolution(form);
+      await this.handleSaveResolution(form);
     });
   },
 
@@ -1029,7 +1009,7 @@ const TecnicoPage = {
     subcategorySelect.classList.add('pulse-highlight');
   },
 
-  attendTicket(ticketId) {
+  async attendTicket(ticketId) {
     const ticket = this.getTicketById(ticketId);
     if (!ticket) {
       Toast.error('Chamado não encontrado.');
@@ -1037,7 +1017,11 @@ const TecnicoPage = {
     }
 
     if (ticket.status === 'Em espera' || ticket.status === 'Aberto') {
-      this.updateTicket(ticketId, { status: 'Em andamento' });
+      const saved = await this.updateTicket(ticketId, { status: 'Em andamento' });
+      if (!saved) {
+        Toast.error('Não foi possível iniciar o atendimento.');
+        return;
+      }
       Toast.success('Chamado ' + ticket.id + ' colocado em andamento.');
     }
 
@@ -1073,6 +1057,7 @@ const TecnicoPage = {
     const currentStatus = ticket.status || 'Em andamento';
     const statusInput = document.getElementById('selectedStatusInput');
     if (statusInput) statusInput.value = currentStatus;
+    this.updateResolutionRequiredFields(currentStatus);
 
     document.querySelectorAll('.status-segment, .status-option-btn').forEach((btn) => {
       btn.classList.toggle('active', btn.dataset.status === currentStatus);
@@ -1118,6 +1103,8 @@ const TecnicoPage = {
     const overlay = document.getElementById('resolutionModalOverlay');
     overlay?.classList.add('open');
     overlay?.setAttribute('aria-hidden', 'false');
+    const modalBody = overlay?.querySelector('.modal-body-scrollable');
+    if (modalBody) modalBody.scrollTop = 0;
   },
 
   closeResolutionModal() {
@@ -1157,10 +1144,19 @@ const TecnicoPage = {
   resetModalStatus() {
     const statusInput = document.getElementById('selectedStatusInput');
     if (statusInput) statusInput.value = 'Em andamento';
+    this.updateResolutionRequiredFields('Em andamento');
     document.querySelectorAll('.status-segment, .status-option-btn').forEach((btn) => {
       btn.classList.toggle('active', btn.dataset.status === 'Em andamento');
     });
     this.updateModalStatusBadge('Em andamento');
+  },
+
+  updateResolutionRequiredFields(status) {
+    const required = status === 'Concluído';
+    ['resolutionCategorySelect', 'resolutionSubcategorySelect', 'resolutionDetailsTextarea'].forEach((id) => {
+      const field = document.getElementById(id);
+      if (field) field.required = required;
+    });
   },
 
   updateModalStatusBadge(status) {
@@ -1171,7 +1167,7 @@ const TecnicoPage = {
     badge.classList.toggle('modal-badge-hidden', !status);
   },
 
-  handleSaveResolution(form) {
+  async handleSaveResolution(form) {
     if (!this.activeEditingTicketId) {
       Toast.error('Nenhum chamado ativo selecionado.');
       return;
@@ -1202,7 +1198,7 @@ const TecnicoPage = {
     const now = new Date();
     const formattedDate = now.toLocaleDateString('pt-BR') + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
 
-    const updated = this.updateTicket(this.activeEditingTicketId, {
+    const updated = await this.updateTicket(this.activeEditingTicketId, {
       status: newStatus,
       resolutionCategory: category,
       resolutionSubcategory: subcategory,

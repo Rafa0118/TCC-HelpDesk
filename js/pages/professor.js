@@ -1,10 +1,11 @@
 /* ============================================
-   HELPIUM - Professor Page Logic
+   iHelpy - Professor Page Logic
    Ticket management, profile modal
    ============================================ */
 
 const ProfessorPage = {
   STORAGE_KEY: 'helpium_professor_tickets',
+  DRAFT_STORAGE_KEY: 'helpium_ticket_draft',
 
   defaultTickets: [
     { id: '#25', title: 'Projetor n\u00e3o liga', room: 'Sala 12', date: '28/05/2025', status: 'Em andamento' },
@@ -55,30 +56,29 @@ const ProfessorPage = {
   getTickets() {
     try {
       const saved = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || 'null');
-      if (Array.isArray(saved) && saved.length) return saved;
+      if (Array.isArray(saved)) return saved;
     } catch { console.warn('Erro ao carregar chamados.'); }
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.defaultTickets));
-    return [...this.defaultTickets];
+    return [];
   },
 
   RESOURCES_KEY: 'helpium_resources',
 
-  defaultRooms: ['Sala 01', 'Sala 02', 'Sala 03', 'Sala 04', 'Laboratório 01', 'Laboratório 02', 'Laboratório 03', 'Laboratório 04', 'Sala 12', 'Bloco B - Sala 22', 'Coordenação Pedagógica'],
-
-  loadRooms() {
+  async loadRooms() {
     const select = document.getElementById('ticketRoom');
     if (!select) return;
-    let rooms = [...this.defaultRooms];
+    select.innerHTML = '<option value="" disabled selected>Carregando espaços...</option>';
     try {
-      const saved = JSON.parse(localStorage.getItem(this.RESOURCES_KEY) || 'null');
-      if (Array.isArray(saved) && saved.length > 0) {
-        const extra = saved.map(r => r.name).filter(n => n && !rooms.includes(n));
-        rooms = [...rooms, ...extra];
-      }
-    } catch {}
-    rooms.sort();
-    select.innerHTML = '<option value="" disabled selected>Selecione uma sala...</option>' +
-      rooms.map(r => '<option value="' + this.escapeHtml(r) + '">' + this.escapeHtml(r) + '</option>').join('');
+      const resources = await FirebaseDB.listResources();
+      const rooms = [...new Set(resources.map((resource) => resource.name.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+      localStorage.setItem(this.RESOURCES_KEY, JSON.stringify(resources));
+      select.innerHTML = '<option value="" disabled selected>' +
+        (rooms.length ? 'Selecione um espaço...' : 'Nenhum espaço cadastrado pela direção') +
+        '</option>' + rooms.map((room) => '<option value="' + this.escapeHtml(room) + '">' + this.escapeHtml(room) + '</option>').join('');
+    } catch (error) {
+      console.error('Erro ao carregar espaços cadastrados pela direção:', error);
+      select.innerHTML = '<option value="" disabled selected>Não foi possível carregar os espaços</option>';
+      Toast.error('Não foi possível carregar os espaços cadastrados pela direção.');
+    }
   },
 
   saveTickets(tickets) {
@@ -105,11 +105,19 @@ const ProfessorPage = {
     }).join('');
 
     tbody.querySelectorAll('.cancel-ticket-btn').forEach(button => {
-      button.addEventListener('click', () => {
+      button.addEventListener('click', async () => {
         const id = button.dataset.ticketId;
-        this.saveTickets(this.getTickets().map(t => t.id === id ? { ...t, status: 'Cancelado' } : t));
-        this.renderTickets();
-        Toast.success('Chamado cancelado.');
+        const tickets = this.getTickets();
+        const ticket = tickets.find((item) => item.id === id);
+        if (!ticket) return;
+        try {
+          await FirebaseDB.updateTicket(ticket, { status: 'Cancelado' }, Auth.getCurrentUser());
+          this.saveTickets(tickets.map((item) => item.id === id ? { ...item, status: 'Cancelado' } : item));
+          this.renderTickets();
+          Toast.success('Chamado cancelado.');
+        } catch (error) {
+          Toast.error('Não foi possível cancelar o chamado.');
+        }
       });
     });
   },
@@ -148,13 +156,26 @@ const ProfessorPage = {
     }).join('');
   },
 
-  init() {
+  async init() {
     const user = Auth.requireAuth();
-    if (!user || user.role !== 'professor') { window.location.href = 'login.html'; return; }
+    if (!user || user.role !== 'professor') { Auth.redirectToLogin(); return; }
     if (user.name) document.getElementById('userName').textContent = user.name;
     Sidebar.init(); UserMenu.init(); Navigation.init(); Navigation.initBottomNav();
     this.bindTicketModal(); this.bindProfileModal();
-    this.loadProfileData(user); this.renderTickets(true);
+    this.loadProfileData(user);
+    try {
+      const resources = await FirebaseDB.listResources();
+      localStorage.setItem(this.RESOURCES_KEY, JSON.stringify(resources));
+    } catch (error) {
+      console.warn('Não foi possível atualizar os espaços do Firebase:', error);
+    }
+    try {
+      this.saveTickets(await FirebaseDB.listTickets(user));
+    } catch (error) {
+      Toast.error('Não foi possível carregar os chamados do banco de dados.');
+      this.saveTickets([]);
+    }
+    this.renderTickets();
     document.addEventListener('bottomNavNewTicket', () => this.openTicketModal());
     document.getElementById('notificationsBtn')?.addEventListener('click', () => {
       Navigation.ringBell();
@@ -203,15 +224,34 @@ const ProfessorPage = {
 
     photoInput?.addEventListener('change', (event) => {
       const file = event.target.files?.[0];
-      if (!file) { this.resetPhotoPreview(); return; }
-      if (!file.type.startsWith('image/')) { Toast.error('Selecione uma imagem v\u00e1lida.'); this.resetPhotoPreview(); return; }
+      if (!file) {
+        this.resetPhotoPreview();
+        this.saveTicketDraft();
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        Toast.error('Selecione uma imagem v\u00e1lida.');
+        this.resetPhotoPreview();
+        this.saveTicketDraft();
+        return;
+      }
       const reader = new FileReader();
-      reader.onload = (e) => { photoPreview.src = e.target.result; photoWrap?.classList.add('has-image'); };
+      reader.onload = (e) => {
+        photoPreview.src = e.target.result;
+        photoWrap?.classList.add('has-image');
+        this.saveTicketDraft();
+      };
       reader.readAsDataURL(file);
     });
-    document.getElementById('removeTicketPhotoBtn')?.addEventListener('click', () => this.resetPhotoPreview());
+    document.getElementById('removeTicketPhotoBtn')?.addEventListener('click', () => {
+      this.resetPhotoPreview();
+      this.saveTicketDraft();
+    });
 
-    form?.addEventListener('submit', (event) => {
+    form?.addEventListener('input', () => this.saveTicketDraft());
+    form?.addEventListener('change', () => this.saveTicketDraft());
+
+    form?.addEventListener('submit', async (event) => {
       event.preventDefault();
       const f = event.currentTarget;
       const title = f.title.value.trim();
@@ -220,38 +260,145 @@ const ProfessorPage = {
       const category = f.category.value;
       if (!title || !room || !description) { Toast.warning('Preencha todos os campos obrigatórios.'); return; }
 
-    const tickets = this.getTickets();
-    const nextNum = tickets.length ? Number(String(tickets[0].id).replace('#', '')) + 1 : 26;
-    tickets.unshift({
-        id: '#' + nextNum, title, room,
+    const ticket = {
+        title, room,
         date: new Date().toLocaleDateString('pt-BR'),
         status: 'Em espera', type: category,
         priority: '',
         locationDetails: f.location_details.value.trim(),
-        description, photo: photoPreview?.src || ''
-    });
-      this.saveTickets(tickets);
-      this.renderTickets();
-      f.reset();
-      this.resetPhotoPreview();
-      this.closeTicketModal();
-      Toast.success('Chamado registrado com sucesso!');
+        description, photo: photoPreview?.getAttribute('src') || ''
+    };
+      try {
+        const created = await FirebaseDB.createTicket(ticket, Auth.getCurrentUser());
+        this.saveTickets([created, ...this.getTickets()]);
+        this.renderTickets();
+        this.clearTicketDraft();
+        f.reset();
+        this.resetPhotoPreview();
+        this.closeTicketModal();
+        Toast.success('Chamado registrado com sucesso!');
+      } catch (error) {
+        console.error('Erro ao registrar chamado no Firebase:', error);
+        const reason = error.code === 'permission-denied'
+          ? 'permissão negada; publique as regras do Firestore/Storage'
+          : error.message || error.code || 'erro desconhecido';
+        Toast.error('Falha ao salvar: ' + reason);
+      }
     });
 
     overlay?.addEventListener('click', (e) => { if (e.target === overlay) this.closeTicketModal(); });
   },
 
-  openTicketModal() {
+  async openTicketModal() {
     const o = document.getElementById('ticketModalOverlay');
     o?.classList.add('open'); o?.setAttribute('aria-hidden', 'false');
-    this.loadRooms();
+    const note = document.getElementById('ticketDraftNote');
+    if (note) note.textContent = 'O rascunho é salvo automaticamente neste dispositivo.';
+    await this.loadRooms();
+    this.restoreTicketDraft();
   },
 
   closeTicketModal() {
     const o = document.getElementById('ticketModalOverlay');
     o?.classList.remove('open'); o?.setAttribute('aria-hidden', 'true');
-    document.getElementById('ticketForm')?.reset(); this.resetPhotoPreview();
     Navigation.showSection('inicio');
+  },
+
+  getTicketDraftStorageKey() {
+    const user = Auth.getCurrentUser();
+    return user?.uid ? this.DRAFT_STORAGE_KEY + '_' + user.uid : null;
+  },
+
+  saveTicketDraft() {
+    const form = document.getElementById('ticketForm');
+    const storageKey = this.getTicketDraftStorageKey();
+    if (!form || !storageKey) return;
+
+    const draft = {
+      title: form.title.value,
+      room: form.room.value,
+      category: form.category.value,
+      locationDetails: form.location_details.value,
+      description: form.description.value,
+      photo: document.getElementById('ticketPhotoPreview')?.getAttribute('src') || ''
+    };
+    const hasContent = Boolean(
+      draft.title.trim() ||
+      draft.room ||
+      draft.category !== 'Outros' ||
+      draft.locationDetails.trim() ||
+      draft.description.trim() ||
+      draft.photo
+    );
+
+    try {
+      if (!hasContent) {
+        localStorage.removeItem(storageKey);
+        return;
+      }
+
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(draft));
+      } catch (error) {
+        if (!draft.photo) throw error;
+        localStorage.setItem(storageKey, JSON.stringify({ ...draft, photo: '', photoOmitted: true }));
+        const note = document.getElementById('ticketDraftNote');
+        if (note) note.textContent = 'Rascunho salvo sem a foto por falta de espaço. Selecione a imagem novamente ao retomar.';
+        return;
+      }
+      const note = document.getElementById('ticketDraftNote');
+      if (note) note.textContent = 'O rascunho é salvo automaticamente neste dispositivo.';
+    } catch (error) {
+      console.error('Não foi possível salvar o rascunho do chamado:', error);
+      const note = document.getElementById('ticketDraftNote');
+      if (note) note.textContent = 'Não foi possível salvar o rascunho neste dispositivo.';
+    }
+  },
+
+  restoreTicketDraft() {
+    const form = document.getElementById('ticketForm');
+    const storageKey = this.getTicketDraftStorageKey();
+    if (!form || !storageKey) return;
+
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (!saved) return;
+      const draft = JSON.parse(saved);
+      if (!draft || typeof draft !== 'object') return;
+
+      form.title.value = typeof draft.title === 'string' ? draft.title : '';
+      form.room.value = typeof draft.room === 'string' ? draft.room : '';
+      form.category.value = typeof draft.category === 'string' ? draft.category : 'Outros';
+      form.location_details.value = typeof draft.locationDetails === 'string' ? draft.locationDetails : '';
+      form.description.value = typeof draft.description === 'string' ? draft.description : '';
+
+      const photoPreview = document.getElementById('ticketPhotoPreview');
+      const photoWrap = document.getElementById('ticketPhotoPreviewWrap');
+      if (typeof draft.photo === 'string' && draft.photo.startsWith('data:image/')) {
+        photoPreview.src = draft.photo;
+        photoWrap?.classList.add('has-image');
+      }
+      if (draft.photoOmitted) {
+        const note = document.getElementById('ticketDraftNote');
+        if (note) note.textContent = 'Rascunho salvo sem a foto por falta de espaço. Selecione a imagem novamente ao retomar.';
+      }
+    } catch (error) {
+      console.error('Não foi possível recuperar o rascunho do chamado:', error);
+      const note = document.getElementById('ticketDraftNote');
+      if (note) note.textContent = 'Não foi possível recuperar o rascunho salvo neste dispositivo.';
+    }
+  },
+
+  clearTicketDraft() {
+    const storageKey = this.getTicketDraftStorageKey();
+    if (!storageKey) return;
+    try {
+      localStorage.removeItem(storageKey);
+    } catch (error) {
+      console.error('Não foi possível apagar o rascunho após salvar o chamado:', error);
+      const note = document.getElementById('ticketDraftNote');
+      if (note) note.textContent = 'Chamado registrado, mas não foi possível apagar o rascunho salvo neste dispositivo.';
+    }
   },
 
   resetPhotoPreview() {

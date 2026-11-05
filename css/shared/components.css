@@ -1,5 +1,5 @@
 /* ============================================
-   HELPIUM - Shared Components (Part 1)
+   iHelpy - Shared Components (Part 1)
    Page Shell, Sidebar, Brand, Nav, Header
    ============================================ */
 
@@ -216,7 +216,7 @@
 .header-action .material-symbols-outlined { font-size: 20px; }
 
 /* ============================================
-   HELPIUM - Shared Components (Part 2)
+   iHelpy - Shared Components (Part 2)
    User Pill, User Menu, Mobile, Toast, Modal
    ============================================ */
 
@@ -492,4 +492,3 @@
   animation: fieldShake 0.4s var(--ease-smooth);
   border-color: rgba(239, 68, 68, 0.5) !important;
 }
-

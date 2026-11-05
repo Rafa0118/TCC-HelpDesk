@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function profile() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
+    }
+
+    function isProfessor() {
+      return signedIn() && (profile().tipo == 'PROFESSOR' || profile().role == 'professor');
+    }
+
+    function isTechnician() {
+      return signedIn() && (profile().tipo == 'TECNICO' || profile().role == 'tecnico');
+    }
+
+    function isDirection() {
+      return signedIn() && (profile().tipo == 'DIRECAO' || profile().role == 'direcao');
+    }
+
+    match /usuarios/{userId} {
+      allow read: if signedIn() && (request.auth.uid == userId || isDirection());
+      allow create: if signedIn() && (
+        (request.auth.uid == userId && request.resource.data.tipo == 'PROFESSOR' && request.resource.data.role == 'professor') || isDirection()
+      );
+      allow update: if signedIn() && (
+        isDirection() ||
+        (request.auth.uid == userId &&
+          request.resource.data.tipo == resource.data.tipo &&
+          request.resource.data.role == resource.data.role)
+      );
+      allow delete: if isDirection();
+    }
+
+    match /chamados/{ticketId} {
+      allow read: if isTechnician() || isDirection() ||
+        (isProfessor() && resource.data.usuarioId == request.auth.uid);
+      allow create: if isProfessor() &&
+        request.resource.data.usuarioId == request.auth.uid &&
+        request.resource.data.status == 'PENDENTE';
+      allow update: if isTechnician() || isDirection() || (
+        isProfessor() &&
+        resource.data.usuarioId == request.auth.uid &&
+        request.resource.data.status == 'CANCELADO' &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+      );
+      allow delete: if isDirection();
+    }
+
+    match /atendimentos/{attendanceId} {
+      allow read: if isTechnician() || isDirection() || (
+        isProfessor() &&
+        get(/databases/$(database)/documents/chamados/$(resource.data.chamadoId)).data.usuarioId == request.auth.uid
+      );
+      allow create: if isTechnician() && request.resource.data.tecnicoId == request.auth.uid;
+      allow update, delete: if isDirection();
+    }
+
+    match /locais/{resourceId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isDirection();
+    }
+  }
+}

@@ -1,5 +1,5 @@
 /* ============================================
-   HELPIUM - Toast Notifications
+   iHelpy - Toast Notifications
    showToast(message, type, duration)
    ============================================ */
 

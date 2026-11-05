@@ -1,5 +1,5 @@
 /* ============================================
-   HELPIUM - Profile Page Logic
+   iHelpy - Profile Page Logic
    Photo management, profile info display
    Used by professor-perfil.html & tecnico-perfil.html
    ============================================ */
