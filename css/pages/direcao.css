@@ -109,6 +109,14 @@ h1, h2, h3, p { margin-top: 0; }
 
 .section-card .table-row { grid-template-columns: 1.4fr 1fr 0.7fr; min-height: 50px; }
 
+.section-card .user-management-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) auto auto; }
+
+.user-reset-button { padding: 8px 10px; border: 1px solid var(--primary-soft-strong); border-radius: 8px; background: var(--primary-soft); color: var(--primary-dark); font: inherit; font-size: 0.66rem; font-weight: 800; cursor: pointer; white-space: nowrap; }
+
+.user-reset-button:hover:not(:disabled), .user-reset-button:focus-visible { background: var(--primary); color: #fff; outline: none; }
+
+.user-reset-button:disabled { cursor: wait; opacity: 0.65; }
+
 .ticket-row { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto auto; }
 
 .ticket-report-button { justify-self: center; padding: 7px 10px; border: 1px solid var(--primary-soft-strong); border-radius: 8px; background: var(--primary-soft); color: var(--primary-dark); font: inherit; font-size: 0.66rem; font-weight: 800; cursor: pointer; white-space: nowrap; }
@@ -186,7 +194,7 @@ h1, h2, h3, p { margin-top: 0; }
         .shortcut-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       }
 
-@media (max-width: 560px) { .stats-grid, .reports-grid { grid-template-columns: 1fr; } .donut-layout { flex-direction: column; justify-content: center; } .table-row { grid-template-columns: 1fr 1fr; } .table-row .status { grid-column: 2; } .ticket-row { grid-template-columns: minmax(0, 1fr) auto; } .ticket-row > span { grid-column: 1 / -1; } .ticket-row .status { grid-column: 1; justify-self: start; } .ticket-report-button { grid-column: 2; grid-row: 3; } .shortcut-grid { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .stats-grid, .reports-grid { grid-template-columns: 1fr; } .donut-layout { flex-direction: column; justify-content: center; } .table-row { grid-template-columns: 1fr 1fr; } .table-row .status { grid-column: 2; } .section-card .user-management-row { grid-template-columns: minmax(0, 1fr) auto; } .user-management-row strong, .user-management-row > span { grid-column: 1 / -1; } .user-management-row .status { grid-column: 1; justify-self: start; } .user-management-row .user-reset-button { grid-column: 2; grid-row: 3; } .ticket-row { grid-template-columns: minmax(0, 1fr) auto; } .ticket-row > span { grid-column: 1 / -1; } .ticket-row .status { grid-column: 1; justify-self: start; } .ticket-report-button { grid-column: 2; grid-row: 3; } .shortcut-grid { grid-template-columns: 1fr; } }
 
 
 /* Hero-box decorative pseudo-elements */

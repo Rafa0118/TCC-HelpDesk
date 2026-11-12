@@ -6,7 +6,7 @@
     <title>iHelpy | Login</title>
     <meta
       name="description"
-      content="Tela de login moderna e inspirada em landing page de SaaS."
+      content="Acesse o sistema privado iHelpy da sua escola."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -21,8 +21,8 @@
       <aside class="login-visual" aria-label="Área promocional de login">
         <div class="login-visual-inner">
           <div class="login-copy">
-            <p class="login-kicker">Você pode facilmente</p>
-            <h1>Organizar seu trabalho<br />com nosso Helpdesk</h1>
+            <p class="login-kicker">Acesso privado</p>
+            <h1>Suporte escolar em um só lugar.</h1>
           </div>
 
           
@@ -31,19 +31,19 @@
 
       <main class="login-panel">
         <div class="login-form-wrap">
-          <h2>Comece agora</h2>
+          <h2>Acesse o iHelpy</h2>
           <p class="login-subtitle">Faça login na sua conta para continuar.</p>
 
           <form class="login-form" action="#" method="post">
             <div class="login-field">
               <label for="email">E-mail corporativo</label>
-              <input id="email" type="email" placeholder="seuemail@empresa.com" />
+              <input id="email" name="email" type="email" autocomplete="username" required placeholder="seuemail@empresa.com" />
             </div>
 
             <div class="login-field">
               <label for="password">Senha</label>
               <div class="input-wrap">
-                <input id="password" type="password" placeholder="••••••••••" />
+                <input id="password" name="password" type="password" autocomplete="current-password" required placeholder="••••••••••" />
                 <button class="password-toggle" type="button" aria-label="Mostrar senha">◌</button>
               </div>
             </div>
@@ -51,10 +51,10 @@
             <button class="login-submit" type="submit">Entrar</button>
           </form>
 
+          <p class="signup-text"><a href="recuperar-senha.html">Esqueci minha senha</a></p>
           <button class="support-btn" type="button" onclick="window.location.href='mailto:suporte@helpium.com?subject=Solicita%C3%A7%C3%A3o%20de%20suporte'">
             Entrar em contato com o suporte
           </button>
-          <p class="signup-text">Ainda não tem conta? <a href="cadastro.html">Criar conta</a></p>
         </div>
       </main>
     </div>
@@ -72,6 +72,7 @@
         const isHidden = passwordInput.type === 'password';
         passwordInput.type = isHidden ? 'text' : 'password';
         toggleButton.textContent = isHidden ? '◉' : '◌';
+        toggleButton.setAttribute('aria-label', isHidden ? 'Ocultar senha' : 'Mostrar senha');
       });
 
       const form = document.querySelector('.login-form');

@@ -43,7 +43,7 @@ const DirecaoPage = {
     try {
       const [users, resources] = await Promise.all([FirebaseDB.listUsers(), FirebaseDB.listResources()]);
       this.userCount = users.length;
-      localStorage.setItem(this.USERS_KEY, JSON.stringify(users.map(({ name, email, role }) => ({ name, email, role }))));
+      localStorage.setItem(this.USERS_KEY, JSON.stringify(users.map(({ id, name, email, role }) => ({ id, name, email, role }))));
       localStorage.setItem(this.RESOURCES_KEY, JSON.stringify(resources));
     } catch (error) {
       Toast.error('Não foi possível carregar os dados administrativos.');
@@ -313,7 +313,7 @@ const DirecaoPage = {
     const users = this.readStorage(this.USERS_KEY, []);
     if (usersList) {
       usersList.innerHTML = users.map((item) =>
-        `<div class="table-row"><strong>${this.escapeHtml(item.name)}</strong><span>${item.role === 'tecnico' ? 'Técnico' : item.role === 'direcao' ? 'Direção' : 'Professor'} · ${this.escapeHtml(item.email)}</span><b class="status">Ativo</b></div>`
+        `<div class="table-row user-management-row"><strong>${this.escapeHtml(item.name)}</strong><span>${item.role === 'tecnico' ? 'Técnico' : item.role === 'direcao' ? 'Direção' : 'Professor'} · ${this.escapeHtml(item.email)}</span><b class="status">Ativo</b><button class="user-reset-button" type="button" data-user-id="${this.escapeHtml(item.id)}">Enviar redefinição</button></div>`
       ).join('');
     }
 
@@ -342,8 +342,8 @@ const DirecaoPage = {
 
       const password = this.createPassword(name);
       try {
-        await FirebaseDB.createManagedUser(name, email, password, role);
-        users.push({ name, email, role });
+        const createdUser = await FirebaseDB.createManagedUser(name, email, password, role);
+        users.push({ id: createdUser.uid, name, email, role });
         localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
         document.getElementById('userFeedback').textContent = `Usuário criado. Login: ${email} · Senha: ${password}`;
         event.target.reset();
@@ -352,6 +352,31 @@ const DirecaoPage = {
         document.getElementById('userFeedback').textContent = error.code === 'auth/email-already-in-use'
           ? 'Este e-mail já está cadastrado.'
           : 'Não foi possível criar o usuário no Firebase.';
+      }
+    });
+
+    document.getElementById('usersList')?.addEventListener('click', async (event) => {
+      const button = event.target.closest('.user-reset-button');
+      if (!button) return;
+
+      const user = this.readStorage(this.USERS_KEY, []).find((item) => item.id === button.dataset.userId);
+      const feedback = document.getElementById('userResetFeedback');
+      if (!user || !user.email) {
+        feedback.textContent = 'Não foi possível localizar o e-mail deste usuário. Atualize a página e tente novamente.';
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = 'Enviando...';
+      feedback.textContent = '';
+      try {
+        const result = await PasswordResetAPI.request(user.email);
+        feedback.textContent = result.message;
+      } catch (error) {
+        feedback.textContent = PasswordResetAPI.getErrorMessage(error);
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Enviar redefinição';
       }
     });
 

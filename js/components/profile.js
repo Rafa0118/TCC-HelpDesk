@@ -7,8 +7,7 @@
 const ProfilePage = {
   getStorageKey() {
     const user = Auth.getCurrentUser();
-    if (!user) return 'helpium_profile_photo';
-    return 'helpium_' + user.role + '_photo';
+    return user?.uid ? `helpium_user_${user.uid}_photo` : null;
   },
 
   init() {
@@ -29,10 +28,12 @@ const ProfilePage = {
   loadProfileInfo(user) {
     const profileName = document.getElementById('profileName');
     const profileEmail = document.getElementById('profileEmail');
+    const profileRole = document.getElementById('profileRole');
     const userName = document.getElementById('userName');
 
     if (profileName) profileName.textContent = user.name || '—';
     if (profileEmail) profileEmail.textContent = user.email || '—';
+    if (profileRole) profileRole.textContent = Auth.getRoleLabel(user.role);
     if (userName) userName.textContent = user.name || user.role;
   },
 
@@ -41,12 +42,19 @@ const ProfilePage = {
     const removeBtn = document.getElementById('removePhotoBtn');
     if (!avatarImage) return;
 
-    const savedPhoto = localStorage.getItem(this.getStorageKey());
-    if (savedPhoto) {
-      avatarImage.src = savedPhoto;
-      if (removeBtn) removeBtn.style.display = 'block';
-    } else {
-      if (removeBtn) removeBtn.style.display = 'none';
+    try {
+      const storageKey = this.getStorageKey();
+      const savedPhoto = storageKey ? localStorage.getItem(storageKey) : null;
+      if (savedPhoto) {
+        avatarImage.src = savedPhoto;
+        if (removeBtn) removeBtn.style.display = 'block';
+      } else {
+        avatarImage.removeAttribute('src');
+        if (removeBtn) removeBtn.style.display = 'none';
+      }
+    } catch (error) {
+      console.error('Não foi possível carregar a foto de perfil:', error);
+      Toast.error('Não foi possível carregar a foto de perfil neste dispositivo.');
     }
   },
 
@@ -67,16 +75,36 @@ const ProfilePage = {
 
         if (!file.type.startsWith('image/')) {
           Toast.error('Selecione uma imagem válida.');
+          photoInput.value = '';
           return;
         }
 
         const reader = new FileReader();
         reader.onload = (e) => {
           const dataUrl = e.target.result;
-          localStorage.setItem(this.getStorageKey(), dataUrl);
+          const storageKey = this.getStorageKey();
+          if (!storageKey) {
+            Toast.error('Não foi possível identificar sua conta para salvar a foto.');
+            photoInput.value = '';
+            return;
+          }
+          try {
+            localStorage.setItem(storageKey, dataUrl);
+          } catch (error) {
+            console.error('Não foi possível salvar a foto de perfil:', error);
+            Toast.error('Não foi possível salvar a foto neste dispositivo. Tente uma imagem menor.');
+            photoInput.value = '';
+            return;
+          }
           avatarImage.src = dataUrl;
           if (removeBtn) removeBtn.style.display = 'block';
+          photoInput.value = '';
           Toast.success('Foto de perfil atualizada com sucesso!');
+        };
+        reader.onerror = () => {
+          console.error('Não foi possível ler o arquivo da foto de perfil:', reader.error);
+          Toast.error('Não foi possível ler esta imagem. Tente outro arquivo.');
+          photoInput.value = '';
         };
         reader.readAsDataURL(file);
       });
@@ -84,11 +112,21 @@ const ProfilePage = {
 
     if (removeBtn) {
       removeBtn.addEventListener('click', () => {
-        localStorage.removeItem(this.getStorageKey());
-        avatarImage.src = '';
-        removeBtn.style.display = 'none';
-        photoInput.value = '';
-        Toast.success('Foto de perfil removida.');
+        const storageKey = this.getStorageKey();
+        if (!storageKey) {
+          Toast.error('Não foi possível identificar sua conta para remover a foto.');
+          return;
+        }
+        try {
+          localStorage.removeItem(storageKey);
+          avatarImage.removeAttribute('src');
+          removeBtn.style.display = 'none';
+          photoInput.value = '';
+          Toast.success('Foto de perfil removida.');
+        } catch (error) {
+          console.error('Não foi possível remover a foto de perfil:', error);
+          Toast.error('Não foi possível remover a foto neste dispositivo.');
+        }
       });
     }
   },

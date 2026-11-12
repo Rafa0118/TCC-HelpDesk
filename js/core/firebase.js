@@ -103,18 +103,6 @@ const FirebaseDB = (() => {
     };
   }
 
-  async function saveProfile(uid, profile) {
-    await db.collection('usuarios').doc(uid).set({
-      nome: profile.name,
-      email: profile.email,
-      tipo: roles[profile.role] || 'PROFESSOR',
-      name: profile.name,
-      role: profile.role,
-      criadoEm: firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
-    return cacheSession(profile);
-  }
-
   async function login(email, password) {
     const credential = await auth.signInWithEmailAndPassword(email.trim(), password);
     const snapshot = await db.collection('usuarios').doc(credential.user.uid).get();
@@ -125,15 +113,8 @@ const FirebaseDB = (() => {
     return cacheSession(profileFromData(credential.user.uid, snapshot.data()));
   }
 
-  async function register(name, email, password) {
-    const credential = await auth.createUserWithEmailAndPassword(email.trim(), password);
-    try {
-      return await saveProfile(credential.user.uid, { uid: credential.user.uid, name: name.trim(), email: email.trim(), role: 'professor' });
-    } catch (error) {
-      await credential.user.delete().catch(() => {});
-      await auth.signOut().catch(() => {});
-      throw error;
-    }
+  async function sendPasswordResetEmail(email) {
+    await auth.sendPasswordResetEmail(email.trim());
   }
 
   async function createManagedUser(name, email, password, role) {
@@ -264,7 +245,7 @@ const FirebaseDB = (() => {
     return { id: reference.id, ...resource };
   }
 
-  return { login, register, createManagedUser, listUsers, listTickets, createTicket, updateTicket, listResources, createResource, profileFromData, cacheSession, auth };
+  return { login, sendPasswordResetEmail, createManagedUser, listUsers, listTickets, createTicket, updateTicket, listResources, createResource, profileFromData, cacheSession, auth };
 })();
 
 window.FirebaseDB = FirebaseDB;

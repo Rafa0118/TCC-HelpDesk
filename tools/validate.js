@@ -4,16 +4,31 @@ const path = require('path');
 const http = require('http');
 const { execSync } = require('child_process');
 
-const PAGES = [
+const PUBLIC_PAGES = [
   'index.html',
   'login.html',
-  'cadastro.html',
+  'recuperar-senha.html',
   'home.html',
+  'direcao.html',
+  'professor.html',
+  'professor-perfil.html',
+  'tecnico.html',
+  'tecnico-perfil.html'
+];
+const LEGACY_REDIRECTS = {
+  'direcao.html': 'dashboard/direcao.html',
+  'professor.html': 'dashboard/professor.html',
+  'professor-perfil.html': 'dashboard/professor-perfil.html',
+  'tecnico.html': 'dashboard/tecnico.html',
+  'tecnico-perfil.html': 'dashboard/tecnico-perfil.html'
+};
+const DASHBOARD_PAGES = [
   'dashboard/direcao.html',
   'dashboard/professor.html',
-  'dashboard/tecnico.html'
+  'dashboard/professor-perfil.html',
+  'dashboard/tecnico.html',
+  'dashboard/tecnico-perfil.html'
 ];
-const DASHBOARD_PAGES = PAGES.filter(p => p.startsWith('dashboard'));
 let pass = 0, fail = 0;
 const failures = [];
 
@@ -115,20 +130,81 @@ server((srv) => {
       });
     });
 
-    console.log('\n===== 4. Public page checks =====');
-    PAGES.filter(p => !p.startsWith('dashboard')).forEach(page => {
+    console.log('\n===== 4. Internal page and section targets =====');
+    [...PUBLIC_PAGES, ...DASHBOARD_PAGES].forEach(page => {
       const html = fs.readFileSync(page, 'utf8');
-      const links = [...html.matchAll(/href="([^"]+)"/g)].map(m => m[1]).filter(p => !p.startsWith('http') && !p.startsWith('#'));
-      const scripts = [...html.matchAll(/src="([^"]+)"/g)].map(m => m[1]).filter(p => !p.startsWith('http'));
+      if (LEGACY_REDIRECTS[page]) {
+        const redirect = html.match(/window\.location\.replace\("([^"]+)"/);
+        const expected = LEGACY_REDIRECTS[page];
+        if (!redirect || redirect[1] !== expected) bad(`${page} → ${expected} (redirect missing)`);
+        else if (!fs.existsSync(expected)) bad(`${page} → ${expected} (file not found)`);
+        else ok(`${page} → ${expected}`);
+        return;
+      }
+
+      const targets = [...html.matchAll(/(?:href|data-target)="([^"]+)"/g)].map(m => m[1]);
+      targets.forEach(target => {
+        if (/^(https?:|mailto:|tel:|javascript:)/i.test(target)) return;
+        const [filePart, fragment] = target.split('#');
+        const isSection = !filePart || (!filePart.includes('/') && !path.extname(filePart));
+        const targetFile = isSection ? page : path.resolve(path.dirname(page), filePart);
+        if (isSection) {
+          const sectionId = fragment || filePart;
+          const escapedId = sectionId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const exists = new RegExp(`\\bid="${escapedId}"`).test(html);
+          const profileModal = sectionId === 'perfil' && /id="profileModalOverlay"/.test(html);
+          if (!exists && !profileModal) bad(`${page} → ${target} (section not found)`);
+          else ok(`${page} → ${target}`);
+          return;
+        }
+
+        if (!fs.existsSync(targetFile)) {
+          bad(`${page} → ${target} (file not found)`);
+          return;
+        }
+        if (fragment) {
+          const targetHtml = fs.readFileSync(targetFile, 'utf8');
+          const escapedId = fragment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          if (!new RegExp(`\\bid="${escapedId}"`).test(targetHtml)) bad(`${page} → ${target} (section not found)`);
+          else ok(`${page} → ${target}`);
+          return;
+        }
+        ok(`${page} → ${target}`);
+      });
+    });
+
+    console.log('\n===== 5. Public page checks =====');
+    PUBLIC_PAGES.forEach(page => {
+      const html = fs.readFileSync(page, 'utf8');
+      if (page === 'index.html' && !/window\.location\.replace\(['"]login\.html['"]\)/.test(html)) {
+        bad('index.html: must redirect to login.html');
+      }
+      const links = [...html.matchAll(/href="([^"]+)"/g)].map(m => m[1]).filter(p => !/^(https?:|mailto:|tel:|javascript:|#)/i.test(p));
+      const scripts = [...html.matchAll(/src="([^"]+)"/g)].map(m => m[1]).filter(p => !/^(https?:|\/\/)/i.test(p));
       [...links, ...scripts].forEach(res => {
         try {
-          if (fs.existsSync(res)) ok(`${page} \u2192 ${res}`);
+          const target = path.resolve(path.dirname(page), res.split(/[?#]/)[0]);
+          if (fs.existsSync(target)) ok(`${page} \u2192 ${res}`);
           else bad(`${page} \u2192 ${res} (file not found)`);
         } catch (e) {
           bad(`${page} \u2192 ${res} (error)`);
         }
       });
     });
+    if (fs.existsSync('cadastro.html')) bad('cadastro.html: self-service registration page must be removed');
+    else ok('cadastro.html removed');
+    const loginHtml = fs.readFileSync('login.html', 'utf8');
+    if (/cadastro\.html|Criar conta|Criar uma conta/.test(loginHtml)) bad('login.html: contains registration links');
+    else ok('login.html: no registration links');
+    const firebaseSource = fs.readFileSync('js/core/firebase.js', 'utf8');
+    if (/function\s+register\s*\(|\bregister,/.test(firebaseSource)) bad('js/core/firebase.js: self-service registration API must be removed');
+    else ok('js/core/firebase.js: no self-service registration API');
+    const firestoreRules = fs.readFileSync('firestore.rules', 'utf8');
+    if (/match\s*\/usuarios\/\{userId\}[\s\S]*?allow create:\s*if isDirection\(\);/.test(firestoreRules)) {
+      ok('firestore.rules: only direction can create user profiles');
+    } else {
+      bad('firestore.rules: user profiles must only be created by direction');
+    }
 
     console.log(`\n========================================`);
     console.log(`RESULT: ${pass} passed, ${fail} failed`);

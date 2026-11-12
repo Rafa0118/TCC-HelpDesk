@@ -1,0 +1,23 @@
+{
+  "name": "helpdesk-password-reset-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API de recuperação de senha do HelpDesk usando Firebase Admin e Nodemailer.",
+  "main": "server.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "firebase-admin": "^14.5.0",
+    "nodemailer": "^10.3.1"
+  }
+}

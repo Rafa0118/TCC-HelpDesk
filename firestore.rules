@@ -23,9 +23,7 @@ service cloud.firestore {
 
     match /usuarios/{userId} {
       allow read: if signedIn() && (request.auth.uid == userId || isDirection());
-      allow create: if signedIn() && (
-        (request.auth.uid == userId && request.resource.data.tipo == 'PROFESSOR' && request.resource.data.role == 'professor') || isDirection()
-      );
+      allow create: if isDirection();
       allow update: if signedIn() && (
         isDirection() ||
         (request.auth.uid == userId &&

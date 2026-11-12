@@ -1257,6 +1257,26 @@ body {
   font-weight: 750;
 }
 
+.form-feedback {
+  min-height: 1.4em;
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.form-feedback[data-kind="success"] {
+  color: #16794b;
+}
+
+.form-feedback[data-kind="error"] {
+  color: #b42318;
+}
+
+.form-feedback:empty {
+  display: none;
+}
+
 .mobile-menu-toggle {
   border-color: var(--line);
   background: #fff;

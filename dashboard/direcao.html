@@ -85,7 +85,7 @@
                 <div id="resourceList" class="resource-list" aria-live="polite"></div>
               </article>
             </div>
-            <div class="section-card"><h2 class="section-title">Usuários do sistema</h2><div id="usersList" class="table-list"></div></div>
+            <div class="section-card"><h2 class="section-title">Usuários do sistema</h2><p class="section-subtitle">Envie um e-mail seguro de redefinição para o usuário escolher uma nova senha.</p><div id="usersList" class="table-list"></div><p id="userResetFeedback" class="form-feedback" role="status" aria-live="polite"></p></div>
           </section>
           <section id="relatorios" class="section"><div class="section-card"><h2 class="section-title">Relatórios</h2><div class="reports-grid"><div class="report-box"><span>Chamados abertos neste mês</span><strong id="reportMonthlyTickets">—</strong></div><div class="report-box"><span>Tempo médio de resolução</span><strong id="reportAverageResolution">—</strong></div><div class="report-box"><span>Taxa de resolução</span><strong id="reportResolutionRate">—</strong></div></div><div class="bar-chart" id="monthlyChart" aria-label="Chamados abertos nos últimos quatro meses"></div></div></section>
           <section id="perfil" class="section"><div class="section-card"><h2 class="section-title">Meu perfil</h2><div class="table-list"><div class="table-row"><strong id="profileName">Direção</strong><span id="profileEmail">direcao@helpium.com</span><b class="status">Ativa</b></div><div class="table-row"><strong>Função</strong><span>Gestão e acompanhamento do sistema</span><b class="status">Direção</b></div></div></div></section>
@@ -144,6 +144,7 @@
     <script src="../js/components/sidebar.js"></script>
     <script src="../js/components/user-menu.js"></script>
     <script src="../js/components/navigation.js"></script>
+    <script src="../js/core/password-reset-api.js"></script>
     <script src="../js/pages/direcao.js"></script>
     <script>
       DarkMode.init();
